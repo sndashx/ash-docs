@@ -1,0 +1,10 @@
+{
+  "id": "coastal_watch",
+  "name": "Coastal Watch",
+  "ranks": [
+    "initiate",
+    "sworn",
+    "vow-keeper",
+    "warden"
+  ]
+}

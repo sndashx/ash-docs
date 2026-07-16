@@ -1,0 +1,10 @@
+{
+  "id": "cartographers",
+  "name": "The Cartographers",
+  "ranks": [
+    "initiate",
+    "sworn",
+    "vow-keeper",
+    "warden"
+  ]
+}
