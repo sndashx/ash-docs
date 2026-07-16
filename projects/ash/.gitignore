@@ -1,0 +1,21 @@
+# Build artifacts
+build/
+*.o
+*.obj
+compile_commands.json
+
+# Editor cruft
+.vscode/
+.cache/
+.idea/
+*.swp
+.DS_Store
+
+# Local notes
+workspace/
+
+# Tracy captures
+*.tracy
+
+# Saves / config (user-local, see 03-directory.txt)
+saves/

@@ -1,0 +1,10 @@
+{
+  "id": "sky_smiths",
+  "name": "Sky-Smiths",
+  "ranks": [
+    "initiate",
+    "sworn",
+    "vow-keeper",
+    "warden"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "quiet_choir",
+  "name": "The Quiet Choir",
+  "ranks": [
+    "initiate",
+    "sworn",
+    "vow-keeper",
+    "warden"
+  ]
+}
