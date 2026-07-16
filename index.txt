@@ -1,0 +1,95 @@
+ASH OF THE SHATTERED COVENANT — MASTER PLAN INDEX
+=====================================================
+
+A hand-authored ASCII RPG in C++20 with REXPaint-native assets, truecolor terminal rendering, and 200 years of broken sky.
+
+00. CONVENTIONS — file format, step IDs, glossary, naming
+01. VISION — pitch, references, design pillars summary
+02. DECISIONS — 70 architectural decisions (tech stack, patterns, constraints)
+03. DIRECTORY — full project tree
+04. PILLARS — 9 core systems overview
+
+ENGINE PHASES (00-11):
+05. PHASE 00 — skeleton (CMake, CPM, deps)
+06. PHASE 01 — renderer (Cell, Buffer, ANSI, Camera, Light)
+07. PHASE 02 — world (entt components, Map, World)
+08. PHASE 03 — rexpaint pipeline (.xp format, layer system)
+09. PHASE 04 — editor (paint, undo, layers, save)
+10. PHASE 05 — input (UiMode, ModeStack, keybinds, camera)
+11. PHASE 06 — character (9 attrs, 24 skills, inventory, equipment)
+12. PHASE 07 — combat (RTwP, weapons, armor, A*, LoS, AI)
+13. PHASE 08 — NPC life (schedules, .dlg DSL, dialogue UI, factions)
+14. PHASE 09 — quests (.qst DSL, journal, objectives, branches)
+15. PHASE 10 — save/load (atomic, 3-gen backup, migrations)
+16. PHASE 11 — polish (settings, accessibility, telemetry-free, build)
+
+CONTENT PHASES (12-23):
+17. PHASE 12 — Scoured Coast (12 maps, ~80 NPCs)
+18. PHASE 13 — Glasswood (20 maps, ~120 NPCs)
+19. PHASE 14 — Riven Spire (15 maps, ~90 NPCs)
+20. PHASE 15 — Ash Plains (18 maps, ~80 NPCs)
+21. PHASE 16 — Hollow Cities (15 maps, ~100 NPCs)
+22. PHASE 17 — main quest (5 acts, 40 stages, 20 branches, 10 endings)
+23. PHASE 18 — faction questlines (4 factions, 7 ranks, 60 quests)
+24. PHASE 19 — side quests (80 total across all regions)
+25. PHASE 20 — books (62 books, ~95K words of prose)
+26. PHASE 21 — item catalog (~400 items, all types)
+27. PHASE 22 — bestiary (~62 creatures, full AI/loot)
+28. PHASE 23 — release (build, distribute, post-launch)
+
+APPENDICES:
+A. REXPaint layer spec (9 layers, item glyphs, faction colors)
+B. Dialogue grammar (.dlg DSL)
+C. Quest format (.qst DSL)
+D. Save schema (save layout, migrations)
+E. Keybind defaults (all modes)
+F. Animation format (.json)
+
+TOTAL SCOPE:
+- 80 maps across 5 regions
+- ~470 named NPCs (full schedules, dialogue trees)
+- ~140 quests (5 acts main + 60 faction + 80 side)
+- ~400 items (weapons, armor, consumables, books, quest, valuables)
+- ~62 creatures (full AI, loot, lore)
+- ~62 books (~95,000 words of readable prose)
+- 4 factions with 7-rank progression each
+- 10+ endings from 5-act main quest
+- 30 Steam achievements
+- Full modding support
+
+TECH STACK:
+- C++20
+- CMake + CPM
+- entt (ECS)
+- spdlog (logging)
+- fmt (formatting)
+- nlohmann/json (data)
+- Catch2 (tests)
+- REXPaint (.xp files)
+- Truecolor ANSI terminal
+- Fixed-point math (1.0 = 256)
+- xoshiro256** RNG
+- XDG paths
+- zlib (compression)
+
+DESIGN REFERENCES:
+- Morrowind (density, hand-authored world, no quest markers)
+- Fallout 1/2 (dialogue trees, NPC persistence, world simulation)
+- Baldur's Gate 3 (modern production values, branching story)
+- Dark Souls (environmental storytelling, item descriptions)
+- Disco Elysium (skill-based dialogue, internal voice)
+- Ultima VII (open world, NPC routines)
+- Planescape: Torment (philosophical depth, memory as theme)
+
+THEME:
+Memory and the cost of carrying what others forget.
+The player wakes in a crypt with a blade inscribed in moving language.
+The blade remembers what its bearer forgets.
+
+DEVELOPMENT ESTIMATE:
+- Vertical slice (1 region): 6-12 months solo
+- Full game: 2-5 years solo, 1-2 years small team (3-5 people)
+- Engine: ~6 months
+- Content: ~3-4 years
+
+THE PLAN IS COMPLETE. BEGIN IMPLEMENTATION.

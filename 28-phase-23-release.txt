@@ -1,0 +1,188 @@
+PHASE 23 — RELEASE
+====================
+Final phase: packaging, marketing, distribution, post-launch support.
+
+23.00 — PRE-RELEASE CHECKLIST
+  23.00.001 — All engine phases complete (00-11)
+  23.00.002 — All content phases complete (12-22)
+  23.00.003 — All appendices present (A-F)
+  23.00.004 — Total content: 80 maps, 470 NPCs, 80 quests, 400 items, 62 creatures, 62 books, 60+ audio tracks
+  23.00.005 — All systems tested
+  23.00.006 — Performance benchmarks met
+  23.00.007 — Save/load verified
+  23.00.008 — Localization framework ready
+  23.00.009 — Modding support tested
+  23.00.010 — Documentation complete
+
+23.10 — RELEASE CANDIDATE BUILD
+  23.10.001 — Set version to 1.0.0 in CMakeLists.txt
+  23.10.002 — Generate CHANGELOG.md with full history
+  23.10.003 — Tag release in git (v1.0.0)
+  23.10.004 — Build release artifacts for all platforms
+  23.10.005 — Run full test suite on RC
+  23.10.006 — Generate checksums for downloads
+  23.10.007 — Sign binaries (GPG)
+  23.10.008 — Build installer packages
+
+23.20 — STEAM RELEASE
+  23.20.001 — Steamworks SDK integration
+  23.20.002 — Steam achievements: 30 achievements
+    - Waking: Complete Act 1
+    - Cartographer: Join Cartographers
+    - Smith: Join Sky-Smiths
+    - Singer: Join Choir
+    - Captain: Reach Coastal Watch Champion
+    - Atlas-Killer: Defeat The Atlas
+    - Spire-Climber: Reach Summit
+    - Storm-Walker: Survive Eye of Storm
+    - Hollow-Reach: Enter Hollow Cities
+    - King-Slayer: Defeat Hollow King
+    - Sky-Mended: Ending A
+    - Sky-Broken: Ending B
+    - Sky-Reforged: Ending C
+    - Completionist: All quests done
+    - Lorekeeper: All books read
+    - Bestiary: All creatures logged
+    - Cartographer-Master: Reach Master rank
+    - Smith-Master: Reach Master rank
+    - Choir-High: Reach High rank
+    - Watch-Champion: Reach Champion rank
+    - All-Shards: Collect 7 sky-shards
+    - All-Endings: All endings seen
+    - All-Factions-Max: Max rep with all 4 factions
+    - Permadeath-Survivor: Finish permadeath run
+    - Ironman: Finish ironman mode
+    - Legendary: Beat on Legendary difficulty
+    - No-Mark: Complete without map markers
+    - Pacifist: Complete without killing NPCs (creatures OK)
+    - Speed-Runner: Complete main quest in <10 hours
+    - Roleplayer: Complete 50 side quests
+  23.20.003 — Steam cloud saves
+  23.20.004 — Steam workshop for mods
+  23.20.005 — Store page: screenshots, description, trailer
+  23.20.006 — Tags: RPG, ASCII, Retro, Fantasy, Open World, Story Rich
+  23.20.007 — Price: $24.99 USD (suggested)
+
+23.30 — GOG RELEASE
+  23.30.001 — GOG Galaxy integration
+  23.30.002 — Cloud saves via GOG
+  23.30.003 — Achievements
+  23.30.004 — DRM-free build
+
+23.40 — ITCH.IO RELEASE
+  23.40.001 — Direct download
+  23.40.002 — Pay-what-youwant option
+  23.40.003 — Cross-platform builds
+
+23.50 — SELF-BUILD / SOURCE
+  23.50.001 — GitHub release with source
+  23.50.002 — Build instructions in README
+  23.50.003 — LICENSE file (MIT or Apache 2.0)
+  23.50.004 — Contribution guidelines
+  23.50.005 — Issue tracker enabled
+  23.50.006 — Discussions enabled
+
+23.60 — MARKETING
+  23.60.001 — Trailer (60s, gameplay + cinematic)
+  23.60.002 — Screenshots (20+, varied locations)
+  23.60.003 — Devlog series (weekly during dev)
+  23.60.004 — Press kit (logos, fact sheet, screenshots)
+  23.60.005 — Demo build (1 region, ~3 hours content)
+  23.60.006 — Influencer outreach (RPG YouTubers, ASCII roguelike community)
+  23.60.007 — Reddit posts (r/roguelikes, r/rpg_gamers, r/indiegaming)
+  23.60.008 — Discord server for community
+  23.60.009 — Wiki for community-driven documentation
+
+23.70 — LAUNCH DAY
+  23.70.001 — Publish on all platforms
+  23.70.002 — Announce via social media
+  23.70.003 — Monitor launch for issues
+  23.70.004 — Hot-fix any critical bugs within 24h
+  23.70.005 — Collect player feedback
+  23.70.006 — Begin patch cycle
+
+23.80 — POST-LAUNCH SUPPORT
+  23.80.001 — Patch 1.1: bug fixes, balance tweaks (week 1-4)
+  23.80.002 — Patch 1.2: quality of life (month 2)
+  23.80.003 — Patch 1.3: new content, side quests (month 3)
+  23.80.004 — Patch 1.4: modding tools, Steam workshop (month 4)
+  23.80.005 — Patch 1.5: New Game+ mode, additional endings (month 6)
+  23.80.006 — DLC 1 (paid, optional): "The First Cartographer" expansion
+    - New region: 10 maps
+    - New main quest act 0 (pre-Shattering)
+    - 20 new NPCs
+    - 15 new quests
+    - 100 new items
+    - 10 new creatures
+    - 5 new books
+    - New ending
+  23.80.007 — DLC 2 (paid, optional): "Coastal Tales" expansion
+    - More Scoured Coast content
+    - Pirate faction
+    - Naval combat
+    - 15 new quests
+    - 50 new items
+  23.80.008 — DLC 3 (free): Community-requested features
+    - Voice acting pack (optional)
+    - More music tracks
+    - Additional languages
+
+23.90 — LONG-TERM ROADMAP
+  23.90.001 — Year 1: bug fixes, balance, community features
+  23.90.002 — Year 2: major expansion (size of base game)
+  23.90.003 — Year 3: sequel consideration
+  23.90.004 — Open-source decision: after year 1, evaluate
+
+23.100 — METRICS & SUCCESS
+  23.100.001 — Target sales: 50K copies year 1
+  23.100.002 — Target reviews: 80%+ positive
+  23.100.003 — Target completion rate: 40% finish main quest
+  23.100.004 — Target play time: average 40 hours per completionist
+  23.100.005 — Community size: 10K Discord, 5K Steam forum
+  23.100.006 — Mod count: 100+ mods in workshop year 1
+  23.100.007 — Critical reception: positive reviews from major outlets
+  23.100.008 — Financial sustainability: cover costs + fund DLC
+
+23.110 — LEGAL
+  23.110.001 — LICENSE: project license chosen (MIT or Apache 2.0)
+  23.110.002 — All assets either: original, CC0, properly licensed
+  23.110.003 — Third-party libraries: all MIT/BSD/Apache compatible
+  23.110.004 — Fonts: open source (e.g. Cascadia Code, JetBrains Mono)
+  23.110.005 — Music: original or CC-BY
+  23.110.006 — Privacy: no telemetry, GDPR compliant
+  23.110.007 — Refund policy: standard Steam/GOG (2 weeks, 2 hours)
+
+23.120 — FINAL DELIVERABLES
+  23.120.001 — Ash of the Shattered Covenant v1.0.0
+    - Engine: C++20, 100K LOC
+    - Content: 80 maps, 470 NPCs, 80 quests, 400 items, 62 creatures, 62 books
+    - Total: ~6,000 hours of dev time
+    - Solo dev or small team: 2-5 years
+  23.120.002 — Documentation: README, architecture, modding, scripting
+  23.120.003 — Tools: editor (built-in), validators, exporters
+  23.120.004 — Community: Discord, wiki, forums
+  23.120.005 — Source: GitHub with build instructions
+
+23.130 — VISION ACHIEVED
+  23.130.001 — All decisions implemented
+  23.130.002 — All pillars delivered
+  23.130.003 — All content authored
+  23.130.004 — Vision realized: an awesome ASCII-styled game in the spirit of Elder Scrolls and Fallout, hand-authored, deep, replayable, moddable, complete.
+
+END PHASE 23
+RELEASE COMPLETE
+ALL PHASES COMPLETE — ASH OF THE SHATTERED COVENANT READY FOR BUILD
+
+SUMMARY:
+- 24 phases
+- 27 plan files (index + 00-22 + 11 appendices)
+- ~12,000-15,000 lines of plan
+- ~25,000 micro-steps
+- ~6,000 dev hours
+- 80 maps, 470 NPCs, 80 quests, 400 items, 62 creatures, 62 books
+- ~95,000 words of in-game prose
+- 4 factions with 7 ranks each
+- 5-act main quest with 10+ endings
+- Moddable, accessible, no telemetry
+
+THE PLAN IS COMPLETE. TIME TO BUILD.

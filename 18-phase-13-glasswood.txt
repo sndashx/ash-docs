@@ -1,0 +1,261 @@
+PHASE 13 — GLASSWOOD (REGION 2)
+=================================
+Region: Vast primeval forest of glass-bark trees. Sky-shards float above the canopy. The Cartographers make their home here.
+Maps: 20 (gw_01 through gw_20)
+Faction primary: Cartographers (ochre)
+Theme: Knowledge and the cost of mapping the unmappable.
+
+13.00 — REGION OVERVIEW
+  13.00.001 — Region def: content/regions/glasswood.json
+    - { key: "glasswood", name: "Glasswood", description: "...", maps: 20, primary_faction: "cartographers", climate: "glass-rain", music_track: "ash_glasswood_theme", sky_color: "#507060", ground_color: "#404848" }
+  13.00.002 — Add special: glass-rain weather (occasional sharp shards fall, dodge or take damage)
+  13.00.003 — Add mechanic: tree-climbing (vertical movement on glass trees)
+  13.00.004 — Add mechanic: shard-spotting (use telescope to identify floating sky-shards)
+  13.00.005 — World map: 100x25 region overview .xp with tree clusters
+
+13.01-13.20 — MAPS (20 total, full spec)
+  13.01.001 — gw_01: Glasswood Edge (transition from Scoured Coast)
+    - 70x60, terrain "glass_grass", ambient "wind_chime"
+    - Entrance from sc_coast_11
+    - 3 NPCs: edge wardens, 1 vendor (outfitter)
+    - 2 creatures: glass-deer (level 2, skittish)
+    - Glass-rain warning system: ambient sound + visual
+    - First shard visible above canopy
+  13.02.001 — gw_02: Whisper Glade
+    - 60x60, terrain "glass_moss", ambient "whisper_loop"
+    - Sound mechanic: voices in wind carry hints/quests
+    - 4 NPCs: whisper-witches (Cartographer scouts)
+    - 1 creature: whisper-stalker (level 3, listens back)
+    - Loot: glass-flowers (alchemy)
+  13.03.001 — gw_03: The First Mapstone
+    - 50x50, terrain "glass_lichen", ambient "stone_hum"
+    - Central monolith with ancient map etched
+    - 1 NPC: Mapstone Keeper (lore, teaches cartography)
+    - Loot: cartographer's_tools (skill book)
+  13.04.001 — gw_04: Webroot Hollow
+    - 80x70, terrain "glass_root", ambient "web_silence"
+    - Giant tree roots form tunnels
+    - 2 NPCs: root-dwellers (herbalists)
+    - 5 creatures: glass-spiders (level 3-4, poison)
+    - Loot: spider_silk (rare), root_tea
+  13.05.001 — gw_05: Cartographer's Lodge (regional hub)
+    - 90x80, terrain "wood_warm", ambient "lodge_bustle"
+    - Central lodge: cartography hall, library, dormitory, council chamber
+    - 15 NPCs: Cartographer leadership, scribes, students, vendors
+    - Quest hub: 8 main + 12 side quests available
+    - Main quest: main_act2_join_cartographers
+  13.06.001 — gw_06: The Hanging Libraries
+    - 70x60, terrain "glass_platform", ambient "paper_rustle"
+    - Tree-houses connected by rope bridges, holding centuries of maps
+    - 4 NPCs: librarians (vendors of maps)
+    - Loot: rare maps (reveal hidden areas), blank scrolls
+  13.07.001 — gw_07: Mirror Lake
+    - 80x60, terrain "glass_water", ambient "stillness"
+    - Reflective lake shows sky-shards clearly
+    - 1 NPC: Mirror-Reader (sage, identifies shards)
+    - 3 creatures: lake-wraiths (level 5, only at night)
+    - Side quest: sq_mirror_dive (retrieve sunken mirror)
+  13.08.001 — gw_08: Thornhold (fortified ruin)
+    - 70x70, terrain "stone_thorn", ambient "wind_howl"
+    - Pre-Shattering fortress, now overgrown
+    - 4 NPCs: Thornhold Reavers (hostile faction, level 4-5)
+    - 1 mini-boss: Reaver Captain (level 6)
+    - Loot: reaver_blade, pre-Shattering weapons
+  13.09.001 — gw_09: The Inkfall
+    - 60x90, terrain "inkstone", ambient "ink_drip"
+    - Underground river of ink flows from cliff
+    - 1 NPC: Inkwell Hermit (alchemy sage)
+    - Loot: living_ink (enchanting material), inks_of_power
+  13.10.001 — gw_10: Petrified Grove
+    - 90x70, terrain "stone_tree", ambient "silence_deep"
+    - Forest of stone trees (preserved corpses of glass giants)
+    - 2 NPCs: Grove Wardens (neutral, ancient)
+    - 4 creatures: stone-bears (level 5, slow but deadly)
+    - Loot: giant_bone (rare crafting), petrified_wood
+  13.11.001 — gw_11: Shardwatch Camp
+    - 50x50, terrain "glass_clear", ambient "watch_calm"
+    - Cartographer observation post
+    - 3 NPCs: Shardwatchers (scouts with telescopes)
+    - Side quest: sq_shard_naming (identify 5 floating shards)
+  13.12.001 — gw_12: Whispering Caves
+    - 80x50, terrain "stone_echo", ambient "whisper_many"
+    - Cave system where every sound echoes forever
+    - 2 NPCs: Echo-Mad Hermit (insane lore)
+    - 6 creatures: echo-bats (level 4, blind but echolocate)
+    - Loot: echo_stone (sound magic component), echo_recordings (lore)
+  13.13.001 — gw_13: The Sunken Cathedral
+    - 100x80, terrain "glass_marble", ambient "choir_faint"
+    - Half-flooded ancient temple, trees growing through walls
+    - 3 NPCs: Drowned Priests (ghosts with quests)
+    - 1 mini-boss: Faded Saint (level 7)
+    - Loot: blessed_blade, saint's_relic
+  13.14.001 — gw_14: The Living Map
+    - 70x70, terrain "glass_flesh", ambient "heart_beat"
+    - A forest section that is itself a giant organism
+    - 1 NPC: The Map (entity, dialogue via signs in bark)
+    - Loot: living_map_fragment (quest)
+  13.15.001 — gw_15: Glassblower's Hollow
+    - 60x60, terrain "glass_work", ambient "forge_ring"
+    - Settlement of glass-workers, makes armor from glass-wood
+    - 5 NPCs: glassblowers (vendors)
+    - Quest: sq_glass_smithing (learn the craft)
+  13.16.001 — gw_16: Thornpath (dangerous travel route)
+    - 90x40, terrain "glass_thorn", ambient "wind_sharp"
+    - Linear narrow path, glass-rain hazard
+    - 3 wandering creatures: thornback_boars (level 4)
+    - Random encounter: shard-storm (survival check)
+  13.17.001 — gw_17: The Canopy Temple
+    - 80x80, terrain "glass_canopy", ambient "sky_song"
+    - Temple built in treetops, accessible only by climbing
+    - 4 NPCs: Sky-Monks (Cartographer ascetics)
+    - Side quest: sq_canopy_vow
+  13.18.001 — gw_18: The Shattered Atlas (forbidden area)
+    - 100x100, terrain "glass_shard", ambient "shard_hum"
+    - Library where maps come alive and attack
+    - 1 NPC: The Atlas (animated construct, boss)
+    - Loot: complete_atlas (reveals all hidden areas)
+  13.19.001 — gw_19: Rootsdeep (underground)
+    - 70x70, terrain "root_dark", ambient "deep_drip"
+    - Deep root system, connects to underground regions
+    - 3 NPCs: Root-Dwellers (subterranean faction)
+    - 5 creatures: burrowers (level 5, ambush)
+    - Transition to Riven Spire underground
+  13.20.001 — gw_20: Edge of the Spire (transition)
+    - 60x60, terrain "glass_rock", ambient "wind_high"
+    - Forest ends, mountain begins
+    - 1 NPC: Cartographer Outrider (warning)
+    - Exit to Riven Spire region
+
+13.30 — REGION NPCs (~120 total, full schedules + dialogue)
+  13.30.001 — Archcartographer Senna (leader, main quest giver)
+    - Schedule: 06:00 council, 12:00 lunch, 14:00 mapping hall, 18:00 dinner, sleep 22:00
+    - Faction: Cartographers rank 5 (Supreme Archcartographer)
+    - Dialogue: 8 greeting variants by rep, 12 lore topics, 6 quest hooks, 5 personal topics
+    - Special: teaches advanced cartography skills
+  13.30.002 — Mapstone Keeper (ancient, lore)
+    - Always at gw_03
+    - Dialogue: philosophical, teaches map-reading
+    - Faction: Cartographers rank 4 (Honorary)
+  13.30.003 — 12 Cartographer Scribes (named: Ren, Wil, Mara, etc.)
+    - Schedule: rotating shifts (mapping, copying, research, rest)
+    - Each specializes: terrain, weather, cities, ruins, sky-shards, etc.
+    - Dialogue: 4 topics each, can teach minor skills
+  13.30.004 — 8 Cartographer Vendors (paper, ink, tools, lenses, books, maps, etc.)
+    - Inventory: 30-50 items each
+    - Prices: standard 10-200 gold
+  13.30.005 — 4 Whisper-Witches (scouts, spies)
+    - Schedule: dawn patrol, dusk return
+    - Faction: Cartographers rank 3 (Spymaster tier)
+    - Dialogue: cryptic, info-rich
+  13.30.006 — 8 Glassblowers (crafters, vendors)
+    - Schedule: 06:00-18:00 work
+    - Sell: glass armor, glass weapons, glass tools
+    - Quest: teach glass-smithing
+  13.30.007 — 5 Sky-Monks (Canopy Temple)
+    - Schedule: dawn prayers, meditation, dusk prayers
+    - Faction: Cartographers rank 4 (Spiritual branch)
+    - Dialogue: theological, contemplative
+  13.30.008 — Root-Dwellers (8 NPCs in Rootsdeep)
+    - Faction: Root-Dweller Coven (hidden faction)
+    - Trade: subterranean goods
+  13.30.009 — Echo-Mad Hermit + 6 named hermits
+    - Each knows one secret
+    - Dialogue: cryptic
+  13.30.010 — 30+ background NPCs: lodge staff, students, guards, vendors, travelers, children
+
+13.40 — REGION QUESTS (~25)
+  13.40.001 — Main: main_act2_join_cartographers (Senna recruitment)
+  13.40.002 — Main: main_act2_first_map (Map the forest edge)
+  13.40.003 — Main: main_act2_lost_archive (Find Hanging Libraries)
+  13.40.004 — Main: main_act2_living_map (Discover the Living Map)
+  13.40.005 — Main: main_act2_shard_naming (Identify 7 sky-shards)
+  13.40.006 — Main: main_act2_atlas_confrontation (Face The Atlas boss)
+  13.40.007 — Faction: fac_cartographer_apprentice (join)
+  13.40.008 — Faction: fac_cartographer_journeyman (promotion)
+  13.40.009 — Faction: fac_cartographer_master (master rank)
+  13.40.010 — Side: sq_mirror_dive (retrieve sunken mirror)
+  13.40.011 — Side: sq_glass_smithing (learn the craft)
+  13.40.012 — Side: sq_shard_naming (5 floating shards)
+  13.40.013 — Side: sq_canopy_vow (become Sky-Monk)
+  13.40.014 — Side: sq_thornhold_clear (clear reaver fort)
+  13.40.015 — Side: sq_echo_rescue (rescue lost explorer in caves)
+  13.40.016 — Side: sq_sunken_cathedral_relic (retrieve relic)
+  13.40.017 — Side: sq_inkwell_ingredient (10 rare inks)
+  13.40.018 — Side: sq_petrified_wood (collect samples)
+  13.40.019 — Side: sq_rosewalker (find lost scout)
+  13.40.020 — Side: sq_living_map_fragment (retrieve fragment)
+  13.40.021 — Side: sq_bear_hunt (clear stone-bears)
+  13.40.022 — Side: sq_herbalist_apprentice (alchemy basics)
+  13.40.023 — Side: sq_root_dweller_diplomacy (peaceful contact)
+  13.40.024 — Side: sq_atlas_warning (warn Cartographers of danger)
+  13.40.025 — Misc: sq_map_collector (find 20 maps)
+  13.40.026 — Misc: sq_paper_shortage (deliver rare paper)
+  13.40.027 — Misc: sq_broken_compass (repair)
+  13.40.028 — Misc: sq_silent_library (unlock mute library)
+
+13.50 — REGION ITEMS (~120 unique)
+  13.50.001 — Glass weapons (8): glass_dagger, glass_sword, glass_axe, glass_spear, glass_bow, glass_staff, glass_throwing_star, glass_blade (enchanted)
+  13.50.002 — Glass armor (8): glass_helm, glass_chest, glass_legs, glass_boots, glass_gauntlets, glass_shield, glass_cloak, glass_robe
+  13.50.003 — Cartographer tools (12): telescope, compass, sextant, map_case, blank_scroll, ink_pen, ink_vial, lens_set, ruler, protractor, charcoal, chalk
+  13.50.004 — Maps (30): region_map_scoured_coast, region_map_glasswood, region_map_riven_spire, region_map_ash_plains, region_map_hollow_cities, treasure_map_1-10, hidden_cave_maps 1-5, boss_lair_maps 1-3, shard_location_maps 1-3
+  13.50.005 — Books (15): cartographer's_manual, mapstone_history, ink_magic_guide, glassblowing_text, sky_monk_scripture, living_map_journal, whisper_witch_codex, root_dweller_tongue, atlas_fragment, shard_naming_guide, weather_patterns, etc.
+  13.50.006 — Alchemy (20): glass-flower, mirror-water, echo-stone, root-tea, thorn-essence, ink-of-truth, shard-dust, sun-mote, moon-drop, star-shard, etc.
+  13.50.007 — Quest items (25): atlas_fragment, living_map_piece, mirror_of_truth, sunken_relic, complete_atlas, etc.
+  13.50.008 — Valuables (20): gemstones, glass-beads, ancient coins, etc.
+  13.50.009 — Food (15): forest_forage, kettle_meals, herbal_tea, etc.
+
+13.60 — REGION CREATURES (~15 types)
+  13.60.001 — Glass-Deer (level 2, skittish)
+  13.60.002 — Whisper-Stalker (level 3, listens)
+  13.60.003 — Glass-Spider (level 3-4, poison)
+  13.60.004 — Lake-Wraith (level 5, night only)
+  13.60.005 — Thornhold Reaver (level 4-5, faction)
+  13.60.006 — Reaver Captain (level 6, mini-boss)
+  13.60.007 — Stone-Bear (level 5, slow)
+  13.60.008 — Echo-Bat (level 4, blind)
+  13.60.009 — Faded Saint (level 7, mini-boss)
+  13.60.010 — Living-Tree (level 6, territorial)
+  13.60.011 — Thornback Boar (level 4, charge)
+  13.60.012 — Burrower (level 5, ambush)
+  13.60.013 — Glass-Stag (level 8, rare boss)
+  13.60.014 — The Atlas (level 12, BOSS, animated construct)
+  13.60.015 — Shard-Wraith (level 6, sky creature)
+
+13.70 — REGION LORE BOOKS (full prose, 15 books)
+  13.70.001 — "The Art of Cartography" — manual, 4000 words
+  13.70.002 — "Shards of the Broken Sky" — shard lore, 3500 words
+  13.70.003 — "Glassblower's Catechism" — craft text, 1500 words
+  13.70.004 — "Songs of the Sky-Monks" — theology, 2000 words
+  13.70.005 — "Whisper-Witch Codex" — spycraft, 2500 words
+  13.70.006 — "Living Map Journal" — first contact, 3000 words
+  13.70.007 — "Inkwell Hermit's Recipes" — alchemy, 1800 words
+  13.70.008 — "Thornhold Siege Account" — history, 2200 words
+  13.70.009 — "Sunken Cathedral Hagiography" — religious, 2800 words
+  13.70.010 — "Rootsdeep Dwellers' Tales" — folklore, 2000 words
+  13.70.011 — "Echo-Mad Hermit's Manifesto" — philosophy, 1500 words
+  13.70.012 — "Sky Shard Naming Compendium" — reference, 1200 words
+  13.70.013 — "Cartographer's Founding Charter" — faction history, 2500 words
+  13.70.014 — "The Glass Giants" — natural history, 1800 words
+  13.70.015 — "Atlas: A Fragility" — poem-cycle, 1000 words
+
+13.80 — REGION AUDIO (12 tracks)
+  13.80.001 — Music: ash_glasswood_theme.wav, lodge_theme.wav, canopy_chant.wav, whisper_jig.wav, atlas_boss.wav
+  13.80.002 — Ambient: wind_chime.wav, whisper_loop.wav, paper_rustle.wav, web_silence.wav, glass_hum.wav
+  13.80.003 — Weather: glass_rain.wav (sharp shards), shard_hum.wav (sky ambient)
+  13.80.004 — Special: telescope_focus.wav (UI), map_unfold.wav, ink_quill.wav
+
+13.90 — REGION VERIFICATION
+  13.90.001 — All 20 maps load
+  13.90.002 — All NPC schedules work
+  13.90.003 — All quests advance
+  13.90.004 — Glass-rain mechanic damages player
+  13.90.005 — Shard-spotting reveals sky-shards
+  13.90.006 — Tree-climbing enables vertical exploration
+  13.90.007 — The Atlas boss beatable
+  13.90.008 — Performance: 60 FPS in lodge with 15 NPCs
+  13.90.009 — Transition to Riven Spire works
+  13.90.010 — All dialogue parses
+  13.90.011 — Document phase 13
+
+END PHASE 13
+GLASSWOOD REGION COMPLETE: 20 maps, ~120 NPCs, 28 quests, 120+ items, 15 creatures, 15 books, 12 audio tracks

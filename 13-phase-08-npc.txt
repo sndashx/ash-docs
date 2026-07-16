@@ -1,0 +1,270 @@
+ASH — Phase 08: NPC Life
+===========================
+
+Phase goal: NPCs with daily schedules, dialogue trees (DSL parser
+and runtime), disposition rules, faction reputation.
+
+Entry criteria: Phase 7 complete.
+Exit criteria: 5 NPCs in a test town have working schedules,
+              dialogue trees, and disposition; talking to them
+              at different times of day yields different dialogue.
+
+[ENTRY CRITERIA]
+  - Phase 7 complete.
+
+[EXIT CRITERIA]
+  - NPC schedules parsed and executed.
+  - Dialogue DSL parser works.
+  - Dialogue UI shows topics and skill checks.
+  - Disposition affects dialogue.
+  - Faction reputation tracked.
+
+[RISKS]
+  - DSL parser bugs. Mitigation: comprehensive tests, error
+    reporting at load.
+  - Schedule complexity. Mitigation: visual debugger (later).
+  - Dialogue runtime bugs. Mitigation: trace mode for dev.
+
+Step 0800.00.00. Create src/npc/npc.hpp.
+  - Sub: struct NpcSpec { std::string id; std::string name;
+         std::string race; std::string sex; int age;
+         MapId home_map; Position home_pos;
+         std::string occupation;
+         FactionId faction; int faction_rank;
+         int disposition_base;
+         std::vector<DispositionMod> disposition_mods;
+         std::string schedule_id;
+         Stats stats;
+         Attributes attrs;
+         Skills skills;
+         Inventory inventory;
+         Equipment equipment;
+         std::vector<std::string> tags;
+         bool essential;
+         bool can_die;
+         std::string portrait_glyph;
+         Color portrait_fg;
+         std::string death_dialogue;
+         std::vector<std::string> flags; };
+
+Step 0800.00.01. Implement NpcDatabase.
+  - Sub: Loads content/npcs/<region>/*.json.
+  - Sub: get(id) -> NpcSpec&.
+
+Step 0800.00.02. Implement NpcFactory.
+  - Sub: spawn_npc(Map&, NpcSpec) -> entt::entity.
+  - Sub: Reads spec, attaches all components.
+
+Step 0801.00.00. Create src/npc/schedule.hpp.
+  - Sub: struct ScheduleBlock {
+         int start_minute, end_minute; // minutes from midnight
+         std::string activity;
+         IVec2 waypoint;
+         std::string dialogue_override;
+         std::string condition; // optional gate
+       };
+
+Step 0801.00.01. Implement Schedule struct.
+  - Sub: struct Schedule {
+         std::string id;
+         std::vector<ScheduleBlock> blocks;
+         std::vector<std::string> random_lines; // for time-of-day quips
+       };
+
+Step 0801.00.02. Implement ScheduleDatabase.
+  - Sub: Loads content/sched/<npc_id>.json.
+
+Step 0801.00.03. Implement ScheduleRunner.
+  - Sub: Per NPC, advance through blocks based on game time.
+  - Sub: Move NPC to waypoint when block changes.
+  - Sub: Set dialogue override.
+
+Step 0801.00.04. Implement schedule conditions.
+  - Sub: Block only active if condition passes (flag, time, etc).
+  - Sub: Evaluated per-tick.
+
+Step 0801.00.05. Tests for schedules.
+
+Step 0802.00.00. Create src/dialogue/dlg_lexer.hpp.
+  - Sub: enum class Token { Ident, String, Int, Bool, Keyword,
+         Punct, Eof };
+  - Sub: struct Token { Token type; std::string text; int line; int col; };
+
+Step 0802.00.01. Implement lexer.
+  - Sub: Tokenize source string.
+  - Sub: Handle // and /* */ comments.
+  - Sub: Handle strings with escapes.
+  - Sub: Report errors with line/col.
+
+Step 0802.00.02. Implement keyword recognition.
+  - Sub: dialogue, node, text, speaker, choice, branch, action,
+         random, skill_check, voice, end, weight, if, else,
+         trigger, etc.
+
+Step 0802.00.03. Tests for lexer.
+
+Step 0803.00.00. Create src/dialogue/dlg_ast.hpp.
+  - Sub: struct Dialogue { std::string id; DialogueMeta meta;
+         std::string entry; std::map<std::string, Node> nodes; };
+  - Sub: struct Node { NodeKind kind; ... };
+  - Sub: enum class NodeKind { Text, Topic, Branch, Action, Exit,
+         SkillCheck, Random };
+
+Step 0803.00.01. Define all AST node types.
+
+Step 0804.00.00. Create src/dialogue/dlg_parser.hpp.
+  - Sub: Dialogue parse(std::string source);
+  - Sub: Reports errors with location.
+
+Step 0804.00.01. Implement parser.
+  - Sub: Recursive descent.
+  - Sub: Parses dialogue header.
+  - Sub: Parses node blocks.
+  - Sub: Parses expressions and actions.
+
+Step 0804.00.02. Implement expression parser.
+  - Sub: Operator precedence climbing.
+  - Sub: Variables, function calls, literals, operators.
+
+Step 0804.00.03. Tests for parser.
+  - Sub: All node types parse.
+  - Sub: Errors reported.
+  - Sub: Roundtrip.
+
+Step 0805.00.00. Create src/dialogue/dlg_eval.hpp.
+  - Sub: struct DialogueState {
+         std::string current_node;
+         std::vector<std::string> history;
+         std::map<std::string, json> local_vars;
+       };
+
+Step 0805.00.01. Implement dialogue runner.
+  - Sub: Step through nodes.
+  - Sub: Handle choices.
+  - Sub: Run actions.
+
+Step 0805.00.02. Implement expression evaluator.
+  - Sub: Resolve variables to current values.
+  - Sub: Evaluate arithmetic and boolean.
+
+Step 0805.00.03. Implement action runner.
+  - Sub: All actions from appendix B.
+
+Step 0805.00.04. Implement skill check resolution.
+  - Sub: Roll skill + attribute + d100.
+  - Sub: Compare to difficulty.
+  - Sub: Branch.
+
+Step 0805.00.05. Tests for evaluator.
+
+Step 0806.00.00. Create src/npc/dialogue_run.hpp.
+  - Sub: struct Conversation {
+         NpcId npc_id;
+         DialogueState state;
+         entt::entity npc_entity;
+         entt::entity player_entity;
+       };
+
+Step 0806.00.01. Implement conversation start.
+  - Sub: Find NPC.
+  - Sub: Load dialogue tree.
+  - Sub: Set initial node = tree.entry.
+
+Step 0806.00.02. Implement topic list rendering.
+  - Sub: Filter topics by conditions.
+  - Sub: Sort by relevance.
+  - Sub: Show skill-gated topics.
+
+Step 0806.00.03. Implement conversation end.
+  - Sub: Cleanup.
+  - Sub: Apply disposition changes.
+
+Step 0807.00.00. Create src/npc/disposition.hpp.
+  - Sub: int effective_disposition(Disposition const&).
+
+Step 0807.00.01. Implement disposition modifiers.
+  - Sub: Sum base + all modifiers.
+  - Sub: Clamp to [0, 100].
+
+Step 0807.00.02. Implement disposition threshold checks.
+  - Sub: is_friendly(disp >= 60).
+  - Sub: is_neutral(disp in [30, 60)).
+  - Sub: is_hostile(disp < 30).
+
+Step 0807.00.03. Implement disposition changes.
+  - Sub: From dialogue actions.
+  - Sub: From gifts.
+  - Sub: From faction reputation.
+  - Sub: From prior interactions.
+
+Step 0808.00.00. Create src/npc/faction.hpp.
+  - Sub: struct FactionDef { std::string id; std::string name;
+         std::vector<FactionRank> ranks;
+         std::map<std::string, int> initial_rep;
+         std::map<std::string, int> rep_thresholds;
+         Color color; };
+
+Step 0808.00.01. Define FactionRank.
+  - Sub: struct FactionRank { int threshold; std::string title;
+         std::vector<std::string> perks; };
+
+Step 0808.00.02. Implement FactionDatabase.
+  - Sub: Loads content/factions/*.json.
+
+Step 0808.00.03. Implement faction reputation.
+  - Sub: get_rep(faction, player) -> int.
+  - Sub: set_rep, modify_rep.
+
+Step 0808.00.04. Implement rank lookup.
+  - Sub: Highest rank with threshold <= current rep.
+
+Step 0809.00.00. Create src/ui/dialogue_ui.hpp.
+  - Sub: Render dialogue tree UI.
+
+Step 0809.00.01. Implement NPC portrait area.
+  - Sub: Show NPC name and glyph.
+
+Step 0809.00.02. Implement dialogue text area.
+  - Sub: Scrolling text.
+  - Sub: Typewriter effect (configurable speed).
+
+Step 0809.00.03. Implement topic list.
+  - Sub: List of available topics.
+  - Sub: Highlight on hover.
+  - Sub: Skill icons next to gated topics.
+
+Step 0809.00.04. Implement skill check display.
+  - Sub: When triggered, show roll vs difficulty.
+  - Sub: Visual feedback.
+
+Step 0810.00.00. Implement skill voices.
+  - Sub: Per skill, optional voice lines.
+  - Sub: Triggered by context.
+
+Step 0810.00.01. Implement voice UI.
+  - Sub: Voice lines appear as text overlay.
+  - Sub: Distinct color from dialogue.
+
+Step 0811.00.00. Tests for NPC system.
+
+Step 0812.00.00. Verify build.
+
+Step 0812.00.01. Final commit.
+  - Sub: git commit -m "feat(phase-08): NPC life, schedules, dialogue".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --npc-test
+  5 NPCs in test town.
+  Each has a schedule.
+  Talking to them at different times yields different dialogue.
+  Skill checks work.
+  Faction rep affects what they say.
+
+[PHASE 8 PLAYABLE BUILD]
+
+  Build 08: "Town"
+    - NPCs with lives.
+    - Dialogue trees.
+    - Disposition matters.
+    - This is where the game starts to feel like an RPG.

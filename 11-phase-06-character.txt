@@ -1,0 +1,254 @@
+ASH — Phase 06: Character System
+==================================
+
+Phase goal: 9 attributes, 24 skills, leveling, derived stats,
+inventory, equipment, conditions.
+
+Entry criteria: Phase 5 complete.
+Exit criteria: character UI shows all stats; leveling works;
+              inventory manages items; equipment affects stats.
+
+[ENTRY CRITERIA]
+  - Phase 5 complete.
+
+[EXIT CRITERIA]
+  - Attributes and skills editable via character UI.
+  - XP and leveling functional.
+  - Inventory add/remove/drop/equip.
+  - Equipped items modify derived stats.
+  - Conditions apply effects.
+
+[RISKS]
+  - Derived stat circular dependencies. Mitigation: explicit
+    recompute order.
+  - Inventory edge cases. Mitigation: comprehensive tests.
+
+Step 0600.00.00. Create src/character/attributes.hpp.
+  - Sub: enum class Attribute { Str, End, Agi, Wil, Int, Wit, Cha,
+         Luc, Voi };
+
+Step 0600.00.01. Implement attribute name map.
+  - Sub: const char* attribute_name(Attribute).
+  - Sub: Localized via locale strings.
+
+Step 0600.00.02. Implement attribute modifiers.
+  - Sub: int modifier(int attr) { return (attr - 50) / 5; }
+  - Sub: -10 to +10 range typical.
+
+Step 0600.00.03. Tests for attributes.
+
+Step 0601.00.00. Create src/character/skills.hpp.
+  - Sub: enum class Skill { Armorer, Blunt, Blade, Marksman, Dodge,
+         Thrown, Mysticism, Restoration, Warding, Alchemy, Enchant,
+         Spellcraft, Stealth, Pickpocket, Security, Speechcraft,
+         Mercantile, Illusion, Deception, Intimidation, Seduction,
+         History, Theology, Linguistics };
+
+Step 0601.00.01. Implement skill governing attribute.
+  - Sub: Attribute skill_attribute(Skill).
+  - Sub: Maps per pillar 5.
+
+Step 0601.00.02. Implement skill name map.
+
+Step 0601.00.03. Tests for skills.
+
+Step 0602.00.00. Create src/character/leveling.hpp.
+  - Sub: struct LevelState { int level; int xp; int xp_to_next; };
+
+Step 0602.00.01. Implement XP curve.
+  - Sub: xp_for_level(int) = 100 * level * level.
+  - Sub: Level 1 -> 2: 100 xp.
+  - Sub: Level 10 -> 11: 10000 xp.
+
+Step 0602.00.02. Implement gain_xp.
+  - Sub: Adds xp.
+  - Sub: If >= xp_to_next, level up.
+  - Sub: On level up: increment hp_max by 5-10, vp_max by 3-5,
+         sp_max by 2-4 based on attributes.
+  - Sub: Grant skill point pool.
+
+Step 0602.00.03. Implement attribute points.
+  - Sub: Every 5 levels, grant 1 attribute point.
+  - Sub: Apply via character UI.
+
+Step 0602.00.04. Tests for leveling.
+
+Step 0603.00.00. Create src/character/derived.hpp.
+  - Sub: struct DerivedStats {
+         int hp_max, vp_max, sp_max;
+         int carry_capacity;
+         int speed_cells_per_sec;
+         int crit_chance_pct;
+         float barter_discount;
+         int identify_skill;
+         int pick_skill;
+         int persuade_skill;
+       };
+
+Step 0603.00.01. Implement recompute.
+  - Sub: Inputs: Attributes, Skills, Equipment, Conditions.
+  - Sub: Apply formulas from pillar 5.
+
+Step 0603.00.02. Implement stat changes on equipment.
+  - Sub: When equip changes, recompute.
+  - Sub: When level up, recompute.
+
+Step 0603.00.03. Tests for derived stats.
+
+Step 0604.00.00. Create src/character/inventory.hpp.
+  - Sub: struct Inventory {
+         std::vector<ItemStack> items;
+         std::map<EquipSlot, ItemId> equipped;
+         int max_slots = 100;
+         float current_weight;
+         float max_weight;
+       };
+
+Step 0604.00.01. Implement ItemStack.
+  - Sub: struct ItemStack { ItemId id; int count; int condition; };
+
+Step 0604.00.02. Implement add_item.
+  - Sub: Stacks with existing if same id.
+  - Sub: New entry if not.
+  - Sub: Returns true if added.
+
+Step 0604.00.03. Implement remove_item.
+  - Sub: Decrement count, remove if 0.
+  - Sub: Returns true if removed.
+
+Step 0604.00.04. Implement has_item.
+  - Sub: bool has_item(ItemId, int count = 1).
+
+Step 0604.00.05. Implement weight calculation.
+  - Sub: Sum weights of all items.
+  - Sub: Update on add/remove.
+
+Step 0604.00.06. Implement encumbrance.
+  - Sub: if current_weight > 0.8 * max_weight: speed penalty.
+
+Step 0604.00.07. Tests for inventory.
+
+Step 0605.00.00. Create src/character/equipment.hpp.
+  - Sub: enum class EquipSlot { Weapon, OffHand, Chest, Helm, Boots,
+         Gloves, RingLeft, RingRight, Amulet };
+
+Step 0605.00.01. Implement equip.
+  - Sub: Check slot compatibility.
+  - Sub: Swap with current if needed.
+  - Sub: Update derived stats.
+
+Step 0605.00.02. Implement unequip.
+  - Sub: Move to inventory if room.
+  - Sub: Update derived stats.
+
+Step 0605.00.03. Implement equip requirements.
+  - Sub: Some items require attribute/skill level.
+  - Sub: Warn if equipping without meeting.
+
+Step 0605.00.04. Tests for equipment.
+
+Step 0606.00.00. Create src/character/condition.hpp.
+  - Sub: enum class Condition { None, Wounded, Exhausted, Inspired,
+         Cursed, Blessed, Warded, Slowed, Hasted, Silenced, Rooted,
+         Burning, Frozen, Dazed, Bleeding, Stunned, Poisoned,
+         Terrified };
+
+Step 0606.00.01. Implement Condition struct.
+  - Sub: struct ActiveCondition { Condition type; int duration_ms;
+         int magnitude; };
+
+Step 0606.00.02. Implement apply_condition.
+  - Sub: Add to entity's condition list.
+  - Sub: Recompute derived stats.
+
+Step 0606.00.03. Implement tick_conditions.
+  - Sub: Each tick: reduce duration by dt.
+  - Sub: Remove expired.
+
+Step 0606.00.04. Implement condition effects.
+  - Sub: Each condition modifies stats.
+  - Sub: Wounded: -50% hp_max.
+  - Sub: Exhausted: -50% sp_max.
+  - Sub: Inspired: +20% xp gain.
+  - Sub: Slowed: -50% speed.
+  - Sub: etc.
+
+Step 0606.00.05. Tests for conditions.
+
+Step 0607.00.00. Create src/character/item_db.hpp.
+  - Sub: struct ItemDef { std::string id; std::string name;
+         std::string description; int weight; int value;
+         std::vector<std::string> tags; json effects; };
+
+Step 0607.00.01. Implement ItemDatabase.
+  - Sub: Loads items.json at startup.
+  - Sub: get(id) -> ItemDef&.
+
+Step 0607.00.02. Implement item queries.
+  - Sub: by_tag(string).
+  - Sub: by_value_range(min, max).
+  - Sub: by_name_fuzzy(string).
+
+Step 0608.00.00. Create src/ui/character_ui.hpp.
+  - Sub: struct CharacterUI { enum class Tab { Attributes, Skills,
+         Inventory, Equipment, Spells, Thoughts, Effects }; };
+
+Step 0608.00.01. Implement attributes tab.
+  - Sub: Show all 9 attributes with bars.
+  - Sub: Show modifiers.
+  - Sub: Allocate points if available.
+
+Step 0608.00.02. Implement skills tab.
+  - Sub: Show all 24 skills with bars.
+  - Sub: Show governing attribute.
+  - Sub: Skill description on hover.
+
+Step 0608.00.03. Implement inventory tab.
+  - Sub: Show all items.
+  - Sub: Categorized (weapons/armor/consumables/misc).
+  - Sub: Weight display.
+  - Sub: Use/drop/examine.
+
+Step 0608.00.04. Implement equipment tab.
+  - Sub: Show all 9 slots.
+  - Sub: Click to equip from inventory.
+
+Step 0608.00.05. Implement spells tab.
+  - Sub: Show known spells.
+  - Sub: Memorize/forget.
+
+Step 0608.00.06. Implement thoughts tab (cabinet).
+  - Sub: Show internalized thoughts.
+  - Sub: Each gives passive bonuses.
+
+Step 0608.00.07. Implement effects tab.
+  - Sub: Show active conditions with durations.
+
+Step 0609.00.00. Wire character UI into mode stack.
+  - Sub: 'c' opens character UI.
+  - Sub: Esc returns to explore.
+
+Step 0610.00.00. Tests for character system.
+
+Step 0611.00.00. Verify build.
+
+Step 0611.00.01. Final commit.
+  - Sub: git commit -m "feat(phase-06): character system with stats and inventory".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --render-test --char-test
+  Character UI opens.
+  All attributes and skills visible.
+  Adjust attributes with arrow keys.
+  Inventory add/remove works.
+  Equip weapon, derived stats update.
+  Conditions apply.
+
+[PHASE 6 PLAYABLE BUILD]
+
+  Build 06: "Sheet"
+    - Full character sheet works.
+    - Stats are editable.
+    - Inventory functional.
+    - This is where RPG mechanics start feeling real.

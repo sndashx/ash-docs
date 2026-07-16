@@ -1,0 +1,91 @@
+ASH — Conventions
+=================
+
+File format
+-----------
+
+Plain UTF-8 text. No BOM. LF line endings. Tabs are forbidden; 4-space
+indent for hierarchy in prose blocks.
+
+Step IDs are globally unique: Step PPFF.SS.SSS where PP=phase, FF=step
+within file, SS=sub-step, SSS=sub-sub-step. Padded with leading zeros.
+
+Sub-bullets use 2-space indent per level.
+
+Status markers
+--------------
+
+  [TODO]          Not started
+  [WIP]           In progress
+  [DONE]          Complete and verified
+  [BLOCKED:why]   Cannot proceed; see reason
+  [RISK:note]     Known risk, mitigation in pillar or appendix
+  [DEFER]         Intentionally deferred
+
+Every step begins with one of these markers. Default is [TODO] if absent.
+
+Glossary
+--------
+
+  RTwP          Real-time with pause
+  ECS           Entity-Component-System
+  DSL           Domain-Specific Language
+  entt          The C++ ECS library used (skypjack/entt v3.x)
+  CP437         Original IBM PC code page 437; the glyph space REXPaint uses
+  truecolor     24-bit ANSI color escape sequences
+  layer         One of 9 planes in a .xp file (1=base .. 9=top)
+  cell          One character position in a grid (glyph + colors)
+  map           One .xp file, 80x24 cells, 9 layers
+  region        A group of related maps forming a playable area
+  flag          A named boolean/int/string in the quest state store
+  stage         A node in a quest's progression graph
+  schedule      Time-blocked waypoint list defining NPC daily behavior
+  disposition   NPC attitude toward player, 0-100
+  faction       A named group of NPCs with shared reputation
+  attribute     One of 9 base character stats (Strength..Voice)
+  skill         One of 24 trainable abilities
+  derived stat  Stat computed from attributes/skills/equipment
+  condition     Temporary status effect on an entity
+  glyph array   Ordered list of glyphs that compose an animation frame
+  sub-cell      Fractional position within a cell (16ths) for smooth motion
+  ambient       Global light level for a map
+  light grid    Per-cell light intensity (0-15)
+
+State colors for output
+-----------------------
+
+  All file references in this plan are relative to ~/Documents/ash-plan/
+  unless prefixed with an absolute path.
+
+Naming conventions
+------------------
+
+  C++ types:      PascalCase
+  C++ functions:  snake_case
+  C++ variables:  snake_case
+  C++ constants:  SCREAMING_SNAKE_CASE
+  C++ files:      snake_case.hpp / snake_case.cpp
+  .xp files:      snake_case.xp
+  .json files:    snake_case.json
+  .dlg files:     snake_case.dlg
+  .qst files:     snake_case.qst
+  NPC ids:        snake_case (e.g. maren_vell)
+  Item ids:       snake_case (e.g. iron_cleaver)
+  Quest ids:      snake_case (e.g. main_act1_wake)
+  Map ids:        snake_case (e.g. silvercliff_inn_floor)
+  Region ids:     single word lowercase (e.g. scoured_coast)
+
+Convention cross-references
+---------------------------
+
+  REXPaint layer usage:        appendices/A-rexpaint-layer-spec.txt
+  Dialogue DSL grammar:        appendices/B-dialogue-grammar.txt
+  Quest file format:           appendices/C-quest-format.txt
+  Save schema:                 appendices/D-save-schema.txt
+  Keybind defaults:            appendices/E-keybind-defaults.txt
+  Animation format:            appendices/F-animation-format.txt
+
+Document version
+----------------
+
+  v0.1.0  Initial draft.

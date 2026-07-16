@@ -1,0 +1,319 @@
+ASH — Phase 07: Combat
+=========================
+
+Phase goal: real-time-with-pause combat. Weapons, armor, status
+effects, AI behaviors, pathfinding, line-of-sight, cover.
+
+Entry criteria: Phase 6 complete.
+Exit criteria: combat encounter with 3 bandits works; player can
+              fight, use items, flee, win, loot corpses.
+
+[ENTRY CRITERIA]
+  - Phase 6 complete.
+
+[EXIT CRITERIA]
+  - RTwP combat loop functional.
+  - All weapon types work.
+  - Armor damage reduction functional.
+  - Status effects apply and tick.
+  - AI uses pathfinding and LoS.
+  - Player can die (and reload).
+
+[RISKS]
+  - Combat balance. Mitigation: data-driven, easy to tune.
+  - AI decision-making complexity. Mitigation: composable behaviors.
+  - Performance with many combatants. Mitigation: LOD updates.
+
+Step 0700.00.00. Create src/combat/combat.hpp.
+  - Sub: enum class CombatState { OutOfCombat, InCombat, Paused };
+
+Step 0700.00.00. Define CombatRound.
+  - Sub: struct CombatRound { int round_number;
+         std::vector<entt::entity> initiative_order;
+         int current_actor_idx; };
+
+Step 0700.00.01. Implement CombatManager.
+  - Sub: Tracks CombatState.
+  - Sub: On hostile action: enter combat.
+  - Sub: On all enemies dead or fled: exit combat.
+
+Step 0700.00.02. Implement initiative roll.
+  - Sub: For each entity: Wit + Luc/4 + d20.
+  - Sub: Sort descending.
+
+Step 0700.00.03. Implement round start.
+  - Sub: Reset action economy.
+  - Sub: Decrement condition durations.
+
+Step 0700.00.04. Implement actor turn.
+  - Sub: Move + Action + Bonus.
+  - Sub: Auto-resolve on timer if not manual.
+
+Step 0701.00.00. Create src/combat/weapon.hpp.
+  - Sub: struct WeaponDef { std::string id;
+         WeaponType type; DamageType damage;
+         int damage_min, damage_max;
+         int reach; int arc;
+         int range; AmmoType ammo;
+         int attack_speed_ms;
+         std::vector<std::string> tags; };
+
+Step 0701.00.01. Define WeaponType enum.
+  - Sub: Melee1H, Melee2H, Polearm, Bow, Crossbow, Firearm, Thrown.
+
+Step 0701.00.02. Define DamageType enum.
+  - Sub: Slash, Pierce, Crush, Element, Voice.
+
+Step 0701.00.03. Define AmmoType enum.
+  - Sub: None, Arrow, Bolt, Bullet, Throwable.
+
+Step 0701.00.04. Implement WeaponDatabase.
+  - Sub: Loads weapons.json.
+  - Sub: get(id) -> WeaponDef&.
+
+Step 0701.00.05. Implement weapon query.
+  - Sub: by_type(WeaponType).
+  - Sub: by_damage_type(DamageType).
+
+Step 0702.00.00. Create src/combat/armor.hpp.
+  - Sub: struct ArmorDef { std::string id;
+         ArmorSlot slot;
+         std::map<DamageType, int> reduction;
+         int encumbrance; int condition_max;
+         std::vector<std::string> tags; };
+
+Step 0702.00.01. Define ArmorSlot enum.
+  - Sub: Chest, Helm, Boots, Gloves, Shield.
+
+Step 0702.00.02. Implement ArmorDatabase.
+  - Sub: Loads armor.json.
+
+Step 0702.00.03. Implement armor damage reduction.
+  - Sub: Total reduction = sum of equipped armor by damage type.
+  - Sub: Cap at 75%.
+
+Step 0703.00.00. Create src/combat/attack.hpp.
+  - Sub: struct AttackResult {
+         bool hit;
+         int damage;
+         DamageType type;
+         std::vector<Condition> applied;
+         std::string message;
+       };
+
+Step 0703.00.01. Implement attack roll.
+  - Sub: d20 + AttackBonus vs DefenderAC.
+  - Sub: AttackBonus = skill + attribute + weapon.
+  - Sub: DefenderAC = base + Agi + armor.
+
+Step 0703.00.02. Implement critical hit.
+  - Sub: Roll >= crit threshold.
+  - Sub: Double damage dice.
+
+Step 0703.00.03. Implement damage roll.
+  - Sub: random(damage_min, damage_max).
+  - Sub: Apply armor reduction.
+  - Sub: Subtract from hp.
+
+Step 0703.00.04. Implement swing arc.
+  - Sub: For melee, check if target in arc.
+  - Sub: Arc = 90 degrees by default.
+
+Step 0703.00.05. Implement ranged attack.
+  - Sub: Check line of sight.
+  - Sub: Check range.
+  - Sub: Roll to hit.
+
+Step 0704.00.00. Create src/combat/damage.hpp.
+  - Sub: struct Damage { int amount; DamageType type;
+         entt::entity source; entt::entity target; };
+
+Step 0704.00.01. Implement resistance.
+  - Sub: Per-damage-type resistance from attributes/conditions/items.
+
+Step 0704.00.02. Implement immunity.
+  - Sub: Skip damage if immune.
+
+Step 0704.00.03. Implement damage event.
+  - Sub: Emit event for animation, log, etc.
+
+Step 0705.00.00. Create src/combat/status.hpp.
+  - Sub: struct StatusEffectDef {
+         Condition type; int duration_ms;
+         int tick_damage; DamageType tick_type;
+         std::map<std::string, int> stat_mods;
+         std::string on_apply_msg, on_tick_msg, on_remove_msg;
+       };
+
+Step 0705.00.01. Implement status database.
+  - Sub: Built-in effects + custom from content.
+
+Step 0705.00.02. Implement apply_status.
+  - Sub: Push to entity's status list.
+  - Sub: If already applied, refresh duration (or stack).
+
+Step 0705.00.03. Implement tick_status.
+  - Sub: Apply tick damage.
+  - Sub: Decrement duration.
+  - Sub: Remove if expired.
+
+Step 0705.00.04. Implement status removal.
+  - Sub: Remove by condition or by source.
+
+Step 0706.00.00. Create src/combat/path.hpp.
+  - Sub: std::vector<IVec2> find_path(Map&, IVec2 from, IVec2 to);
+
+Step 0706.00.01. Implement A* pathfinder.
+  - Sub: Open set, closed set, g/h/f scores.
+  - Sub: 4 or 8 directional movement.
+  - Sub: Returns path or empty if no path.
+
+Step 0706.00.02. Implement path cache.
+  - Sub: Cache by (from, to, door_state).
+  - Sub: Invalidate on door change.
+
+Step 0706.00.03. Tests for pathfinder.
+  - Sub: Straight line.
+  - Sub: Around obstacle.
+  - Sub: No path.
+
+Step 0707.00.00. Create src/combat/line_of_sight.hpp.
+  - Sub: bool has_line_of_sight(Map&, IVec2 from, IVec2 to);
+
+Step 0707.00.01. Implement Bresenham LoS.
+  - Sub: Walk cells from to.
+  - Sub: Block on opaque cells.
+
+Step 0707.00.02. Implement range query.
+  - Sub: All entities in range from point.
+
+Step 0708.00.00. Create src/combat/cover.hpp.
+  - Sub: enum class Cover { None, Partial, Full };
+  - Sub: Cover get_cover(Map&, IVec2 attacker, IVec2 target);
+
+Step 0708.00.01. Implement cover check.
+  - Sub: If line passes through obstacle adjacent to target: partial.
+  - Sub: If target behind wall: full.
+
+Step 0709.00.00. Create src/combat/ai.hpp.
+  - Sub: enum class Behavior { Idle, Patrol, Guard, Flee, Berserk,
+         Caster, Summoner, Support, Ambusher, Coward,
+         PackHunter, Territorial, PackRetreat };
+
+Step 0709.00.01. Implement AIComponent.
+  - Sub: struct AI { Behavior primary; Behavior secondary;
+         entt::entity leash_target; float leash_radius;
+         float aggression; float self_preservation; };
+
+Step 0709.00.02. Implement AI tick.
+  - Sub: Sub: For each entity with AI:
+    - Sense nearby entities.
+    - Score possible actions.
+    - Pick best.
+    - Execute.
+
+Step 0709.00.03. Implement Idle.
+  - Sub: Stay in place. Wander if no patrol.
+
+Step 0709.00.04. Implement Patrol.
+  - Sub: Walk waypoints.
+  - Sub: Alert on player detection.
+
+Step 0709.00.05. Implement Guard.
+  - Sub: Stay at post.
+  - Sub: Attack hostiles in range.
+
+Step 0709.00.06. Implement Flee.
+  - Sub: Move away from threat.
+  - Sub: Until safe distance or no path.
+
+Step 0709.00.07. Implement Berserk.
+  - Sub: Always close to nearest enemy.
+  - Sub: No retreat.
+
+Step 0709.00.08. Implement Caster.
+  - Sub: Maintain distance.
+  - Sub: Cast spells.
+
+Step 0709.00.09. Implement Support.
+  - Sub: Heal/buff allies.
+  - Sub: Stay near them.
+
+Step 0709.00.10. Implement Ambusher.
+  - Sub: Wait in place.
+  - Sub: Attack when player in range.
+
+Step 0709.00.11. Implement Coward.
+  - Sub: Flee when threatened.
+  - Sub: Surrender if cornered.
+
+Step 0709.00.12. Implement PackHunter.
+  - Sub: Coordinate with pack.
+  - Sub: Flank target.
+
+Step 0709.00.13. Implement Territorial.
+  - Sub: Attack if player enters territory.
+  - Sub: Return to territory if pursued outside.
+
+Step 0709.00.14. Implement PackRetreat.
+  - Sub: When alpha dies, retreat.
+  - Sub: Reform at fallback point.
+
+Step 0710.00.00. Tests for AI behaviors.
+
+Step 0711.00.00. Combat UI elements.
+  - Sub: Health bar above enemies.
+  - Sub: Initiative order panel.
+  - Sub: Action selection menu.
+
+Step 0711.00.01. Implement combat log.
+  - Sub: Scrollable list of recent actions.
+  - Sub: Color-coded by type.
+
+Step 0712.00.00. Death and corpse handling.
+  - Sub: On hp <= 0: switch to death anim.
+  - Sub: After anim: spawn corpse entity.
+  - Sub: Remove from combat.
+
+Step 0712.00.01. Implement player death.
+  - Sub: Show "You died" screen.
+  - Sub: Options: reload last save, load, exit.
+  - Sub: If permadeath: end game.
+
+Step 0713.00.00. Loot corpses.
+  - Sub: Interact with corpse.
+  - Sub: Show inventory transfer UI.
+  - Sub: Take all / individual.
+
+Step 0714.00.00. Flee mechanics.
+  - Sub: Player can flee combat.
+  - Sub: Roll Wit vs pursuing enemies.
+  - Sub: On failure: take damage during flee.
+
+Step 0715.00.00. Encounter balance data.
+  - Sub: tests/data/encounters.json.
+  - Sub: Tests combat math.
+
+Step 0716.00.00. Tests for combat system.
+
+Step 0717.00.00. Verify build.
+
+Step 0717.00.01. Final commit.
+  - Sub: git commit -m "feat(phase-07): RTwP combat system".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --combat-test
+  Encounter with 3 bandits starts.
+  Player can attack, use items, pause, flee.
+  Combat ends on player victory or death.
+  Corpse can be looted.
+
+[PHASE 7 PLAYABLE BUILD]
+
+  Build 07: "First Blood"
+    - Real combat.
+    - AI behaves.
+    - Player can die.
+    - Loot works.
+    - Foundation for the entire game's combat loop.

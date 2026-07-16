@@ -1,0 +1,193 @@
+PHASE 14 — RIVEN SPIRE (REGION 3)
+===================================
+Region: Single vast mountain split by the Shattering, with sky-shards embedded in its sides. Sky-Smiths work the forges here.
+Maps: 15 (rs_01 through rs_15)
+Faction primary: Sky-Smiths (violet)
+Theme: Craft and the relationship between the broken and the reforged.
+
+14.00 — REGION OVERVIEW
+  14.00.001 — Region def: content/regions/riven_spire.json
+    - { key: "riven_spire", name: "Riven Spire", description: "...", maps: 15, primary_faction: "sky_smiths", climate: "high_wind", music_track: "ash_spire_theme", sky_color: "#8090a0", ground_color: "#383838" }
+  14.00.002 — Mechanic: mountain climbing (vertical, stamina-based)
+  14.00.003 — Mechanic: shard-tempering (use forge to strengthen weapons with shard dust)
+  14.00.004 — Mechanic: high-altitude damage (thin air, cold)
+
+14.01-14.15 — MAPS (15 total)
+  14.01.001 — rs_01: Spirefoot (entrance from Glasswood)
+    - 80x60, terrain "stone_rough", ambient "wind_low"
+    - Village at mountain base
+    - 8 NPCs: smiths, vendors, guards
+    - 3 creatures: mountain goats
+    - Quest hub for Spire
+  14.02.001 — rs_02: The Low Forges
+    - 70x70, terrain "stone_warm", ambient "forge_distant"
+    - Open-air forges, hot springs nearby
+    - 6 NPCs: smiths (vendors, crafters)
+    - Loot: ingots, tools, fire-resistant gear
+  14.03.001 — rs_03: Echo Mines
+    - 80x80, terrain "stone_echo_mine", ambient "pick_strike"
+    - Active mines, mineral-rich
+    - 4 NPCs: miners (vendors of ore)
+    - 5 creatures: cave_grimlins (level 3)
+    - Loot: rare ores, gems
+  14.04.001 — rs_04: The Climb (vertical shaft)
+    - 40x120, terrain "stone_climb", ambient "wind_rising"
+    - Single path up, hand-holds
+    - Stamina checks every 20 feet
+    - 3 NPCs: climbing guides (sell gear)
+  14.05.001 — rs_05: Mid-Spire Settlement
+    - 70x70, terrain "stone_balcony", ambient "wind_mid"
+    - Halfway up, town clinging to cliff
+    - 12 NPCs: mid-level smiths, vendors, lore keepers
+    - Side quest hub
+  14.06.001 — rs_06: The Shard Gallery
+    - 60x60, terrain "shard_white", ambient "shard_song"
+    - Natural shard formation, plays music in wind
+    - 2 NPCs: shard-listener (sage)
+    - Side quest: sq_shard_melody (learn the song)
+  14.07.001 — rs_07: The Great Anvil
+    - 100x80, terrain "forge_ancient", ambient "anvil_hum"
+    - Central forge, older than Shattering
+    - 1 NPC: First Smith (boss NPC, leader)
+    - Main quest: main_act3_meet_sky_smiths
+  14.08.001 — rs_08: The Crucible Pits
+    - 80x80, terrain "magma_rock", ambient "lava_bubble"
+    - Underground lava chambers
+    - 3 NPCs: smelters (rare materials)
+    - 6 creatures: fire_elementals (level 5-6)
+    - Loot: fire_cores, magma_steel
+  14.09.001 — rs_09: The Shardsmith's Hall
+    - 70x70, terrain "shard_forge", ambient "shard_hum_forge"
+    - Where shards are worked into weapons
+    - 5 NPCs: master shardsmiths
+    - Mechanic hub: shard-tempering service
+  14.10.001 — rs_10: High Pass
+    - 90x60, terrain "stone_ice", ambient "wind_high"
+    - Mountain pass, snow, ice
+    - 4 NPCs: high-wardens
+    - 4 creatures: frost_wolves (level 5)
+    - Cold damage mechanic
+  14.11.001 — rs_11: The Shattered Gate
+    - 80x80, terrain "shard_massive", ambient "gate_hum"
+    - Massive embedded sky-shard, glows
+    - 2 NPCs: gate-keepers (lore)
+    - Side quest: activate the gate (teleport hub)
+  14.12.001 — rs_12: The Summit Forge
+    - 60x60, terrain "forge_summit", ambient "summit_wind"
+    - Forge at peak, view entire world
+    - 3 NPCs: summit smiths
+    - Main quest: main_act3_shard_tempering
+  14.13.001 — rs_13: Cloud City Ruins
+    - 100x80, terrain "cloud_stone", ambient "cloud_silence"
+    - Pre-Shattering city in clouds, now ruins
+    - 6 NPCs: cloud ghosts (quests)
+    - 1 mini-boss: The Sentinel (level 8)
+    - Loot: pre-Shattering artifacts
+  14.14.001 — rs_14: The Broken Crown
+    - 80x80, terrain "shard_crown", ambient "wind_extreme"
+    - Mountain peak split by Shattering
+    - 2 NPCs: hermits (peak wardens)
+    - Side quest: sq_peak_ascent (reach highest point)
+  14.15.001 — rs_15: Edge of Ash Plains (transition)
+    - 70x60, terrain "ash_rock", ambient "wind_dying"
+    - Mountain ends, ash plains begin
+    - 1 NPC: Sky-Smith Outrider (warning)
+    - Exit to Ash Plains
+
+14.30 — REGION NPCs (~90 total)
+  14.30.001 — First Smith Hesta (leader, main quest)
+    - Schedule: forge work all day
+    - Faction: Sky-Smiths rank 5 (First Smith)
+    - Dialogue: 10 greeting variants, 15 lore topics, 8 quest hooks
+    - Special: teaches advanced smithing, shard-tempering
+  14.30.002 — 12 Master Smiths (named: Korren from coast now here as master, etc.)
+  14.30.003 — 8 Shard-Smiths (specialized in shard work)
+  14.30.004 — 10 Miners + Smelters
+  14.30.005 — 8 Vendors (ore, ingots, tools, weapons, armor, food)
+  14.30.006 — 6 Lore NPCs (Gate-Keepers, Shard-Listeners)
+  14.30.007 — 4 Climbing Guides
+  14.30.008 — 3 Peak Hermits
+  14.30.009 — 8 Cloud Ghosts
+  14.30.010 — 30+ background NPCs: guards, apprentices, travelers
+
+14.40 — REGION QUESTS (~22)
+  14.40.001 — Main: main_act3_meet_sky_smiths
+  14.40.002 — Main: main_act3_shard_tempering (forge player's blade)
+  14.40.003 — Main: main_act3_summit_ascent (reach peak)
+  14.40.004 — Main: main_act3_cloud_secrets (explore Cloud City)
+  14.40.005 — Main: main_act3_gate_activate (unlock fast travel)
+  14.40.006 — Faction: fac_sky_smith_apprentice
+  14.40.007 — Faction: fac_sky_smith_journeyman
+  14.40.008 — Faction: fac_sky_smith_master
+  14.40.009 — Faction: fac_sky_smith_shardforger (special rank)
+  14.40.010 — Side: sq_shard_melody (learn shard song)
+  14.40.011 — Side: sq_ore_run (rare ores)
+  14.40.012 — Side: sq_anvil_repair (restore ancient forge)
+  14.40.013 — Side: sq_fire_elemental_cores (collect cores)
+  14.40.014 — Side: sq_summit_relic (artifact at peak)
+  14.40.015 — Side: sq_cloud_ghost_memories (learn history)
+  14.40.016 — Side: sq_gate_activation (multi-stage)
+  14.40.017 — Side: sq_frost_wolf_pelt (hunt)
+  14.40.018 — Side: sq_shard_listening (meditate)
+  14.40.019 — Side: sq_first_smith_test (pass smith trial)
+  14.40.020 — Side: sq_blade_mastery (learn technique)
+  14.40.021 — Misc: sq_mountain_climber (reach all peaks)
+  14.40.022 — Misc: sq_forge_keeper (help at forge)
+
+14.50 — REGION ITEMS (~100 unique)
+  14.50.001 — Smithing tools (15): hammer, tongs, anvil, quenching_basin, bellows, file, rasp, whetstone, fire_pot, forge_bricks, ingot_mold, quenching_oil, smith_apron, smith_gloves, forge_pick
+  14.50.002 — Ores & ingots (20): iron, steel, sky-steel, shard-steel, magma-steel, frost-steel, gold, silver, copper, tin, lead, mithril (rare), adamant (rare), orichalcum (rare), star-iron (rare), shard_ingot, fire_core, frost_core, lightning_core, void_core
+  14.50.003 — Weapons (15): shard_blade, magma_axe, frost_hammer, sky_spear, smith's_hammer, firebrand, icebrand, stormbrand, shard_katana, shard_dagger, shard_bow, shard_staff, shard_mace, shard_sickle, master_breath (unique)
+  14.50.004 — Armor (12): shard_helm, shard_chest, shard_legs, shard_boots, shard_gauntlets, shard_shield, magma_armor, frost_armor, smith_apron_set, miner_gear, climber_gear, sky_warden_armor
+  14.50.005 — Shards (8): shard_small, shard_medium, shard_large, shard_cursed, shard_blessed, shard_broken, shard_pristine, shard_at_the_gate
+  14.50.006 — Books (10): sky_smith_codex, anvil_history, shard_tempering_manual, smith_philosophy, cloud_city_records, mountain_guide, ore_compendium, summit_poems, etc.
+  14.50.007 — Potions/Food (15): fire_resist, frost_resist, stamina_potion, climbing_meal, smith's_ale, magma_bread, frost_tea, summit_water, forge_biscuit, etc.
+  14.50.008 — Quest items (15): shard_at_the_gate, forge_artifact, summit_relic, cloud_key, etc.
+
+14.60 — REGION CREATURES (~12 types)
+  14.60.001 — Mountain Goat (level 1, skittish)
+  14.60.002 — Cave Grimp (level 3, swarm)
+  14.60.003 — Forge Imp (level 3, mischievous)
+  14.60.004 — Fire Elemental (level 5-6, magma)
+  14.60.005 — Frost Wolf (level 5, pack)
+  14.60.006 — Shard Wraith (level 6, sky)
+  14.60.007 — Magma Golem (level 7, slow)
+  14.60.008 — The Sentinel (level 8, mini-boss, Cloud City)
+  14.60.009 — Storm Roc (level 9, sky creature)
+  14.60.010 — First Smith's Shadow (level 7, mini-boss, test)
+  14.60.011 — Summit Wyrm (level 10, boss)
+  14.60.012 — Cloud Serpent (level 8, sky)
+
+14.70 — REGION LORE BOOKS (12 books)
+  14.70.001 — "Anvil Hymns" — smithing philosophy, 3000 words
+  14.70.002 — "Sky-Smith Founding Charter" — faction lore, 2500 words
+  14.70.003 — "The Art of Shard-Tempering" — craft manual, 4000 words
+  14.70.004 — "Cloud City Annals" — pre-Shattering history, 5000 words
+  14.70.005 — "Ore and Ingot: A Survey" — mineralogy, 2000 words
+  14.70.006 — "First Smith's Journal" — personal, 3500 words
+  14.70.007 — "The Shattered Crown" — geological survey, 2500 words
+  14.70.008 — "Summit Poems" — poetry, 1500 words
+  14.70.009 — "Mountain Climbing Manual" — practical, 1200 words
+  14.70.010 — "Shard-Listener's Notes" — music theory, 2000 words
+  14.70.011 — "The Broken Gate" — mystery, 3000 words
+  14.70.012 — "Forgekeepers' Tales" — folklore, 1500 words
+
+14.80 — REGION AUDIO (10 tracks)
+  14.80.001 — Music: ash_spire_theme.wav, forge_theme.wav, summit_theme.wav, shard_song.wav, boss_summit.wav
+  14.80.002 — Ambient: wind_low.wav, wind_mid.wav, wind_high.wav, wind_extreme.wav, forge_distant.wav, lava_bubble.wav, shard_hum.wav
+  14.80.003 — SFX: hammer_strike.wav, anvil_ring.wav, quenching_sizzle.wav, climb_grip.wav
+
+14.90 — REGION VERIFICATION
+  14.90.001 — All 15 maps load
+  14.90.002 — Vertical climbing works with stamina
+  14.90.003 — High-altitude damage
+  14.90.004 — Shard-tempering enhances weapons
+  14.90.005 — All NPCs schedule correctly
+  14.90.006 — All quests advance
+  14.90.007 — Boss beatable
+  14.90.008 — Transition to Ash Plains
+  14.90.009 — Performance: 60 FPS at summit with view distance
+  14.90.010 — Document phase 14
+
+END PHASE 14
+RIVEN SPIRE REGION COMPLETE: 15 maps, ~90 NPCs, 22 quests, 100+ items, 12 creatures, 12 books, 10 audio tracks

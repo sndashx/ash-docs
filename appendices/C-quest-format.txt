@@ -1,0 +1,264 @@
+ASH — Appendix C: Quest File Format
+====================================
+
+File extension: .qst
+Encoding: UTF-8
+Comments: // line, /* block */
+
+Quest files describe quest progression as a directed graph of
+stages. Stages have entry conditions and exit actions. The engine
+maintains the active stage per quest.
+
+Top-level structure
+-------------------
+
+  quest <id> {
+    meta {
+      name: "The Wake in the Crypt";
+      category: "Main Quest";
+      priority: 100;          // higher = shown first
+      giver: maren_vell;       // optional, the NPC who starts it
+      sort_index: 1;           // display order within category
+      hidden_until: <condition>; // optional, hidden from journal until
+      auto_complete: false;    // can auto-complete on conditions
+    }
+
+    entry: <stage_id>;
+
+    stage <stage_id> {
+      // stage body
+    }
+    ...
+  }
+
+Stage types
+-----------
+
+  1. OBJECTIVE - Player must do something specific.
+
+     stage find_brother {
+       description: "Find Maren's brother, Rellan.";
+       objective: "Search Silvercliff for Rellan.";
+       location_hint: "He was last seen near the docks.";
+       on_enter {
+         set_flag met_maren = true;
+         journal add, "Main Quest",
+           "Maren Vell asked me to find her brother Rellan.";
+       }
+       on_exit {
+         set_flag rellan_met = true;
+         inc_flag maren_trust, 10;
+       }
+
+       condition {
+         flag:rellan_met;
+       }
+
+       next: report_back;
+     }
+
+  2. BRANCH - Conditional next-stage selection.
+
+     stage choose_faction {
+       description: "Choose a faction.";
+       on_enter {
+         // player must talk to all faction leaders
+       }
+
+       branch {
+         if (reputation(coastal_watch) >= 50) -> coastal_path;
+         else if (reputation(cartographers) >= 50) -> cartographer_path;
+         else if (reputation(sky_smiths) >= 50) -> smith_path;
+         else if (reputation(quiet_choir) >= 50) -> choir_path;
+         else -> lone_wolf_path;
+       }
+     }
+
+  3. SIMULTANEOUS - Multiple objectives must complete.
+
+     stage gather_components {
+       description: "Gather the spell components.";
+       objective_all: [
+         { item: "moonstone_dust", count: 3 },
+         { item: "ashwood_bark",   count: 5 },
+         { item: "saltwater_flask", count: 1 }
+       ];
+       on_complete {
+         give_item player, assembled_relic, 1;
+         take_item player, moonstone_dust, 3;
+         take_item player, ashwood_bark, 5;
+         take_item player, saltwater_flask, 1;
+       }
+       next: bring_to_altar;
+     }
+
+  4. ESCORT - Player must escort an NPC.
+
+     stage escort_maren_home {
+       escort_npc: maren_vell;
+       destination: silvercliff_inn_floor;
+       on_arrive {
+         disposition maren_vell += 20;
+         reputation coastal_watch += 5;
+       }
+       on_fail {
+         // if maren dies or gets left behind
+         disposition maren_vell = 0;
+       }
+       next: maren_home_arrive;
+     }
+
+  5. INVESTIGATE - Player must examine specific entities.
+
+     stage investigate_corpse {
+       description: "Examine the corpse in the alley.";
+       objective_any: [
+         { examine: "corpse_alley_north" },
+         { talk_to: "harric_dockworker" },
+         { flag: heard_from_witness }
+       ];
+       on_complete {
+         give_item player, ciphershard_fragment, 1;
+       }
+       next: pursue_lead;
+     }
+
+  6. TIMED - Complete within a time limit.
+
+     stage rescue_before_dusk {
+       description: "Rescue the prisoner before dusk.";
+       duration: "until_dusk"; // game-time
+       on_timeout {
+         // prisoner dies
+         spawn_npc prisoner_ghost, hollow_prison, 12, 8;
+         set_flag prisoner_died = true;
+         journal add, "Side Quest",
+           "I was too late. The prisoner's ghost haunts the cell.";
+       }
+       on_complete {
+         give_item player, prisoner_gratitude_token, 1;
+         disposition prisoner_kin += 30;
+       }
+       condition {
+         flag: prisoner_rescued;
+       }
+       next: report_success;
+     }
+
+  7. KILL - Defeat a specific entity or count.
+
+     stage clear_lair {
+       description: "Clear the lair of hostiles.";
+       objective_count: { faction: "creature_hostile", count: 8 };
+       on_complete {
+         give_item player, lair_pay, 50;
+         reputation coastal_watch += 10;
+       }
+       next: claim_reward;
+     }
+
+  8. FETCH - Collect items.
+
+     stage fetch_ingredients {
+       description: "Bring Maren the herbs she needs.";
+       objective_all: [
+         { item: "silverleaf", count: 5 },
+         { item: "foxglove",   count: 3 }
+       ];
+       on_complete {
+         give_item player, gold, 50;
+         disposition maren_vell += 15;
+       }
+       next: maren_pay;
+     }
+
+Conditions
+----------
+
+Conditions can appear in:
+  - Stage entry (skip stage if not met)
+  - Branch selection
+  - Stage completion
+  - Quest entry
+
+Expression syntax: same as dialogue DSL (see appendix B).
+
+  flag:<flag_id>
+  flag:<flag_id> == <value>
+  flag:<flag_id> >= <value>
+  disposition(<npc_id>)
+  reputation(<faction_id>)
+  skill:<skill_id>
+  has_item(<item_id>)
+  has_item(<item_id>, <count>)
+  completed_quest(<quest_id>)
+  active_quest(<quest_id>)
+  time:hour, time:day, time:month, time:year
+  weather
+  at(<map_id>, <x>, <y>)
+  in_combat
+
+Actions (same set as dialogue)
+-----------------------------
+
+Plus quest-specific:
+  set_stage <quest_id>, <stage_id>;        force stage (debug)
+  fail_quest <quest_id>;
+  complete_quest <quest_id>;
+  spawn_npc <npc_id>, <map_id>, <x>, <y>;
+  despawn_npc <npc_id>;
+  set_schedule <npc_id>, <schedule_id>;
+
+Quest categories and journal
+----------------------------
+
+Categories shown in journal UI:
+  "Main Quest"     - the 5-act main storyline
+  "Faction"        - 4 faction questlines
+  "Side Quest"     - misc side quests
+  "Misc"           - rumors, micro-events, achievements
+
+Per-quest journal entry template (engine substitutes variables):
+  "{quest.name}: {stage.description}"
+  "Objective: {stage.objective}"
+
+Hidden quests
+-------------
+
+  hidden_until: <condition>
+
+Quest is not shown in journal until condition is met. Useful for
+faction-internal quests that only reveal once you're in.
+
+Auto-complete
+-------------
+
+  auto_complete: true
+
+Quest completes as soon as all conditions are met (e.g., "explore
+all 5 regions"). No explicit completion trigger.
+
+Persistence
+-----------
+
+Per quest:
+  - state: NOT_STARTED | ACTIVE | COMPLETED | FAILED
+  - current_stage: <stage_id>
+  - visited_stages: vector<stage_id>
+  - timestamp_started, timestamp_completed
+
+Stored in world.v0.json under "quests": { <quest_id>: {...} }.
+
+Failure conditions
+------------------
+
+Stages can fail via:
+  - Explicit fail action
+  - Condition that becomes false (e.g., NPC dies before you
+    deliver item)
+  - Timeout
+
+When a quest fails, all stages complete; the quest state is FAILED;
+journal shows failed entry; consequences run.
+
+Examples are in content/quests/ in phase content specs.

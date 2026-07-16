@@ -1,0 +1,198 @@
+ASH — Appendix F: Animation Format
+===================================
+
+File extension: .json
+Location: content/anim/
+
+Animations are ordered sequences of glyphs (with optional color
+overrides) played at a specified framerate. They are referenced
+from entity JSON files by id and triggered by state changes
+(idle, walk, attack, hurt, death, cast, etc).
+
+Format
+------
+
+  {
+    "schema_version": 0,
+    "id": "player_walk_down",
+    "loop": true,
+    "fps": 8,
+    "frames": [
+      {
+        "duration_ms": 125,
+        "glyph": "V",
+        "fg": [220, 200, 120],
+        "bg": null,
+        "offset_x": 0,
+        "offset_y": 0
+      },
+      {
+        "duration_ms": 125,
+        "glyph": "v",
+        "fg": [220, 200, 120],
+        "bg": null,
+        "offset_x": 0,
+        "offset_y": 0
+      }
+    ],
+    "transitions": {
+      "to_idle": { "at_end": true }
+    }
+  }
+
+Schema fields
+-------------
+
+  schema_version: integer, currently 0
+  id: string, unique animation id
+  loop: bool, true for walk/idle, false for one-shot (attack, hurt, death)
+  fps: int, frames per second (used to compute duration_ms if absent)
+  frames: array of frame objects (see below)
+  transitions: optional, behavior when animation ends
+
+Frame fields
+------------
+
+  duration_ms: int, how long this frame shows (overrides fps)
+  glyph: string, single character (UTF-8) or unicode escape
+  fg: [r, g, b] or null (use entity base color)
+  bg: [r, g, b] or null (transparent)
+  offset_x: int, pixel offset (sub-cell: 0-15) for shake/jitter
+  offset_y: int, pixel offset for vertical bob
+  rotation: int, 0/90/180/270 (for direction variants)
+  alpha: float 0-1 (engine treats as blend if supported)
+
+Transitions
+-----------
+
+  to_idle: { at_end: true }      // when done, return to idle
+  to_next: { next: "anim_id" }   // chain to next animation
+  on_event: { "attack": "anim_attack" }  // event-triggered chain
+
+Standard animation sets
+-----------------------
+
+Player (content/anim/player/):
+  idle_down, idle_up, idle_left, idle_right
+  walk_down, walk_up, walk_left, walk_right
+  attack_down, attack_up, attack_left, attack_right
+  attack_power_down, attack_power_up, ...
+  bow_draw, bow_release
+  spell_cast_down, spell_cast_up, ...
+  hurt
+  death
+  dodge
+  block
+  sneak_idle, sneak_walk_down, ...
+
+NPCs (content/anim/npc/):
+  Same set as player, but per-NPC overrides allowed.
+  Generic "npc_walk_down" applies to all by default.
+
+Creatures (content/anim/creatures/):
+  Per-creature-type animations.
+  Example: rat_idle, rat_walk, rat_attack, rat_hurt, rat_death
+           wolf_idle, wolf_walk, wolf_howl, wolf_attack, wolf_death
+           bandit_idle, bandit_walk, bandit_attack, ...
+
+Direction encoding
+------------------
+
+Animation IDs conventionally end in _down, _up, _left, _right, or
+_diagonal_<dir>. The engine picks the right variant based on facing.
+
+Facing is stored on entity as a 0-7 enum:
+  0 = south
+  1 = southwest
+  2 = west
+  3 = northwest
+  4 = north
+  5 = northeast
+  6 = east
+  7 = southeast
+
+Performance
+-----------
+
+- Animations update at 60Hz max, throttled by game tick.
+- Frame data cached; lookup is O(1) by id.
+- Switching animations mid-frame is allowed but creates a slight
+  visual stutter (intentional, communicates state change).
+
+Color tweening
+--------------
+
+Frame colors can tween via:
+  "tween": {
+    "from": [r, g, b],
+    "to": [r, g, b],
+    "duration_ms": 250
+  }
+
+Useful for spells, glows, fade-in/fade-out.
+
+Easing
+------
+
+Frames can specify easing for transitions:
+  "ease": "linear" | "ease_in" | "ease_out" | "ease_in_out"
+  Default: linear.
+
+Examples
+--------
+
+Player walk cycle (8 fps, 4 frames):
+
+  {
+    "schema_version": 0,
+    "id": "player_walk_down",
+    "loop": true,
+    "fps": 8,
+    "frames": [
+      { "duration_ms": 125, "glyph": "V", "fg": [220, 200, 120] },
+      { "duration_ms": 125, "glyph": "v", "fg": [220, 200, 120] },
+      { "duration_ms": 125, "glyph": "V", "fg": [220, 200, 120] },
+      { "duration_ms": 125, "glyph": "w", "fg": [220, 200, 120] }
+    ]
+  }
+
+Torch flicker (light source, modulates light intensity):
+
+  {
+    "schema_version": 0,
+    "id": "torch_flicker",
+    "loop": true,
+    "fps": 6,
+    "frames": [
+      { "duration_ms": 167, "glyph": "*", "fg": [255, 180, 80] },
+      { "duration_ms": 167, "glyph": "*", "fg": [255, 160, 60] },
+      { "duration_ms": 167, "glyph": "*", "fg": [255, 200, 100] },
+      { "duration_ms": 167, "glyph": "*", "fg": [240, 150, 50] },
+      { "duration_ms": 167, "glyph": "*", "fg": [255, 170, 70] },
+      { "duration_ms": 167, "glyph": "*", "fg": [255, 190, 90] }
+    ]
+  }
+
+Death (one-shot, transitions to corpse state):
+
+  {
+    "schema_version": 0,
+    "id": "player_death",
+    "loop": false,
+    "fps": 8,
+    "frames": [
+      { "duration_ms": 250, "glyph": "@", "fg": [220, 200, 120] },
+      { "duration_ms": 250, "glyph": "%", "fg": [180, 100, 80] },
+      { "duration_ms": 250, "glyph": "#", "fg": [120, 60, 40] },
+      { "duration_ms": 1500, "glyph": "_", "fg": [80, 40, 30] }
+    ],
+    "transitions": {
+      "to_idle": { "at_end": true, "with_state": "corpse" }
+    }
+  }
+
+Hot reload
+----------
+
+In dev mode (ASH_DEV=1), the engine watches content/anim/ for changes
+and reloads animations without restart. Useful for tuning walk cycles.

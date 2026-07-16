@@ -1,0 +1,489 @@
+ASH — Phase 01: Renderer Foundation
+====================================
+
+Phase goal: a truecolor terminal renderer that fills the viewport
+with a colored grid, supports camera, sub-cell motion, lighting,
+animation, and a moving cursor controlled by the keyboard.
+
+Entry criteria: Phase 0 complete.
+Exit criteria: ./build/ash --render-test shows a colored viewport
+              with a smoothly moving cursor.
+
+[ENTRY CRITERIA]
+  - Phase 0 complete.
+
+[EXIT CRITERIA]
+  - ./build/ash --render-test fills terminal with dark blue.
+  - Cursor cell moves smoothly with arrow keys.
+  - Window resize (SIGWINCH) handled without crash.
+  - Light grid visibly darkens an area when a torch is removed.
+  - Sub-cell movement: hold right arrow 5s, cursor moves 80 cells
+    with no jitter.
+
+[RISKS]
+  - Terminal size detection across platforms. Mitigation: ioctl on
+    Unix, fallback to env vars.
+  - Truecolor support varies. Mitigation: detect via $COLORTERM or
+    OSC 4 probe; degrade to 256-color.
+  - Render performance at 240x80. Mitigation: dirty-rect diffing.
+  - Mouse escape sequence parsing complexity. Mitigation: feature
+    flag, default off.
+
+Step 0100.00.00. Create src/core/math.hpp.
+  - Sub: namespace ash::math.
+  - Sub: using Fixed = int32_t; // 16.16 fixed-point.
+  - Sub: constexpr Fixed FIXED_SHIFT = 16.
+  - Sub: constexpr Fixed make_fixed(int32_t whole, int32_t frac = 0).
+
+Step 0100.00.01. Implement Fixed arithmetic operators.
+  - Sub: Fixed operator+(Fixed, Fixed).
+  - Sub: Fixed operator-(Fixed, Fixed).
+  - Sub: Fixed operator*(Fixed, Fixed) with overflow guard.
+  - Sub: Fixed operator/(Fixed, Fixed) with divide-by-zero guard.
+  - Sub: Fixed& operator+=(Fixed&).
+  - Sub: Fixed& operator-=(Fixed&).
+
+Step 0100.00.02. Implement Fixed comparison operators.
+  - Sub: bool operator==(Fixed, Fixed).
+  - Sub: bool operator!=(Fixed, Fixed).
+  - Sub: bool operator<(Fixed, Fixed).
+  - Sub: bool operator<=(Fixed, Fixed).
+  - Sub: bool operator>(Fixed, Fixed).
+  - Sub: bool operator>=(Fixed, Fixed).
+
+Step 0100.00.03. Implement Fixed conversion.
+  - Sub: int32_t to_int(Fixed).
+  - Sub: float to_float(Fixed).
+  - Sub: Fixed from_int(int32_t).
+  - Sub: Fixed from_float(float).
+
+Step 0100.00.04. Implement Vec2<Fixed>.
+  - Sub: struct Vec2 { Fixed x, y; }.
+  - Sub: +, -, *, / operators.
+  - Sub: ==, != comparisons.
+  - Sub: dot(Vec2, Vec2).
+  - Sub: length(Vec2).
+  - Sub: normalize(Vec2).
+
+Step 0100.00.05. Implement Vec2<int>.
+  - Sub: struct IVec2 { int x, y; }.
+  - Sub: +, -, *, / operators.
+  - Sub: ==, != comparisons.
+
+Step 0100.00.06. Implement Rect<int>.
+  - Sub: struct IRect { int x, y, w, h; }.
+  - Sub: bool contains(IRect, IVec2).
+  - Sub: bool intersects(IRect, IRect).
+  - Sub: IRect intersection(IRect, IRect).
+  - Sub: IRect union_rect(IRect, IRect).
+
+Step 0100.00.07. Tests for math primitives.
+  - Sub: TEST_CASE for Fixed arithmetic.
+  - Sub: TEST_CASE for Vec2 operations.
+  - Sub: TEST_CASE for Rect operations.
+
+Step 0101.00.00. Create src/render/cell.hpp.
+  - Sub: struct Cell { uint32_t glyph; uint8_t fg_r, fg_g, fg_b,
+         bg_r, bg_g, bg_b; uint8_t flags; };
+  - Sub: static_assert(sizeof(Cell) == 12).
+
+Step 0101.00.01. Add Cell constants.
+  - Sub: constexpr uint8_t FLAG_NONE     = 0.
+  - Sub: constexpr uint8_t FLAG_BOLD     = 1 << 0.
+  - Sub: constexpr uint8_t FLAG_ITALIC   = 1 << 1.
+  - Sub: constexpr uint8_t FLAG_UNDERLINE= 1 << 2.
+  - Sub: constexpr uint8_t FLAG_BLINK    = 1 << 3.
+  - Sub: constexpr uint8_t FLAG_INVERSE  = 1 << 4.
+  - Sub: constexpr uint8_t FLAG_STRIKE   = 1 << 5.
+  - Sub: constexpr uint8_t FLAG_DIM      = 1 << 6.
+
+Step 0101.00.02. Add Cell constructors.
+  - Sub: constexpr Cell() = default.
+  - Sub: constexpr Cell(uint32_t g, uint8_t fr, uint8_t fg, uint8_t fb).
+  - Sub: constexpr Cell(uint32_t g, uint8_t fr, uint8_t fg, uint8_t fb,
+                        uint8_t br, uint8_t bg, uint8_t bb, uint8_t f).
+
+Step 0101.00.03. Add Cell::CELL_BLANK constant.
+  - Sub: constexpr Cell CELL_BLANK = { 0x20, 0,0,0, 0,0,0, 0 }.
+
+Step 0101.00.04. Tests for Cell.
+  - Sub: sizeof check.
+  - Sub: FLAG constants check.
+
+Step 0102.00.00. Create src/render/terminal.hpp.
+  - Sub: struct Terminal { uint16_t width_cells, height_cells;
+         uint16_t cell_pixel_w, cell_pixel_h; bool truecolor; };
+
+Step 0102.00.01. Implement Terminal::query().
+  - Sub: Use ioctl(TIOCGWINSZ) on Unix.
+  - Sub: Fallback to env vars COLUMNS and LINES.
+  - Sub: Final fallback 80x24.
+  - Sub: Detect truecolor: $COLORTERM == "truecolor" or "24bit",
+         or terminfo check (later phase).
+  - Sub: Return Terminal.
+
+Step 0102.00.02. Implement Terminal::resize().
+  - Sub: Update width_cells, height_cells.
+
+Step 0102.00.03. Implement Terminal::cell_count().
+  - Sub: Returns width_cells * height_cells as size_t.
+
+Step 0102.00.04. Tests for Terminal.
+  - Sub: Mocked query returning fixed sizes.
+  - Sub: cell_count test.
+
+Step 0103.00.00. Add SIGWINCH handler in src/platform/signal.hpp.
+  - Sub: extern std::atomic<bool> g_resize_pending.
+  - Sub: void install_signal_handlers().
+
+Step 0103.00.01. Implement SIGWINCH handler.
+  - Sub: Sets g_resize_pending = true.
+  - Sub: Async-signal-safe (atomic only).
+
+Step 0103.00.02. Implement SIGINT handler.
+  - Sub: Sets g_shutdown_requested = true.
+  - Sub: Allows clean shutdown.
+
+Step 0103.00.03. Install handlers on startup.
+  - Sub: In main(), call ash::platform::install_signal_handlers().
+  - Sub: Main loop checks g_resize_pending each iteration.
+
+Step 0104.00.00. Create src/render/buffer.hpp.
+  - Sub: struct Buffer { std::vector<Cell> cells;
+         uint16_t width, height; };
+  - Sub: Constructor Buffer(uint16_t w, uint16_t h).
+  - Sub: Buffer(Terminal const&).
+
+Step 0104.00.01. Implement Buffer::clear(Cell).
+  - Sub: Fill cells with given Cell.
+
+Step 0104.00.02. Implement Buffer::set(x, y, Cell).
+  - Sub: Bounds check in debug (assert).
+  - Sub: No-op if out of bounds in release.
+  - Sub: Index: y * width + x.
+
+Step 0104.00.03. Implement Buffer::get(x, y) const.
+  - Sub: Returns Cell.
+  - Sub: Out-of-bounds returns CELL_BLANK.
+
+Step 0104.00.04. Implement Buffer::fill_rect(x, y, w, h, Cell).
+  - Sub: Set all cells in rect.
+
+Step 0104.00.05. Implement Buffer::resize(w, h).
+  - Sub: Resize vector, fill new cells with CELL_BLANK.
+
+Step 0104.00.06. Tests for Buffer.
+
+Step 0105.00.00. Create src/render/buffer_diff.hpp.
+  - Sub: struct DirtyRect { uint16_t x, y, w, h; };
+  - Sub: std::vector<DirtyRect> diff(Buffer const& old, Buffer const& new_buf).
+
+Step 0105.00.01. Implement Buffer diff algorithm.
+  - Sub: Naive O(n) scan: compare cell-by-cell.
+  - Sub: Group consecutive differing cells in a row into rects.
+  - Sub: Returns rects covering all differences.
+
+Step 0105.00.02. Tests for diff.
+  - Sub: Identical buffers -> empty rects.
+  - Sub: One cell different -> one 1x1 rect.
+  - Sub: Row of changes -> one wide rect.
+
+Step 0106.00.00. Create src/render/buffer_emit.hpp.
+  - Sub: void emit(Buffer const& buf, std::string& out,
+         std::vector<DirtyRect> const& dirty_rects).
+
+Step 0106.00.01. Implement emit().
+  - Sub: For each dirty rect, walk cells.
+  - Sub: For each cell, emit ansi::move_cursor, ansi::set_fg,
+         ansi::set_bg, ansi::set_flags, UTF-8 encode glyph.
+  - Sub: Coalesce adjacent cells with same fg/bg to avoid
+         redundant escape sequences.
+
+Step 0106.00.02. Implement UTF-8 encoding for glyph.
+  - Sub: encode_utf8(uint32_t codepoint, char* out, int& len).
+  - Sub: Handle 1-byte (ASCII), 2-byte, 3-byte, 4-byte sequences.
+
+Step 0106.00.03. Tests for emit.
+  - Sub: Empty rects emit nothing.
+  - Sub: Single cell with color emits correct sequence.
+
+Step 0107.00.00. Create src/render/camera.hpp.
+  - Sub: struct Camera {
+         Vec2<Fixed> world_pos;  // top-left cell + sub-cell offset
+         uint16_t width_cells, height_cells;
+         uint16_t map_width_cells, map_height_cells;
+       };
+
+Step 0107.00.01. Implement Camera::center_on(Vec2<Fixed> target).
+  - Sub: target.x = center.x of viewport.
+  - Sub: Clamp to map bounds.
+  - Sub: Smooth follow with lerp factor.
+
+Step 0107.00.02. Implement Camera::move(Vec2<Fixed> delta).
+  - Sub: world_pos += delta.
+  - Sub: Clamp to map bounds.
+
+Step 0107.00.03. Implement Camera::world_to_screen(Vec2<Fixed>) const.
+  - Sub: Returns screen pixel coords (or cell + sub).
+
+Step 0107.00.04. Implement Camera::screen_to_world(IVec2) const.
+  - Sub: Inverse of above.
+
+Step 0107.00.05. Tests for Camera.
+
+Step 0108.00.00. Create src/render/light.hpp.
+  - Sub: struct LightGrid { std::vector<uint8_t> intensity;
+         uint16_t width, height; };
+  - Sub: Ambient level (0-15).
+
+Step 0108.00.01. Implement LightGrid::resize(w, h).
+  - Sub: Fill with 0 (pitch dark).
+
+Step 0108.00.02. Implement LightGrid::set(x, y, uint8_t).
+  - Sub: Bounds check.
+
+Step 0108.00.03. Implement LightGrid::get(x, y) const.
+  - Sub: Returns 0 if out of bounds.
+
+Step 0108.00.04. Implement LightGrid::add_light(x, y, radius, intensity).
+  - Sub: Bresenham-like flood from (x,y) with radius decay.
+  - Sub: intensity at distance d = max(0, intensity - d).
+  - Sub: Each cell = max(existing, new).
+
+Step 0108.00.05. Implement LightGrid::add_flicker(x, y, radius, base).
+  - Sub: Same as add_light but intensity randomized by tick.
+
+Step 0108.00.06. Implement LightGrid::propagate().
+  - Sub: 4-pass radial blur.
+  - Sub: Each pass: cell = max(self, neighbor).
+  - Sub: Smooths light edges.
+
+Step 0108.00.07. Implement LightGrid::apply_to(Cell&, ambient) const.
+  - Sub: Multiply fg/bg by light factor.
+  - Sub: factor = (intensity + ambient) / 30.0 (cap at 1.0).
+
+Step 0108.00.08. Tests for LightGrid.
+
+Step 0109.00.00. Create src/render/compositor.hpp.
+  - Sub: struct CompositeInput {
+         std::array<Buffer, 9> layers;
+         LightGrid const* light;
+         uint8_t ambient;
+       };
+  - Sub: Buffer composite(CompositeInput const&).
+
+Step 0109.00.01. Implement compositor.
+  - Sub: Start with CELL_BLANK.
+  - Sub: For each layer 1..9:
+    - If cell is opaque, overwrite.
+    - If transparent and bg, blend (alpha over).
+    - If invisible, skip.
+  - Sub: Apply light.
+
+Step 0109.00.02. Tests for compositor.
+
+Step 0110.00.00. Create src/render/palette.hpp.
+  - Sub: struct Palette { std::array<Color, 256> colors; };
+  - Sub: struct Color { uint8_t r, g, b; };
+
+Step 0110.00.01. Implement default 256-color palette.
+  - Sub: Standard xterm 256 palette.
+
+Step 0110.00.02. Implement colorblind palettes.
+  - Sub: Protanopia, deuteranopia, tritanopia remappings.
+  - Sub: Function palette_for_mode(string mode).
+
+Step 0110.00.03. Implement high-contrast palette.
+  - Sub: Higher separation between adjacent hues.
+
+Step 0110.00.04. Implement no-color mode.
+  - Sub: All cells use luminance only.
+
+Step 0110.00.05. Tests for palette.
+
+Step 0111.00.00. Create src/render/animation.hpp.
+  - Sub: struct AnimFrame { int duration_ms; uint32_t glyph;
+         std::optional<Color> fg, bg; int offset_x, offset_y; };
+  - Sub: struct Animation { std::string id; bool loop; int fps;
+         std::vector<AnimFrame> frames; };
+
+Step 0111.00.01. Implement AnimationRegistry.
+  - Sub: Loads animations from content/anim/.
+  - Sub: Map<string, Animation>.
+  - Sub: Hot-reload on file change (dev mode).
+
+Step 0111.00.02. Implement AnimationState per entity.
+  - Sub: current_anim_id.
+  - Sub: elapsed_ms.
+  - Sub: current_frame_index.
+  - Sub: method tick(int dt_ms).
+
+Step 0111.00.03. Implement AnimationState::tick.
+  - Sub: Add dt_ms to elapsed.
+  - Sub: If elapsed >= frame.duration_ms, advance frame.
+  - Sub: If loop=false and last frame done, set finished=true.
+
+Step 0111.00.04. Tests for animation.
+
+Step 0112.00.00. Create src/render/font_metrics.hpp.
+  - Sub: struct FontMetrics { uint16_t cell_w, cell_h; };
+  - Sub: FontMetrics query();
+  - Sub: Returns cell_w=8, cell_h=16 default.
+
+Step 0112.00.01. Implement font query.
+  - Sub: For now, return defaults.
+  - Sub: Post-launch: query via OSC 4 or specific terminal APIs.
+
+Step 0113.00.00. Create src/input/key.hpp.
+  - Sub: enum class Key { ... };
+  - Sub: enum class Mod { None=0, Shift=1, Ctrl=2, Alt=4 };
+
+Step 0113.00.01. Implement Key enum values.
+  - Sub: Char('a')..Char('z'), Char('A')..Char('Z').
+  - Sub: Char('0')..Char('9').
+  - Sub: Named: Up, Down, Left, Right.
+  - Sub: Named: Space, Tab, Esc, Enter, Backspace.
+  - Sub: Named: F1..F12.
+  - Sub: Named: Home, End, PageUp, PageDown, Insert, Delete.
+  - Sub: Named: MouseLeft, MouseRight, MouseMiddle.
+  - Sub: Named: WheelUp, WheelDown, MouseMove.
+
+Step 0113.00.02. Implement key event struct.
+  - Sub: struct KeyEvent { Key key; Mod mods; uint32_t raw_codepoint; };
+  - Sub: bool pressed; (down/up).
+
+Step 0113.00.03. Tests for key.
+
+Step 0114.00.00. Create src/input/input.hpp.
+  - Sub: struct InputState { std::queue<KeyEvent> queue; };
+  - Sub: bool poll_event(KeyEvent& out).
+
+Step 0114.00.01. Implement raw terminal mode setup.
+  - Sub: tcgetattr to read current settings.
+  - Sub: Save original.
+  - Sub: Set raw mode (no echo, no line buffer).
+  - Sub: Restore on shutdown.
+
+Step 0114.00.02. Implement input pump.
+  - Sub: Read from stdin in non-blocking mode.
+  - Sub: Parse escape sequences into KeyEvent.
+  - Sub: Push to queue.
+
+Step 0114.00.03. Implement escape sequence parser.
+  - Sub: Handle CSI sequences: ESC [ <params> <final>.
+  - Sub: Common: ESC[A=Up, ESC[B=Down, ESC[C=Right, ESC[D=Left.
+  - Sub: Handle SS3: ESC O A = Up (application mode).
+  - Sub: Handle mouse: ESC[<...M.
+
+Step 0114.00.04. Implement SGR mouse mode.
+  - Sub: Enable: ESC[?1006h.
+  - Sub: Disable: ESC[?1006l.
+  - Sub: Parse: ESC[<button;x;y;M or m.
+
+Step 0114.00.05. Tests for input parser.
+
+Step 0115.00.00. Create src/input/mouse.hpp.
+  - Sub: struct MouseEvent { int x, y; int button; bool pressed; }.
+
+Step 0115.00.01. Tests for mouse parsing.
+
+Step 0116.00.00. Create src/app/app.hpp.
+  - Sub: struct App { std::unique_ptr<...> subsystems; };
+  - Sub: App(int argc, char** argv).
+  - Sub: int run().
+  - Sub: ~App().
+
+Step 0116.00.01. Implement App constructor.
+  - Sub: Init logging.
+  - Sub: Parse CLI.
+  - Sub: Install signal handlers.
+  - Sub: Set raw terminal mode.
+
+Step 0116.00.02. Implement App::run.
+  - Sub: Main loop.
+  - Sub: Check g_resize_pending -> re-query terminal size.
+  - Sub: Check g_shutdown_requested -> break.
+  - Sub: Pump input.
+  - Sub: Update state.
+  - Sub: Render.
+  - Sub: Sleep until next frame.
+
+Step 0116.00.03. Implement App destructor.
+  - Sub: Restore terminal mode.
+  - Sub: Show cursor.
+  - Sub: Print summary.
+
+Step 0117.00.00. Implement --render-test CLI flag.
+  - Sub: ash::cli::CliArgs gets bool render_test.
+  - Sub: main() checks and dispatches.
+
+Step 0117.00.01. Implement render-test mode.
+  - Sub: Set up Buffer, fill with dark blue background.
+  - Sub: Cursor entity at center.
+  - Sub: Camera follows cursor.
+  - Sub: Render loop: poll input, update cursor pos, redraw.
+  - Sub: Arrow keys move cursor at 5 cells/sec.
+  - Sub: Hold Shift to run (10 cells/sec).
+  - Sub: Esc quits.
+
+Step 0117.00.02. Add torch light at top-left.
+  - Sub: LightGrid add_light(2, 2, radius=8, intensity=10).
+  - Sub: Show visible falloff.
+
+Step 0117.00.03. Add sub-cell motion.
+  - Sub: Cursor has sub_x, sub_y.
+  - Sub: Smooth movement between cells.
+
+Step 0117.00.04. Add window resize handling.
+  - Sub: On SIGWINCH, re-query terminal size.
+  - Sub: Reallocate buffers.
+  - Sub: Repaint.
+
+Step 0118.00.00. Implement basic framerate.
+  - Sub: Use std::chrono::steady_clock.
+  - Sub: Target 60fps.
+  - Sub: Sleep remaining time.
+
+Step 0118.00.01. Implement frame timing struct.
+  - Sub: struct FrameTimer { steady_clock::time_point last;
+         int frame_count; double avg_ms; }.
+
+Step 0118.00.02. Implement variable timestep update.
+  - Sub: dt_ms = elapsed since last frame.
+  - Sub: Clamp dt_ms to 50ms max (avoid huge jumps).
+
+Step 0119.00.00. Tests for App lifecycle.
+
+Step 0119.00.01. Integration test for render-test.
+  - Sub: Spawn subprocess.
+  - Sub: Send arrow key sequence.
+  - Sub: Verify output contains expected ANSI.
+
+Step 0120.00.00. Verify build and run.
+  - Sub: cmake --build build -j.
+  - Sub: ./build/ash --render-test.
+  - Sub: Visually verify.
+  - Sub: Resize terminal mid-run, verify no crash.
+
+Step 0120.00.01. Final commit for Phase 1.
+  - Sub: git add -A.
+  - Sub: git commit -m "feat(phase-01): renderer foundation with camera and light".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --render-test
+  Terminal fills with dark blue.
+  A torch glow at (2, 2) lights surrounding cells.
+  A cursor (gold V) is at center.
+  Arrow keys move cursor smoothly.
+  Window resize does not crash.
+  Esc exits cleanly.
+
+[PHASE 1 PLAYABLE BUILD]
+
+  Build 01: "Empty Room"
+    - Truecolor grid renders.
+    - Light source visible.
+    - Cursor moves with arrow keys.
+    - Sub-cell motion smooth.
+    - No world content yet.

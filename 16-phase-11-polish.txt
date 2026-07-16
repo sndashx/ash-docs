@@ -1,0 +1,204 @@
+PHASE 11 — ENGINE POLISH
+==========================
+Goal: Settings, accessibility, telemetry-free logging, debug overlays, modding hooks, build pipeline, distribution. Content phases 12-22 follow.
+
+11.00 — SETTINGS SYSTEM
+  11.00.001 — Create src/settings/Settings.hpp/cpp
+    - struct Settings { DisplaySettings display; AudioSettings audio; InputSettings input; AccessibilitySettings access; GameplaySettings gameplay; };
+    - struct DisplaySettings { int cell_width=16; int cell_height=16; bool truecolor=true; int font_size=100; std::string palette="default"; float ui_scale=1.0; bool vsync=true; bool show_fps=false; bool show_debug=false; };
+    - struct AudioSettings { float master_volume=1.0; float sfx_volume=1.0; float music_volume=0.7; float ambient_volume=0.5; bool mute=false; };
+    - struct InputSettings { int keybind_profile=0; bool smooth_camera=true; float camera_lerp=0.2; float mouse_sensitivity=1.0; bool pause_on_focus_loss=true; };
+    - struct AccessibilitySettings { int text_size=100; bool high_contrast=false; bool colorblind_mode="none"; bool reduce_motion=false; bool screen_reader_hints=false; float ui_scale=1.0; };
+    - struct GameplaySettings { int difficulty=1; bool permadeath=false; bool auto_save=true; int auto_save_minutes=10; bool show_damage_numbers=false; bool pause_during_dialogue=true; float timescale_default=1.0; };
+  11.00.002 — Load from XDG_CONFIG_HOME/ash/settings.json on startup
+  11.00.003 — Save on change (debounced 1s)
+  11.00.004 — Hot-reload settings without restart where possible
+  11.00.005 — Validate schema on load, reset invalid fields to defaults
+  11.00.006 — Settings UI (menu) with categorized panels
+
+11.01 — DISPLAY SETTINGS UI
+  11.01.001 — Font size: 80%, 90%, 100%, 110%, 125%, 150%, 200%
+  11.01.002 — Palette: default, solarized, monochrome, high-contrast, deuteranopia, protanopia, tritanopia
+  11.01.003 — UI scale: 80%, 90%, 100%, 110%, 125%
+  11.01.004 — Show FPS: toggle
+  11.01.005 — Show debug overlay: toggle (Shift+F12)
+  11.01.006 — VSync: toggle
+  11.01.007 — Fullscreen: toggle (alt+enter)
+  11.01.008 — Live preview on change
+
+11.02 — ACCESSIBILITY
+  11.02.001 — Text size 80%-200% (affects font cell size)
+  11.02.002 — High contrast palette (pure black/white + accent colors)
+  11.02.003 — Colorblind modes: deuteranopia, protanopia, tritanopia (recolor glyphs per palette)
+  11.02.004 — Reduce motion: disable camera shake, smooth scroll, animated transitions
+  11.02.005 — Screen reader hints: terminal bell on important events (quest complete, low HP)
+  11.02.006 — Pause on focus loss (window minimized): toggle
+  11.02.007 — Remappable keys: all keybinds rebindable (in-game UI)
+  11.02.008 — Subtitle size: small/medium/large
+  11.02.009 — Subtitle background: none/translucent/solid
+
+11.03 — DIFFICULTY MODES
+  11.03.001 — Difficulty levels: Novice (0.5x dmg taken, 2x given), Apprentice (0.75x, 1.5x), Expert (1x, 1x), Master (1.5x, 0.75x), Legendary (2x, 0.5x)
+  11.03.002 — Permadeath toggle (separate from difficulty)
+    - On death: show game over, single autosave "ghost" can reload once
+    - After reload: save deleted permanently
+  11.03.003 — Ironman mode: autosave only, no manual saves
+  11.03.004 — Custom difficulty sliders (advanced)
+
+11.04 — DEBUG OVERLAY
+  11.04.001 — Create src/core/DebugOverlay.hpp/cpp
+    - Toggle: Shift+F12 or backtick
+    - Render top-left corner with: FPS, frame time, entity count, draw calls, camera pos, current map, time of day, player HP, memory usage
+    - Toggle subsections: render stats, world stats, combat stats, AI stats
+    - Color-coded: green=ok, yellow=warning, red=critical
+  11.04.002 — Toggle: --debug flag enables on by default
+  11.04.003 — Toggle: --debug-region flag shows collision/light grids
+  11.04.004 — Toggle: --debug-ai shows AI state per visible NPC
+  11.04.005 — Toggle: --debug-path shows pathfinding visualization
+  11.04.006 — Profiler view: histogram of last 60 frames' update times
+  11.04.007 — Memory view: heap usage, allocator stats
+
+11.05 — TELEMETRY & LOGGING
+  11.05.001 — No telemetry, no analytics, no phone-home (offline-first)
+  11.05.002 — spdlog configuration: console at level=info, file at level=debug
+  11.05.003 — Log file: XDG_DATA_HOME/ash/logs/ash-<timestamp>.log
+  11.05.004 — Rotate logs at 10MB, keep last 5
+  11.05.005 — Player-facing log optional via --verbose flag
+  11.05.006 — Crash log: write stack trace to crash-<timestamp>.log on SIGSEGV
+  11.05.007 — Performance log: --profile flag writes per-system timings
+  11.05.008 — Log categories: engine, render, world, combat, ai, quest, save, content
+
+11.06 — MODDING HOOKS
+  11.06.001 — Load order: data/ → mods/ → user/ (later overrides earlier)
+  11.06.002 — Hot-reload content on file change (optional, F10)
+  11.06.003 — Mod manifest: mod.json with name, version, author, dependencies
+  11.06.004 — Override content: drop .xp/.qst/.dlg/.json files into mods/<name>/
+  11.06.005 — Mod config UI: enable/disable mods, set load order
+  11.06.006 — Validation: warn on missing dependencies, version conflicts
+  11.06.007 — Mods directory: <game>/mods/ + XDG_DATA_HOME/ash/mods/
+  11.06.008 — No scripting API in v1 (data overrides only)
+  11.06.009 — Document modding in docs/modding.md
+
+11.07 — BUILD PIPELINE
+  11.07.001 — CMake presets: debug, release, relwithdebinfo
+  11.07.002 — CI config: .github/workflows/build.yml runs on push
+    - Matrix: ubuntu-latest, macos-latest, windows-latest
+    - Steps: checkout, install deps, cmake configure, cmake build, ctest
+  11.07.003 — Static analysis: clang-tidy with project .clang-tidy config
+  11.07.004 — Format check: clang-format with .clang-format
+  11.07.005 — Coverage: gcov/lcov, upload to codecov
+  11.07.006 — Sanitizers: ASan, UBSan, TSan in debug builds
+  11.07.007 — Reproducible builds: SOURCE_DATE_EPOCH, deterministic linking
+  11.07.008 — Strip symbols in release: -s flag
+  11.07.009 — UPX compression optional (off by default for auditability)
+  11.07.010 — Package: CPack generates .deb, .rpm, .pkg, .zip
+
+11.08 — DISTRIBUTION
+  11.08.001 — Linux: AppImage, .deb, .rpm, AUR package
+  11.08.002 — macOS: .app bundle, .dmg, Homebrew formula
+  11.08.003 — Windows: .zip portable, .msi installer, Steam build
+  11.08.004 — Steamworks integration (optional): achievements, cloud saves
+  11.08.005 — itch.io page with builds for all platforms
+  11.08.006 — GOG Galaxy integration (optional)
+  11.08.007 — Auto-update via Sparkle (macOS), WinSparkle (Windows), AppImageUpdate (Linux)
+  11.08.008 — No DRM, no copy protection beyond files-on-disk
+  11.08.009 — Crash reporting: opt-in only, via Sentry or similar (off by default)
+
+11.09 — COMMAND LINE FLAGS
+  11.09.001 — --help: print usage
+  11.09.002 — --version: print version + build hash
+  11.09.003 — --debug: enable debug overlay + verbose logging
+  11.09.004 — --profile: enable profiler, write perf.log
+  11.09.005 — --render-test: render test pattern and exit
+  11.09.006 — --quest-test <file>: validate .qst file
+  11.09.007 — --validate-save <slot>: validate save integrity
+  11.09.008 — --export-content <dir>: dump loaded content to directory
+  11.09.009 — --headless: run without renderer (server/CI mode)
+  11.09.010 — --mod <name>: load specific mod
+  11.09.011 — --lang <code>: UI language (en, es, fr, de, ja, zh)
+  11.09.012 — --data-dir <path>: override XDG paths
+  11.09.013 — --no-audio: disable audio
+  11.09.014 — --safe-mode: load with all mods disabled
+  11.09.015 — --strict-saves: validate saves on startup
+
+11.10 — INTERNATIONALIZATION
+  11.10.001 — String catalog: content/strings/<lang>.json
+  11.10.002 — Fallback to English if string missing
+  11.10.003 — Externalize all UI strings (~500 entries)
+  11.10.004 — Externalize all item/NPC/quest names
+  11.10.005 — Externalize all dialogue text
+  11.10.006 — Externalize all book prose
+  11.10.007 — Font fallback: CJK, Cyrillic, Arabic via Noto fonts
+  11.10.008 — Text wrapping aware of CJK no-space rules
+  11.10.009 — v1 ships with English only; structure ready for translations
+
+11.11 — ERROR HANDLING & CRASHES
+  11.11.001 — Use Result<T, ErrorCode> for fallible operations
+  11.11.002 — Centralized error handler: ErrorReporter::report(ErrorCode, context)
+  11.11.003 — User-friendly error messages (no stack traces in UI)
+  11.11.004 — Fatal errors show modal: "An error occurred. Please report this with crash-<timestamp>.log"
+  11.11.005 — Recovery options: reload last save, return to menu, quit
+  11.11.006 — Catch SIGSEGV/SIGABRT, write crash log with backtrace
+  11.11.007 — Validate all file loads (magic numbers, version checks, size checks)
+  11.11.008 — Graceful degradation: missing optional content = warning, missing required = error
+
+11.12 — PERFORMANCE BASELINE
+  11.12.001 — Target: 60 FPS at 1920x1080 on mid-range hardware (Intel UHD 620)
+  11.12.002 — 200 visible entities without frame drops
+  11.12.003 — 80 maps loaded simultaneously in memory (~80MB)
+  11.12.004 — Save game <2s, load game <4s
+  11.12.005 — Startup time <3s on SSD
+  11.12.006 — Memory footprint <500MB resident
+  11.12.007 — Binary size <50MB (release)
+  11.12.008 — Update budget per frame: 16ms (60 FPS), budget per system:
+    - Input: 0.5ms
+    - AI: 3ms
+    - Combat: 2ms
+    - Render: 4ms
+    - Quest: 1ms
+    - UI: 1ms
+    - Save (background): async
+  11.12.009 — Profile each system, surface slow frames in debug overlay
+  11.12.010 — Add 30 micro-benchmarks using Google Benchmark or Catch2 BENCHMARK macros
+
+11.13 — TESTING INFRASTRUCTURE
+  11.13.001 — Catch2 v3 test suites per module
+  11.13.002 — Unit tests for all pure functions
+  11.13.003 — Integration tests for all systems
+  11.13.004 — Snapshot tests for renderer (golden images)
+  11.13.005 — Property-based tests for serializer (round-trip)
+  11.13.006 — Performance tests for hot paths
+  11.13.007 — Coverage target: 70% line coverage for engine, 50% for content
+  11.13.008 — CI runs full test suite on every PR
+  11.13.009 — Pre-commit hook: format + lint + fast tests
+  11.13.010 — Test data: tests/fixtures/ with sample .xp, .qst, .dlg, .json
+
+11.14 — DOCUMENTATION
+  11.14.001 — README.md: project intro, build instructions, controls, screenshots
+  11.14.002 — docs/architecture.md: high-level design, module overview
+  11.14.003 — docs/content-guide.md: how to author .xp, .qst, .dlg, items, NPCs
+  11.14.004 — docs/modding.md: mod structure, override system
+  11.14.005 — docs/scripting.md: quest callback DSL, dialogue actions
+  11.14.006 — docs/performance.md: budgets, profiling, optimization
+  11.14.007 — CHANGELOG.md: version history (Keep a Changelog format)
+  11.14.008 — CONTRIBUTING.md: how to contribute
+  11.14.009 — LICENSE.md: project license (MIT or Apache 2.0)
+  11.14.010 — CODE_OF_CONDUCT.md: community guidelines
+
+11.15 — PHASE 11 VERIFICATION
+  11.15.001 — Run full test suite: expect 100% pass
+  11.15.002 — Run --render-test: expect ASCII test pattern
+  11.15.003 — Run --validate-save on every existing save: expect ok
+  11.15.004 — Build all CMake presets: expect success
+  11.15.005 — Build on Linux/macOS/Windows CI: expect success
+  11.15.006 — Profile baseline performance: meet all budgets
+  11.15.007 — Verify all CLI flags work
+  11.15.008 — Verify mod loading overrides content
+  11.15.009 — Verify settings persist across runs
+  11.15.010 — Verify accessibility settings affect UI
+  11.15.011 — Document phase 11 completion — ENGINE COMPLETE
+
+END PHASE 11
+ENGINE FEATURE COMPLETE — ALL 11 ENGINE PHASES DONE
+
+NEXT: PHASE 12+ CONTENT (regions, quests, NPCs, dialogue, items, books, creatures)

@@ -1,0 +1,203 @@
+PHASE 15 — ASH PLAINS (REGION 4)
+===================================
+Region: Vast ash-covered grasslands east of the Spire, where the Shattering's fallout settled. Outlaws, hermits, and the ruined caravans of old trade routes.
+Maps: 18 (ap_01 through ap_18)
+Faction primary: none (independent, with Cartographer presence)
+Theme: Survival and the long memory of the land.
+
+15.00 — REGION OVERVIEW
+  15.00.001 — Region def: content/regions/ash_plains.json
+    - { key: "ash_plains", name: "Ash Plains", description: "...", maps: 18, primary_faction: "independent", climate: "ash-storm", music_track: "ash_plains_theme", sky_color: "#707060", ground_color: "#3a3530" }
+  15.00.002 — Mechanic: ash-storms (visibility reduced, damage over time)
+  15.00.003 — Mechanic: water finding (dehydration mechanic in deep plains)
+  15.00.004 — Mechanic: caravan travel (slow movement on foot, faster on mounts)
+  15.00.005 — Mechanic: buried loot (shovel to dig up caches)
+
+15.01-15.18 — MAPS (18 total)
+  15.01.001 — ap_01: Plains Edge (entrance from Riven Spire)
+    - 80x60, terrain "ash_grass", ambient "wind_dry"
+    - Sparse settlement
+    - 5 NPCs: outriders, trader
+    - 2 creatures: ash-hyenas
+    - Warning: enter plains unprepared = death
+  15.02.001 — ap_02: Old Caravan Road
+    - 100x30, terrain "ash_path", ambient "wind_path"
+    - Linear route, abandoned carts as cover
+    - 4 NPCs: caravan guards (ghosts)
+    - 5 creatures: ash-bandits (level 3-4)
+    - Loot: caravan cargo (random)
+  15.03.001 — ap_03: The Bone Field
+    - 90x70, terrain "ash_bone", ambient "silence_eerie"
+    - Carcass graveyard of giant beasts
+    - 1 NPC: Bone-Collector (rare vendor)
+    - 8 creatures: bone-scavengers (level 4)
+    - Loot: giant_bones, ancient_hides
+  15.04.001 — ap_04: Caravan Wreck (hub)
+    - 70x70, terrain "wood_burnt", ambient "creak_wood"
+    - Massive crashed caravan, multi-level
+    - 12 NPCs: survivors, scavengers, vendors
+    - Quest hub for plains
+  15.05.001 — ap_05: Ash Lake
+    - 80x80, terrain "ash_water", ambient "still_ash"
+    - Lake of ash-water (drinkable when filtered)
+    - 2 NPCs: filter-makers
+    - Side quest: sq_water_purifier
+  15.06.001 — ap_06: The Singing Stones
+    - 60x60, terrain "ash_stone", ambient "stone_sing"
+    - Stones that hum in wind
+    - 1 NPC: Stone-Singer (lore)
+    - Side quest: sq_stone_chorus
+  15.07.001 — ap_07: Hermit's Hollow
+    - 70x60, terrain "ash_clay", ambient "wind_quiet"
+    - Hidden valley with hermits
+    - 6 NPCs: hermits (philosophers, sages)
+    - Skill training: alchemy, lore, meditation
+  15.08.001 — ap_08: The Glass Desert (transition to Hollow Cities)
+    - 100x100, terrain "glass_sand", ambient "wind_shard"
+    - Sand melted into glass by Shattering
+    - 2 NPCs: glass-walkers (rare traders)
+    - 10 creatures: glass-scorpions (level 5)
+    - Side quest: sq_glass_walk_survive
+  15.09.001 — ap_09: Lost Oasis
+    - 60x60, terrain "ash_green", ambient "water_calm"
+    - Hidden spring with vegetation
+    - 2 NPCs: oasis-keepers
+    - Rest & recovery hub
+  15.10.001 — ap_10: The Howling Waste
+    - 90x70, terrain "ash_open", ambient "wind_howl"
+    - Open plains, ash-storms spawn here
+    - 4 NPCs: storm-chasers (lunatics)
+    - Survival mechanics intense
+  15.11.001 — ap_11: Drowned City Outskirts
+    - 80x80, terrain "stone_ash", ambient "wind_sad"
+    - Edge of Hollow Cities region
+    - 3 NPCs: scout hermits
+    - Side quest: sq_plains_to_cities
+  15.12.001 — ap_12: Smuggler's Crossroads
+    - 60x60, terrain "ash_path", ambient "wind_cross"
+    - Crossroads with hidden caches
+    - 4 NPCs: smugglers (faction neutral)
+    - Vendor: rare goods
+  15.13.001 — ap_13: The Battle Field
+    - 90x90, terrain "ash_weapons", ambient "wind_history"
+    - Site of ancient battle, weapons still embedded
+    - 2 NPCs: war-ghosts (quests)
+    - Loot: ancient weapons, armor
+  15.14.001 — ap_14: Burned Forest Stand
+    - 70x70, terrain "ash_wood", ambient "wind_coal"
+    - Remnant of forest, black trees
+    - 5 creatures: ash-wolves (level 4)
+    - Loot: charred_wood (rare crafting)
+  15.15.001 — ap_15: The Deep Ash
+    - 100x100, terrain "ash_deep", ambient "wind_extreme"
+    - Deepest plains, constant ash-storms
+    - 2 NPCs: deep-plains hermits
+    - 8 creatures: ash-drakes (level 6-7)
+  15.16.001 — ap_16: The Eye of the Storm
+    - 80x80, terrain "ash_calm", ambient "calm_strange"
+    - Dead center of perpetual storm
+    - 1 NPC: The Storm-Walker (boss NPC, hermit)
+    - Main quest: main_act4_meet_storm_walker
+  15.17.001 — ap_17: Buried City Entrance
+    - 70x70, terrain "ash_stone", ambient "wind_under"
+    - Entrance to underground Hollow Cities
+    - 3 NPCs: guides
+    - Quest: descend into Hollow Cities
+  15.18.001 — ap_18: The Far Edge (endgame)
+    - 60x60, terrain "ash_void", ambient "wind_void"
+    - Edge of mapped world
+    - 1 NPC: Lone Cartographer (endgame sage)
+    - Main quest: main_act4_cartographer_journey
+
+15.30 — REGION NPCs (~80 total)
+  15.30.001 — Bone-Collector Voss (rare vendor)
+  15.30.002 — Stone-Singer (lore sage)
+  15.30.003 — 6 Hermits (philosophers, sages, skill trainers)
+  15.30.004 — 8 Caravan Survivors (vendors, quest givers)
+  15.30.005 — 4 Smugglers (neutral)
+  15.30.006 — 4 Storm-Chasers (lunatics, random events)
+  15.30.007 — 2 War-Ghosts (quests)
+  15.30.008 — 2 Oasis-Keepers (rest hub)
+  15.30.009 — 2 Glass-Walkers (rare traders)
+  15.30.010 — The Storm-Walker (boss NPC, hermit, lore)
+  15.30.011 — Lone Cartographer (endgame sage)
+  15.30.012 — 30+ background: scavengers, traders, travelers, guards
+
+15.40 — REGION QUESTS (~20)
+  15.40.001 — Main: main_act4_meet_storm_walker
+  15.40.002 — Main: main_act4_plains_survival (learn to survive)
+  15.40.003 — Main: main_act4_water_purifier (build purifier)
+  15.40.004 — Main: main_act4_cartographer_journey (find Lone Cartographer)
+  15.40.005 — Main: main_act4_buried_entrance (find Hollow Cities)
+  15.40.006 — Side: sq_water_purifier
+  15.40.007 — Side: sq_stone_chorus
+  15.40.008 — Side: sq_glass_walk_survive
+  15.40.009 — Side: sq_plains_to_cities (prepare for Hollow Cities)
+  15.40.010 — Side: sq_caravan_recovery (salvage)
+  15.40.011 — Side: sq_bone_collector (deliver bones)
+  15.40.012 — Side: sq_hermit_peace (live among hermits)
+  15.40.013 — Side: sq_smuggler_caches (find hidden goods)
+  15.40.014 — Side: sq_battle_relic (ancient weapon)
+  15.40.015 — Side: sq_wolf_pelt (hunt)
+  15.40.016 — Side: sq_oasis_defense (protect oasis)
+  15.40.017 — Side: sq_drake_horns (collect)
+  15.40.018 — Side: sq_ash_storm_survivor (endure storm)
+  15.40.019 — Misc: sq_caravan_escort
+  15.40.020 — Misc: sq_buried_treasure (dig up caches)
+
+15.50 — REGION ITEMS (~90 unique)
+  15.50.001 — Survival gear (15): water_skin, water_filter, ash_mask, ash_boots, ash_cloak, wide-brim_hat, sun_shades, shovel, bedroll, tent, fire_kit, compass, map_plains, signal_mirror, storm_shelter_kit
+  15.50.002 — Weapons (15): bone_sword, ash_blade, smuggler_knife, glass_dagger, drake_fang, war_spear (ancient), bone_club, glass_sword, ash_spear, bone_axe, plains_bow, smuggler_stiletto, glass_katana, drake_sword (unique), plains_chief_blade (unique)
+  15.50.003 — Armor (12): ash_jerkin, bone_armor, smuggler_leather, ash_robes, glass_chain, drake_scale, war_plate (ancient), plains_warden_armor, scavenger_gear, ash_cloak_heavy, drake_helm (unique), bone_warden_armor (unique)
+  15.50.004 — Food/Water (15): ash_bread, dried_meat, water_pure, water_dirty, oasis_fruit, root_vegetable, plains_ration, traveler_meal, ash_tea, bone_broth, etc.
+  15.50.005 — Books (10): plains_survival_guide, bone_collector's_notes, hermit_philosophy, storm_walker's_journal, war_history, etc.
+  15.50.006 — Crafting (15): bone, ash-glass, charred_wood, drake_hide, ash-cloth, ancient_iron, ancient_steel, giant_bone, scavenged_parts, glue, sinew, etc.
+  15.50.007 — Quest items (15): buried_map, storm_eye_crystal, drake_horn_x5, ash_chief_relic, etc.
+  15.50.008 — Valuables (10): ancient coins, gemstones, ash-pearls, etc.
+
+15.60 — REGION CREATURES (~12 types)
+  15.60.001 — Ash-Hyena (level 2, pack)
+  15.60.002 — Ash-Bandit (level 3-4, humanoid)
+  15.60.003 — Bone-Scavenger (level 4)
+  15.60.004 — Glass-Scorpion (level 5, poison)
+  15.60.005 — Ash-Wolf (level 4)
+  15.60.006 — Ash-Drake (level 6-7, mini-boss)
+  15.60.007 — Storm Elemental (level 7, ash-storms)
+  15.60.008 — War-Ghost (level 6, mini-boss)
+  15.60.009 — Glass-Wraith (level 5)
+  15.60.010 — Lone Hunter (level 5, NPC)
+  15.60.011 — The Storm-Walker's Shadow (level 9, boss fight if attacked)
+  15.60.012 — Ash Lord (level 11, hidden boss, endgame)
+
+15.70 — REGION LORE BOOKS (10 books)
+  15.70.001 — "Plains Survival Manual" — practical, 2000 words
+  15.70.002 — "Bone-Collector's Diary" — personal, 2500 words
+  15.70.003 — "Hermit Philosophy" — essays, 4000 words
+  15.70.004 — "The Battle of Ash Plain" — history, 3500 words
+  15.70.005 — "Storm-Walker's Journal" — mystical, 3000 words
+  15.70.006 — "Lone Cartographer's Notes" — exploration, 2500 words
+  15.70.007 — "Ash-Storms: Patterns and Survival" — weather lore, 1500 words
+  15.70.008 — "Caravan Routes, Old and New" — travel, 1800 words
+  15.70.009 — "Drake: A Natural History" — fauna, 2000 words
+  15.70.010 — "The Far Edge: Speculation" — cosmological, 1500 words
+
+15.80 — REGION AUDIO (8 tracks)
+  15.80.001 — Music: ash_plains_theme.wav, caravan_theme.wav, storm_theme.wav, hermit_chant.wav, boss_storm_walker.wav
+  15.80.002 — Ambient: wind_dry.wav, wind_howl.wav, ash_settle.wav, oasis_calm.wav, void_silence.wav
+  15.80.003 — SFX: dig.wav, water_pour.wav, storm_warning.wav
+
+15.90 — REGION VERIFICATION
+  15.90.001 — All 18 maps load
+  15.90.002 — Ash-storms damage player
+  15.90.003 — Water finding mechanic works
+  15.90.004 — Buried loot dig mechanic
+  15.90.005 — Caravan travel
+  15.90.006 — All NPCs schedule
+  15.90.007 — All quests advance
+  15.90.008 — Boss beatable
+  15.90.009 — Transition to Hollow Cities
+  15.90.010 — Performance: 60 FPS in deep plains
+  15.90.011 — Document phase 15
+
+END PHASE 15
+ASH PLAINS REGION COMPLETE: 18 maps, ~80 NPCs, 20 quests, 90+ items, 12 creatures, 10 books, 8 audio tracks

@@ -1,0 +1,287 @@
+PHASE 17 — MAIN QUEST (FULL DIALOGUE + BRANCHES)
+====================================================
+5-act main quest: Waking → Blade → Cartographers → Sky-Smiths → Storm-Walker → Hollow Cities → Covenant.
+All branches fully scripted.
+Reference: phases 12-16 region hooks.
+
+17.00 — MAIN QUEST STRUCTURE
+  17.00.001 — Total: 5 acts, ~40 stages, ~20 branches, ~10 endings
+  17.00.002 — Quest key: main_quest
+  17.00.003 — Starts: main_act1_waking (auto on new game)
+  17.00.004 — Ends: main_act5_ending
+  17.00.005 — All stages have: text, conditions, branches, rewards, scripted sequences
+
+17.01 — ACT 1: WAKING (Crypt → Black Harbor)
+  17.01.001 — Stage 1.1: "Wake in the crypt"
+    - Trigger: new_game
+    - Text: "You wake. Stone. Cold. Breath like smoke. Your hands are clasped around a blade that hums."
+    - Cutscene: 5s fade-in, ambient audio
+    - Action: spawn player at sc_coast_01 (30,20)
+  17.01.002 — Stage 1.2: "Examine the blade"
+    - Trigger: examine entity blade_moving_tongue
+    - Text: "The inscriptions move. The blade remembers what its bearer forgets."
+    - Action: pickup blade, set flag blade_acquired, language_understand=25, start tutorial "moving language"
+    - Cinematic: blade glows, inscriptions animate 3s
+  17.01.003 — Stage 1.3: "Find the exit"
+    - Trigger: open crypt door (Crypt Key not needed yet, blade opens it)
+    - Text: "The crypt door yields to the blade as if it remembers you."
+    - Action: open stone_door sc_coast_01 → sc_coast_02
+    - Sound: stone_grind.wav
+  17.01.004 — Stage 1.4: "Reach the surface"
+    - Trigger: enter sc_coast_02
+    - Text: "The wind hits you first. Then the salt. Then the endless grey."
+    - Cinematic: view of coast, ambient sea_wind.wav swells
+  17.01.005 — Stage 1.5: "Find the living"
+    - Trigger: enter sc_coast_03 (Saltmarket)
+    - Text: "A market. Voices. The smell of fish and smoke. People look at you strangely."
+    - Cinematic: 3s pan across market
+  17.01.006 — Stage 1.6: "Speak with the Watch"
+    - Trigger: enter Watchtower or speak to Iola
+    - Branches:
+      - 1.6a (Watch rep >= 0): Iola offers recruitment
+      - 1.6b (Watch rep < 0): Iola suspicious, harder path
+      - 1.6c (player declined earlier): different dialogue
+  17.01.007 — Stage 1.7 BRANCH: "Join the Watch / Walk alone"
+    - Choice: join_coastal_watch vs decline
+    - If join: rep +5 Watch, main_act2_join_cartographers, fast-track
+    - If decline: more freedom, slower progression, different Act 2 opener
+  17.01.008 — Stage 1.8: "The blade whispers"
+    - Trigger: language_understand reaches 30
+    - Text: "First word on the blade: 'covenant'. The letters move like they want to speak."
+    - Tutorial: moving language basics
+  17.01.009 — Stage 1.9: "Old Maren sees the blade"
+    - Trigger: speak to Maren with blade equipped
+    - Text: "She sees the blade and her face goes pale. 'You carry the moving tongue. Where did you find it? More importantly — where did it find you?'"
+    - Quest hook: visit lighthouse
+  17.01.010 — Stage 1.10: "Lighthouse vision"
+    - Trigger: top of sc_coast_09 at dawn (6am)
+    - Text: "The light catches a shard above the horizon. It pulses. Once. Twice. Then darkness."
+    - Vision: floating shard visible for 3s
+    - Action: set flag shard_seen_1, start main_act1_first_shard
+  17.01.011 — Stage 1.11: "Travel to Black Harbor"
+    - Trigger: arrive sc_coast_12
+    - Cinematic: 5s descent into dark harbor
+  17.01.012 — Stage 1.12: "Confront the Drowned King"
+    - Trigger: enter throne room
+    - Boss fight: The Drowned King
+    - 3 phases: tide rises, summons adds, final stand
+  17.01.013 — Stage 1.13 BRANCH: "Spare / Kill / Banish"
+    - Choice: 3 options
+    - 1.13a (spare): +5 Choir, -2 Watch, "He deserved better."
+    - 1.13b (kill): +5 Watch, -2 Choir, "Justice. Or vengeance. Hard to say."
+    - 1.13c (banish): neutral, secret reward "covenant_fragment_1"
+  17.01.014 — Stage 1.14: "Receive the shard"
+    - Action: player gains shard_1_first (key quest item)
+    - Text: "The shard is cold. It hums when you touch it. The blade seems to recognize it."
+    - Reward: XP 2000, items
+  17.01.015 — Stage 1.15: "Choose your path"
+    - Trigger: flag shard_1_acquired
+    - Opens Act 2 selection: Cartographers (Glasswood), Sky-Smiths (Spire), Choir (Hollow Cities), Free
+    - Branches affect Act 2 opening dialogue
+
+17.02 — ACT 2: GLASSWOOD (Cartographers branch)
+  17.02.001 — Stage 2.1: "Find the Cartographers"
+    - Trigger: act2_opened + region_glasswood_entered
+    - Text: "The trees of glass are older than the Shattering. They say the Cartographers map what cannot be mapped."
+  17.02.002 — Stage 2.2: "Speak with Archcartographer Senna"
+    - Trigger: enter gw_05 Lodge
+    - 4 dialogue branches by rep
+  17.02.003 — Stage 2.3 BRANCH: "Join Cartographers / Freelance / Compete"
+    - 2.3a (join): rep +5 Cartographers, full access
+    - 2.3b (freelance): rep 0, buy maps only
+    - 2.3c (compete): rep -5, hostile, secret path
+  17.04.004 — Stage 2.4: "Map the unknown"
+    - Quest: complete 5 mapping tasks
+    - Branches by which maps discovered first
+  17.02.005 — Stage 2.5: "Find the Living Map"
+    - Main quest: discover the entity in gw_14
+    - Dialogue: 3 outcomes by approach (study, harvest, befriend)
+  17.02.006 — Stage 2.6: "Identify sky shards"
+    - Quest: identify 7 floating shards via telescope
+    - Each shard unlocks a region sub-quest
+  17.02.007 — Stage 2.7: "Confront the Atlas"
+    - Trigger: enter gw_18
+    - Boss fight: The Atlas (animated construct)
+    - 4 phases, environment attacks
+  17.02.008 — Stage 2.8 BRANCH: "Destroy / Preserve / Steal"
+    - 2.8a (destroy): Cartographer rep +10, lose map access
+    - 2.8b (preserve): Choir rep +10, secret quest
+    - 2.8c (steal): Watch rep +10, gain Complete Atlas
+  17.02.009 — Stage 2.9: "Receive shard_2"
+    - Item: shard_2_mapping (quest)
+    - Blade reacts: "covenant" word now understood
+  17.02.010 — Stage 2.10: "Path to the Spire"
+    - Transition to Act 3
+
+17.03 — ACT 3: RIVEN SPIRE (Sky-Smiths branch)
+  17.03.001 — Stage 3.1: "Climb the mountain"
+    - Trigger: enter rs_01
+    - Text: "The Spire splits the sky. They say the Sky-Smiths reforged what the Shattering broke."
+  17.03.002 — Stage 3.2: "Reach the Great Anvil"
+    - Trigger: enter rs_07
+    - Meet First Smith Hesta
+  17.03.003 — Stage 3.3 BRANCH: "Serve / Learn / Compete"
+    - 3.3a (serve): Sky-Smith rep +5
+    - 3.3b (learn): rep 0, can use forges
+    - 3.3c (compete): rep -5, steal forge secrets
+  17.03.004 — Stage 3.4: "Temper the blade"
+    - Quest: bring shard_1 + shard_2 to summit forge
+    - Result: blade_moving_tongue becomes blade_tempered (better stats, new abilities)
+  17.03.005 — Stage 3.5: "Activate the gate"
+    - Quest: complete multi-stage activation
+    - Reward: fast-travel unlocked
+  17.03.006 — Stage 3.6: "Cloud City secrets"
+    - Side: explore pre-Shattering city
+    - Discover: why the Shattering happened
+  17.03.007 — Stage 3.7: "Summit confrontation"
+    - Trigger: reach rs_14
+    - Meet Sky-Smith council, debate blade's fate
+  17.03.008 — Stage 3.8 BRANCH: "Reforge / Preserve / Shatter"
+    - 3.8a (reforge): Sky-Smith rep +10, blade gains final form
+    - 3.8b (preserve): Cartographer rep +10, blade gains language form
+    - 3.8c (shatter): Choir rep +10, lose blade, gain shard_3
+  17.03.009 — Stage 3.9: "Receive shard_3"
+    - Item: shard_3_forge
+    - Opens Act 4
+  17.03.010 — Stage 3.10: "Return to the world"
+    - Transition to Act 4
+
+17.04 — ACT 4: ASH PLAINS (Free exploration + Storm-Walker)
+  17.04.001 — Stage 4.1: "Cross the plains"
+    - Trigger: enter ap_01
+    - Text: "Ash and wind. The horizon is a lie. Something waits in the deep."
+  17.04.002 — Stage 4.2: "Survive the ash-storms"
+    - Quest: endure 3 storms without dying
+    - Teaches ash-storm mechanics
+  17.04.003 — Stage 4.3: "Find water"
+    - Quest: locate and purify water
+    - Side: build water_purifier
+  17.04.004 — Stage 4.4: "Lone Cartographer's trail"
+    - Quest: find the mapmaker who went alone
+    - Clues across plains
+  17.04.005 — Stage 4.5: "Eye of the Storm"
+    - Trigger: enter ap_16
+    - Meet The Storm-Walker (boss NPC, hermit)
+  17.04.006 — Stage 4.6: "The Storm-Walker's test"
+    - 3 challenges: physical, mental, spiritual
+    - All 3 must be passed
+  17.04.007 — Stage 4.7 BRANCH: "Accept / Refuse / Question"
+    - 4.7a (accept): Storm-Walker joins as ally (unique NPC follower)
+    - 4.7b (refuse): lose ally, gain item storm_eye
+    - 4.7c (question): secret path, learn truth about Shattering
+  17.04.008 — Stage 4.8: "Hidden truth"
+    - Vision: see the moment of Shattering (player's memory unlock)
+    - Learn: who broke the sky and why
+  17.04.009 — Stage 4.9: "Buried entrance"
+    - Trigger: find hc_01 entrance
+    - Quest: descend into Hollow Cities
+  17.04.010 — Stage 4.10: "Choose the final path"
+    - 3 options: Choir (memory), Watch (justice), Free (wandering)
+    - Affects Act 5 tone
+
+17.05 — ACT 5: HOLLOW CITIES (Final act)
+  17.05.001 — Stage 5.1: "Buried Gate"
+    - Trigger: enter hc_01
+    - Text: "Two hundred years of darkness. Two hundred years of waiting."
+  17.05.002 — Stage 5.2: "Memory Library"
+    - Trigger: enter hc_03
+    - Read: full history of Shattering
+  17.05.003 — Stage 5.3: "Choir Sanctum"
+    - Trigger: enter hc_04
+    - Meet High Choir Aelis
+  17.05.004 — Stage 5.4 BRANCH: "Join Choir / Question / Defy"
+    - 5.4a (join): Choir rep +10, full access
+    - 5.4b (question): dialogue deepens, secret path
+    - 5.4c (defy): Choir hostile, lose rep, harder path
+  17.05.005 — Stage 5.5: "Throne memory"
+    - Trigger: enter hc_05
+    - Memory of vanished king plays
+    - Learn: the king tried to prevent Shattering
+  17.05.006 — Stage 5.6: "Council debate"
+    - Trigger: enter hc_06
+    - Memory of pre-Shattering debate
+    - Learn: the gods disagreed
+  17.05.007 — Stage 5.7: "Living Darkness"
+    - Trigger: enter hc_08
+    - Diplomacy with The Dark
+    - Outcomes: ally, enemy, ignored
+  17.05.008 — Stage 5.8: "Final descent"
+    - Trigger: enter hc_12
+    - Boss arena
+  17.05.009 — Stage 5.9: "Confront the Hollow King"
+    - BOSS: level 15, 5 phases
+    - Phase 1: shadow attacks
+    - Phase 2: summons echoes of past kings
+    - Phase 3: arena floods with memory
+    - Phase 4: hollow king splits into 7 (the Shattering reflection)
+    - Phase 5: final confrontation
+  17.05.010 — Stage 5.10 BRANCH: "End the Covenant / Restore / Reforge"
+    - 5.10a (end): kill Hollow King, shatter covenant, world returns to chaos
+    - 5.10b (restore): spare king, restore covenant, world heals slowly
+    - 5.10c (reforge): merge shards with blade, become new covenant
+  17.05.011 — Stage 5.11: "Covenant choice"
+    - Trigger: enter hc_15
+    - Dialogue with The Covenant entity
+    - Final 3 options: accept, reject, replace
+  17.05.012 — Stage 5.12 ENDING A: "The Sky Mended"
+    - Restore covenant
+    - World heals, NPCs comment
+    - Credits roll
+  17.05.013 — Stage 5.13 ENDING B: "The Sky Broken"
+    - End covenant
+    - World descends, NPCs suffer
+    - Dark credits
+  17.05.014 — Stage 5.14 ENDING C: "The Sky Reforged"
+    - Become new covenant
+    - Player ascends, world transforms
+    - Mythic credits
+  17.05.015 — Stage 5.15: "Epilogue"
+    - 2-year time skip
+    - Slideshow of region outcomes
+    - Final NPC dialogue
+    - New Game+ prompt
+
+17.06 — MAIN QUEST DIALOGUE FILES
+  17.06.001 — content/quests/main_quest.qst (~500 lines)
+  17.06.002 — content/dialogue/main/iola_main.dlg (~300 lines)
+  17.06.003 — content/dialogue/main/maren_main.dlg (~250 lines)
+  17.06.004 — content/dialogue/main/senna_main.dlg (~300 lines)
+  17.06.005 — content/dialogue/main/hesta_main.dlg (~280 lines)
+  17.06.006 — content/dialogue/main/storm_walker_main.dlg (~250 lines)
+  17.06.007 — content/dialogue/main/aelis_main.dlg (~300 lines)
+  17.06.008 — content/dialogue/main/hollow_king_main.dlg (~200 lines)
+  17.06.009 — content/dialogue/main/covenant_main.dlg (~150 lines)
+  17.06.010 — content/dialogue/main/blade_visions.dlg (~100 lines, special)
+  17.06.011 — content/dialogue/main/various_questgivers.dlg (~400 lines)
+
+17.07 — CUTSCENES (scripted sequences, no UI)
+  17.07.001 — cutscene_wake_up (~30s, crypt awakening)
+  17.07.002 — cutscene_blade_pickup (~10s, blade glows)
+  17.07.003 — cutscene_first_view (~20s, coast vista)
+  17.07.004 — cutscene_lighthouse_vision (~15s, shard appears)
+  17.07.005 — cutscene_drowned_king_intro (~30s, boss intro)
+  17.07.006 — cutscene_glasswood_entry (~25s, forest reveal)
+  17.07.007 — cutscene_atlas_intro (~30s, atlas awakens)
+  17.07.008 — cutscene_summit_ascent (~40s, climb to peak)
+  17.07.009 — cutscene_shattering_vision (~60s, full flashback)
+  17.07.010 — cutscene_buried_gate (~20s, gate opens)
+  17.07.011 — cutscene_throne_memory (~45s, king memory)
+  17.07.012 — cutscene_hollow_king_intro (~40s, boss intro)
+  17.07.013 — cutscene_ending_a (~120s, sky mends)
+  17.07.014 — cutscene_ending_b (~120s, sky breaks)
+  17.07.015 — cutscene_ending_c (~150s, sky reforged)
+
+17.08 — MAIN QUEST VERIFICATION
+  17.08.001 — All 5 acts start correctly from each branch
+  17.08.002 — All ~20 branches reachable
+  17.08.003 — All ~10 endings reachable
+  17.08.004 — All cutscenes play without errors
+  17.08.005 — All NPC dialogues advance quest
+  17.08.006 — Quest conditions evaluate correctly
+  17.08.007 — Save/load preserves quest state mid-act
+  17.08.008 — Play time: ~40-60 hours for full completionist run
+  17.08.009 — Multiple playthroughs needed for all endings
+  17.08.010 — Performance: cutscenes at 60 FPS
+
+END PHASE 17
+MAIN QUEST COMPLETE: 5 acts, ~40 stages, ~20 branches, ~10 endings, 15 cutscenes, 11 dialogue files

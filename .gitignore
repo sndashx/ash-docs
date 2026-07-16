@@ -1,0 +1,15 @@
+# Build artifacts
+build/
+*.o
+*.obj
+compile_commands.json
+
+# Editor cruft
+.vscode/
+.cache/
+.idea/
+*.swp
+.DS_Store
+
+# Local notes (the workspace/ subdir is intentionally NOT ignored — it's
+# agent-design documentation, not scratch)

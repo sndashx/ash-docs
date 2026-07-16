@@ -1,0 +1,416 @@
+ASH — Phase 00: Project Skeleton
+==================================
+
+Phase goal: bootstrap a buildable, testable C++20 project with
+CMake, CPM, and a minimal "ASH v0.0.1" truecolor banner.
+
+Entry criteria: nothing; this is the start.
+Exit criteria: ./build/ash prints truecolor banner and exits 0.
+
+[ENTRY CRITERIA]
+  - None.
+
+[EXIT CRITERIA]
+  - cmake -B build succeeds with -Wall -Wextra -Wpedantic.
+  - ./build/ash prints banner in truecolor and exits 0.
+  - ./build/ash --version prints version and exits 0.
+  - ./build/ash --help prints usage and exits 0.
+  - ./build/ash --unknown-flag prints error and exits 1.
+  - All tests pass (zero tests yet, but Catch2 wired up).
+  - Conventional Commits format on git log.
+
+[BLOCKERS]
+  - None expected.
+
+[RISKS]
+  - Terminal truecolor detection. Mitigation: probe via OSC 4 query
+    OR trust modern terminal defaults.
+  - CPM cache misses in CI. Mitigation: pre-cache via cpm-cache GitHub
+    Action.
+
+Step 0000.00.00. Create the project root directory ~/projects/ash/.
+  - Sub: Use mkdir -p.
+  - Sub: Confirm with ls -la ~/projects/ash.
+
+Step 0000.00.01. Create initial subdirectory tree.
+  - Sub: src/, content/, build/, docs/, scripts/, tests/.
+  - Sub: mkdir -p with parents.
+
+Step 0000.00.02. cd into ~/projects/ash and run git init.
+  - Sub: Set default branch to main (git init -b main on git 2.28+).
+  - Sub: Configure user.name and user.email if not already global.
+
+Step 0000.00.03. Create .gitignore at project root.
+  - Sub: Ignore build/, *.o, *.obj, compile_commands.json, .vscode/,
+         .cache/, saves/, *.swp, .DS_Store.
+
+Step 0000.00.04. Initial empty commit.
+  - Sub: git add .gitignore
+  - Sub: git commit -m "chore: bootstrap project"
+
+Step 0001.00.00. Write top-level CMakeLists.txt.
+  - Sub: cmake_minimum_required(VERSION 3.21)
+  - Sub: project(ash VERSION 0.1.0 LANGUAGES CXX)
+  - Sub: set(CMAKE_CXX_STANDARD 20)
+  - Sub: set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  - Sub: set(CMAKE_CXX_EXTENSIONS OFF)
+  - Sub: set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+Step 0001.00.01. Add compiler warning flags.
+  - Sub: include(cmake/CompilerWarnings.cmake) at top.
+  - Sub: Flags: -Wall -Wextra -Wpedantic -Wshadow -Wconversion
+         -Wsign-conversion -Wnull-dereference -Wdouble-promotion
+         -Wformat=2.
+  - Sub: MSVC equivalent flags for cross-platform (later phases).
+
+Step 0001.00.02. Create cmake/CompilerWarnings.cmake.
+  - Sub: Function ash_set_project_warnings(target).
+  - Sub: Function detects MSVC vs GCC/Clang and applies equivalent flags.
+
+Step 0001.00.03. Add option ASH_BUILD_TESTS (default ON).
+  - Sub: option(ASH_BUILD_TESTS "Build tests" ON)
+
+Step 0001.00.04. Add option ASH_ENABLE_ASAN (default OFF).
+  - Sub: option(ASH_ENABLE_ASAN "Enable AddressSanitizer" OFF)
+
+Step 0001.00.05. Add option ASH_ENABLE_UBSAN (default OFF).
+  - Sub: option(ASH_ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+
+Step 0001.00.06. Add option ASH_WARNINGS_AS_ERRORS (default OFF).
+  - Sub: option(ASH_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
+
+Step 0001.00.07. Add option ASH_HOT_RELOAD_CONTENT (default OFF).
+  - Sub: option(ASH_HOT_RELOAD_CONTENT "Hot-reload content files" OFF)
+
+Step 0001.00.08. Add option ASH_PROFILE (default OFF).
+  - Sub: option(ASH_PROFILE "Enable Tracy profiler" OFF)
+
+Step 0001.00.09. Create cmake/CPM.cmake with download fallback.
+  - Sub: Pull CPM.cmake from github.com/cpm-cmake/CPM.cmake releases.
+  - Sub: Pin to CPM.cmake v0.38.7.
+
+Step 0002.00.00. Include CPM after the project() call.
+  - Sub: include(cmake/CPM.cmake)
+
+Step 0002.00.01. Add CPM package: entt v3.13.0.
+  - Sub: CPMAddPackage("gh:skypjack/entt@3.13.0")
+  - Sub: Create imported target entt::entt.
+
+Step 0002.00.02. Add CPM package: spdlog v1.12.0.
+  - Sub: CPMAddPackage("gh:gabime/spdlog@v1.12.0")
+
+Step 0002.00.03. Add CPM package: fmt v10.1.1.
+  - Sub: CPMAddPackage("gh:fmtlib/fmt@10.1.1")
+
+Step 0002.00.04. Add CPM package: nlohmann/json v3.11.3.
+  - Sub: CPMAddPackage("gh:nlohmann/json@v3.11.3")
+
+Step 0002.00.05. Add CPM package: Catch2 v3.5.3 (test-only).
+  - Sub: CPMAddPackage("gh:catchorg/Catch2@v3.5.3")
+
+Step 0002.00.06. Verify CMake configure succeeds.
+  - Sub: cmake -B build -S . produces no errors.
+  - Sub: Check that all 5 packages are resolved.
+
+Step 0003.00.00. Create src/main.cpp with empty main().
+  - Sub: #include <cstdlib>
+  - Sub: int main() { return 0; }
+
+Step 0003.00.01. Add executable target ash in CMakeLists.txt.
+  - Sub: add_executable(ash src/main.cpp)
+  - Sub: target_compile_features(ash PRIVATE cxx_std_20)
+  - Sub: Apply ash_set_project_warnings(ash).
+
+Step 0003.00.02. Add test infrastructure.
+  - Sub: include(CTest) if ASH_BUILD_TESTS.
+  - Sub: enable_testing().
+  - Sub: add_subdirectory(tests).
+
+Step 0003.00.03. First successful build.
+  - Sub: cmake -B build -S .
+  - Sub: cmake --build build -j
+  - Sub: ./build/ash returns 0.
+
+Step 0004.00.00. Create src/core/log.hpp.
+  - Sub: namespace ash::log.
+  - Sub: Declare functions: init(), info(...), warn(...), error(...),
+         debug(...), trace(...).
+
+Step 0004.00.01. Create src/core/log.cpp.
+  - Sub: Use spdlog::logger named "ash".
+  - Sub: Default level: ASH_LOG_LEVEL env var, else info.
+  - Sub: Pattern: "[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] %v".
+
+Step 0004.00.02. Add init() that reads ASH_LOG_LEVEL.
+  - Sub: spdlog::level::trace if "trace".
+  - Sub: spdlog::level::debug if "debug".
+  - Sub: spdlog::level::info if "info" (default).
+  - Sub: spdlog::level::warn if "warn".
+  - Sub: spdlog::level::err if "error".
+  - Sub: spdlog::level::critical if "critical".
+  - Sub: off if "off".
+
+Step 0005.00.00. Create src/core/version.hpp.
+  - Sub: constexpr int ASH_VERSION_MAJOR = 0.
+  - Sub: constexpr int ASH_VERSION_MINOR = 0.
+  - Sub: constexpr int ASH_VERSION_PATCH = 1.
+  - Sub: constexpr const char* ASH_VERSION_STRING = "0.0.1".
+  - Sub: constexpr const char* ASH_CODENAME = "First Spark".
+
+Step 0005.00.01. Create src/core/version.cpp.
+  - Sub: const char* ash_version_string() { return ASH_VERSION_STRING; }
+  - Sub: int ash_version_major() { return ASH_VERSION_MAJOR; }
+  - Sub: int ash_version_minor() { return ASH_VERSION_MINOR; }
+  - Sub: int ash_version_patch() { return ASH_VERSION_PATCH; }
+
+Step 0006.00.00. Create src/render/ansi.hpp.
+  - Sub: namespace ash::ansi.
+  - Sub: Function declarations using fmt::format or std::string returns.
+
+Step 0006.00.01. Implement ansi::move_cursor(x, y).
+  - Sub: Returns "\x1b[{y};{x}H".
+  - Sub: y is 1-based; x is 1-based.
+  - Sub: Returns std::string.
+
+Step 0006.00.02. Implement ansi::set_fg(r, g, b).
+  - Sub: Returns "\x1b[38;2;{r};{g};{b}m".
+
+Step 0006.00.03. Implement ansi::set_bg(r, g, b).
+  - Sub: Returns "\x1b[48;2;{r};{g};{b}m".
+
+Step 0006.00.04. Implement ansi::reset().
+  - Sub: Returns "\x1b[0m".
+
+Step 0006.00.05. Implement ansi::bold(bool on).
+  - Sub: Returns "\x1b[1m" or "\x1b[22m".
+
+Step 0006.00.06. Implement ansi::underline(bool on).
+  - Sub: Returns "\x1b[4m" or "\x1b[24m".
+
+Step 0006.00.07. Implement ansi::italic(bool on).
+  - Sub: Returns "\x1b[3m" or "\x1b[23m".
+
+Step 0006.00.08. Implement ansi::inverse(bool on).
+  - Sub: Returns "\x1b[7m" or "\x1b[27m".
+
+Step 0006.00.09. Implement ansi::hide_cursor().
+  - Sub: Returns "\x1b[?25l".
+
+Step 0006.00.10. Implement ansi::show_cursor().
+  - Sub: Returns "\x1b[?25h".
+
+Step 0006.00.11. Implement ansi::alt_screen_on().
+  - Sub: Returns "\x1b[?1049h".
+
+Step 0006.00.12. Implement ansi::alt_screen_off().
+  - Sub: Returns "\x1b[?1049l".
+
+Step 0006.00.13. Implement ansi::clear_screen().
+  - Sub: Returns "\x1b[2J\x1b[H".
+
+Step 0006.00.14. Implement ansi::clear_line().
+  - Sub: Returns "\x1b[2K".
+
+Step 0006.00.15. Implement ansi::save_cursor().
+  - Sub: Returns "\x1b[s".
+
+Step 0006.00.16. Implement ansi::restore_cursor().
+  - Sub: Returns "\x1b[u".
+
+Step 0006.00.17. Implement ansi::query_terminal_size().
+  - Sub: Outputs "\x1b[18t" and reads response.
+  - Sub: For now, returns optional<pair<int,int>>.
+
+Step 0007.00.00. Create src/app/cli.hpp.
+  - Sub: namespace ash::cli.
+  - Sub: struct CliArgs { bool show_version, show_help, ... };
+  - Sub: CliArgs parse(int argc, char** argv).
+
+Step 0007.00.01. Implement CliArgs::parse.
+  - Sub: Loop over argv.
+  - Sub: Recognize --version, -v, --help, -h, --log-level.
+  - Sub: Unknown flags: print to stderr, set error code.
+
+Step 0007.00.02. Implement usage() function.
+  - Sub: Prints multi-line help to stdout.
+  - Sub: Describes all flags.
+
+Step 0008.00.00. Update src/main.cpp to use cli and log.
+  - Sub: #include "core/log.hpp"
+  - Sub: #include "core/version.hpp"
+  - Sub: #include "render/ansi.hpp"
+  - Sub: #include "app/cli.hpp"
+
+Step 0008.00.01. In main(), initialize logging first.
+  - Sub: ash::log::init().
+
+Step 0008.00.02. Parse CLI args.
+  - Sub: ash::cli::CliArgs args = ash::cli::parse(argc, argv).
+
+Step 0008.00.03. If --version: print and exit 0.
+  - Sub: Print "ASH v{version} ({codename})".
+  - Sub: Print in truecolor magenta (255, 80, 200).
+  - Sub: Reset, flush, exit.
+
+Step 0008.00.04. If --help: print usage and exit 0.
+  - Sub: Call ash::cli::usage().
+
+Step 0008.00.05. Otherwise: print banner and exit 0.
+  - Sub: Print "ASH v{version} ({codename})" in magenta.
+  - Sub: Print tagline: "A hand-authored ASCII RPG" in cyan.
+  - Sub: Reset, flush, exit.
+
+Step 0008.00.06. Build and verify.
+  - Sub: ./build/ash outputs magenta banner.
+  - Sub: ./build/ash --version outputs version.
+  - Sub: ./build/ash --help outputs usage.
+  - Sub: ./build/ash --unknown outputs error.
+
+Step 0009.00.00. Create tests/CMakeLists.txt.
+  - Sub: add_executable(ash_tests test_main.cpp).
+  - Sub: Catch2::Catch2WithMain dependency.
+
+Step 0009.00.01. Create tests/test_main.cpp.
+  - Sub: #define CATCH_CONFIG_RUNNER.
+  - Sub: #include <catch2/catch_session.hpp>.
+  - Sub: int main(int argc, char* argv[]) { return Catch::Session().run(); }
+
+Step 0009.00.02. Add CTest integration.
+  - Sub: include(Catch).
+  - Sub: catch_discover_tests(ash_tests).
+
+Step 0009.00.03. Create tests/test_main.cpp first test.
+  - Sub: TEST_CASE("smoke test") { REQUIRE(1 + 1 == 2); }
+
+Step 0009.00.04. Run tests.
+  - Sub: ctest --test-dir build --output-on-failure.
+
+Step 0009.00.05. Create tests/render/test_ansi.cpp.
+  - Sub: TEST_CASE("ansi::move_cursor").
+  - Sub: TEST_CASE("ansi::set_fg").
+  - Sub: TEST_CASE("ansi::set_bg").
+  - Sub: TEST_CASE("ansi::reset").
+
+Step 0009.00.06. Verify all tests pass.
+
+Step 0010.00.00. Create docs/README.md.
+  - Sub: Title and tagline.
+  - Sub: One-paragraph description.
+  - Sub: Build instructions.
+  - Sub: Run instructions.
+  - Sub: Screenshot placeholder.
+
+Step 0010.00.01. Create docs/code-style.md.
+  - Sub: 4-space indent, Allman braces.
+  - Sub: 100-column limit.
+  - Sub: snake_case for functions and variables.
+  - Sub: PascalCase for types.
+  - Sub: SCREAMING_SNAKE for constants.
+
+Step 0010.00.02. Create docs/architecture.md.
+  - Sub: Brief overview of pillars (link to 04-pillars.txt).
+
+Step 0011.00.00. Create scripts/run.sh.
+  - Sub: #!/usr/bin/env bash.
+  - Sub: cd "$(dirname "$0")/.."
+  - Sub: exec ./build/ash "$@".
+
+Step 0011.00.01. chmod +x scripts/run.sh.
+
+Step 0011.00.02. Create scripts/ci-build.sh.
+  - Sub: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release.
+  - Sub: cmake --build build -j.
+
+Step 0012.00.00. Create .clang-format.
+  - Sub: BasedOnStyle: LLVM.
+  - Sub: IndentWidth: 4.
+  - Sub: BraceStyle: Allman.
+  - Sub: ColumnLimit: 100.
+  - Sub: PointerAlignment: Left.
+
+Step 0012.00.01. Create .clang-tidy.
+  - Sub: Checks: -*, bugprone-*, performance-*, readability-*.
+  - Sub: WarningsAsErrors: '' (empty for now).
+  - Sub: HeaderFilterRegex: '.*'.
+
+Step 0013.00.00. Create LICENSE (MIT).
+  - Sub: Standard MIT license text.
+  - Sub: Copyright 2026 [Your Name].
+
+Step 0013.00.01. Add license reference to README.
+
+Step 0014.00.00. Create .github/workflows/build.yml.
+  - Sub: name: Build.
+  - Sub: on: push, pull_request.
+  - Sub: jobs.build: Ubuntu latest.
+
+Step 0014.00.01. Configure Ubuntu job.
+  - Sub: Install build-essential, cmake, ninja-build.
+  - Sub: Cache build/ via actions/cache@v4.
+
+Step 0014.00.02. Configure build steps.
+  - Sub: cmake -B build -S . -G Ninja -DCMAKE_BUILD_TYPE=Release.
+  - Sub: cmake --build build -j.
+  - Sub: ctest --test-dir build --output-on-failure.
+
+Step 0014.00.03. Add ASAN+UBSAN job.
+  - Sub: matrix: { sanitizer: [none, asan, ubsan] }.
+  - Sub: Pass -DASH_ENABLE_ASAN=ON or -DASH_ENABLE_UBSAN=ON.
+
+Step 0014.00.04. Add clang-tidy job.
+  - Sub: Run clang-tidy on src/.
+  - Sub: Use llvm/clang-tidy Action or manual run.
+
+Step 0015.00.00. Create CODEOWNERS.
+  - Sub: * @your-github-handle.
+
+Step 0016.00.00. Verify full build and test pipeline.
+  - Sub: cmake -B build -S .
+  - Sub: cmake --build build -j
+  - Sub: ctest --test-dir build --output-on-failure
+  - Sub: ./build/ash
+  - Sub: ./build/ash --version
+  - Sub: ./build/ash --help
+
+Step 0016.00.01. Final commit for Phase 0.
+  - Sub: git add -A.
+  - Sub: git commit -m "feat(phase-00): project skeleton with CMake + CPM".
+
+[EXIT VERIFICATION]
+
+  $ cmake -B build -S . && cmake --build build -j
+  ... builds with zero warnings ...
+
+  $ ./build/ash
+  \x1b[38;2;255;80;200mASH v0.0.1 (First Spark)\x1b[0m
+  \x1b[38;2;80;200;255mA hand-authored ASCII RPG\x1b[0m
+
+  $ ./build/ash --version
+  ASH v0.0.1 (First Spark)
+
+  $ ./build/ash --help
+  Usage: ash [options]
+  Options:
+    -v, --version     Show version
+    -h, --help        Show this help
+    --log-level LEVEL Set log level (trace|debug|info|warn|error|critical|off)
+
+  $ ./build/ash --unknown
+  Error: unknown flag '--unknown'
+  Try 'ash --help' for usage.
+
+  $ ctest --test-dir build --output-on-failure
+  test 1: smoke test ... PASSED
+  test 2: ansi::move_cursor ... PASSED
+  test 3: ansi::set_fg ... PASSED
+  test 4: ansi::set_bg ... PASSED
+  test 5: ansi::reset ... PASSED
+  100% tests passed, 0 tests failed
+
+[PHASE 0 PLAYABLE BUILD]
+
+  Build 00: "Empty Shell"
+    - Launches.
+    - Prints colored banner.
+    - Exits.
+    - No gameplay. Project structure visible in filesystem.

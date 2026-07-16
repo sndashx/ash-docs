@@ -1,0 +1,207 @@
+PHASE 16 — HOLLOW CITIES (REGION 5)
+=====================================
+Region: Underground cities of the pre-Shattering civilization, abandoned for 200 years. The Quiet Choir has their deepest sanctuaries here.
+Maps: 15 (hc_01 through hc_15)
+Faction primary: Quiet Choir (crimson)
+Theme: Memory, what was lost, and the final confrontation.
+
+16.00 — REGION OVERVIEW
+  16.00.001 — Region def: content/regions/hollow_cities.json
+    - { key: "hollow_cities", name: "Hollow Cities", description: "...", maps: 15, primary_faction: "quiet_choir", climate: "underground", music_track: "ash_hollow_theme", sky_color: "#000000", ground_color: "#252525" }
+  16.00.002 — Mechanic: permanent darkness (light sources required)
+  16.00.003 — Mechanic: memory echoes (reading stones shows past events)
+  16.00.004 — Mechanic: depth (deeper = more loot, more danger)
+
+16.01-16.15 — MAPS (15 total)
+  16.01.001 — hc_01: Buried Gate (entrance from Ash Plains)
+    - 60x60, terrain "stone_under", ambient "echo_deep"
+    - Massive sealed gate, 200 years old
+    - 3 NPCs: gate-keepers (Choir)
+    - Main quest trigger: descend
+  16.02.001 — hc_02: First City Streets
+    - 80x80, terrain "stone_street", ambient "echo_street"
+    - Empty streets, abandoned shops, homes
+    - 4 NPCs: ghost-residents (quests)
+    - 5 creatures: hollow-shades (level 4)
+    - Loot: pre-Shattering goods
+  16.03.001 — hc_03: Memory Library
+    - 90x80, terrain "stone_library", ambient "echo_pages"
+    - Vast underground library, books preserved
+    - 5 NPCs: librarian-ghosts (quests)
+    - Side quest: sq_memory_keeper
+  16.04.001 — hc_04: Choir Sanctum (regional hub)
+    - 100x80, terrain "marble_dark", ambient "choir_deep"
+    - Choir's deepest sanctuary
+    - 15 NPCs: high-ranking Choir, scribes, healers
+    - Main quest hub for Hollow Cities
+  16.05.001 — hc_05: The Empty Throne
+    - 80x80, terrain "marble_throne", ambient "echo_throne"
+    - Throne room of vanished king
+    - 1 NPC: Throne-Echo (memory of king)
+    - Main quest: main_act5_throne_memory
+  16.06.001 — hc_06: The Shattered Council
+    - 70x70, terrain "stone_council", ambient "echo_debate"
+    - Council chamber where gods debated
+    - 2 NPCs: council-echoes (memory fragments)
+    - Side quest: sq_council_truth
+  16.07.001 — hc_07: Depths of the City
+    - 100x100, terrain "stone_deep", ambient "deep_silence"
+    - Lower levels, more dangerous
+    - 8 creatures: deep-shades (level 6)
+    - Loot: rare pre-Shattering
+  16.08.001 — hc_08: The Living Darkness
+    - 80x80, terrain "shadow_flesh", ambient "breathing"
+    - Darkness is alive here
+    - 1 NPC: The Dark (entity, dialogue)
+    - Boss fight if attacked, quest if diplomacy
+  16.09.001 — hc_09: Pre-Shattering Market
+    - 90x90, terrain "stone_market", ambient "echo_market"
+    - Perfectly preserved market, frozen in time
+    - 6 NPCs: merchant-ghosts (vendors of ancient goods)
+    - Loot: priceless artifacts
+  16.10.001 — hc_10: The Glass Garden
+    - 70x70, terrain "glass_under", ambient "glass_hum"
+    - Underground garden, plants grown from glass shards
+    - 3 NPCs: garden-keepers
+    - Side quest: sq_garden_secret
+  16.11.001 — hc_11: The Forges of the Old
+    - 80x80, terrain "forge_ancient_deep", ambient "anvil_deep"
+    - Ancient forges, still working after 200 years
+    - 4 NPCs: ancient-smiths (vendors)
+    - Mechanic: shard-forging available here
+  16.12.001 — hc_12: The Hollow King (boss area)
+    - 100x100, terrain "stone_throne_deep", ambient "hollow_hum"
+    - True boss arena, deepest point
+    - 1 BOSS: The Hollow King (level 15)
+    - Mechanics: 5 phases, environmental hazards
+  16.13.001 — hc_13: The Memory Wells
+    - 70x70, terrain "water_memo", ambient "water_memory"
+    - Wells that show any past event
+    - 2 NPCs: well-keepers
+    - Mechanic: view any quest event
+  16.14.001 — hc_14: Choir's Heart
+    - 80x80, terrain "marble_heart", ambient "heart_song"
+    - Most sacred Choir space
+    - 5 NPCs: highest Choir
+    - Final quest: main_act5_choir_choice
+  16.15.001 — hc_15: The Final Door
+    - 60x60, terrain "void_stone", ambient "void_silence"
+    - Endgame, beyond the map
+    - 1 NPC: The Covenant (entity, final dialogue)
+    - Main quest ending trigger
+
+16.30 — REGION NPCs (~100 total)
+  16.30.001 — High Choir Aelis (leader, main quest)
+    - Schedule: pray, council, sleep
+    - Faction: Quiet Choir rank 5 (High Choir)
+    - Dialogue: deep theological, 12 topics, 10 quest hooks
+  16.30.002 — Memory Keeper (librarian-ghost)
+  16.30.003 — 8 Choir Scribes (named)
+  16.30.004 — 6 Choir Healers
+  16.30.005 — 4 Council-Echoes (memory NPCs)
+  16.30.006 — 6 Merchant-Ghosts (vendors)
+  16.30.007 — 4 Garden-Keepers
+  16.30.008 — 4 Ancient-Smiths
+  16.30.009 — Throne-Echo (memory NPC)
+  16.30.010 — The Dark (entity, dialogue/boss)
+  16.30.011 — The Covenant (final NPC)
+  16.30.012 — 50+ background: ghost-residents, shades, lost souls
+
+16.40 — REGION QUESTS (~25)
+  16.40.001 — Main: main_act5_throne_memory
+  16.40.002 — Main: main_act5_choir_choice
+  16.40.003 — Main: main_act5_covenant_meeting
+  16.40.004 — Main: main_act5_final_battle (Hollow King)
+  16.40.005 — Main: main_act5_ending (Covenant choice)
+  16.40.006 — Faction: fac_choir_initiate
+  16.40.007 — Faction: fac_choir_scribe
+  16.40.008 — Faction: fac_choir_healer
+  16.40.009 — Faction: fac_choir_high (top rank)
+  16.40.010 — Side: sq_memory_keeper (restore library)
+  16.40.011 — Side: sq_council_truth (witness debate)
+  16.40.012 — Side: sq_garden_secret (find ancient plant)
+  16.40.013 — Side: sq_ancient_forge_use (craft ultimate item)
+  16.40.014 — Side: sq_well_memories (view past events)
+  16.40.015 — Side: sq_dark_diplomacy (talk to The Dark)
+  16.40.016 — Side: sq_ghost_resident (help ghosts pass on)
+  16.40.017 — Side: sq_hollow_truth (learn what happened)
+  16.40.018 — Side: sq_throne_relinquish (give up throne memory)
+  16.40.019 — Side: sq_choir_secret (learn Choir's true purpose)
+  16.40.020 — Side: sq_memory_archaeology (excavate)
+  16.40.021 — Misc: sq_pre_shattering_relic
+  16.40.022 — Misc: sq_ancient_currency (collect 200-year coins)
+  16.40.023 — Misc: sq_choir_donation
+  16.40.024 — Misc: sq_shadow_tolerance (survive darkness)
+  16.40.025 — Misc: sq_void_whisper (hear the void)
+
+16.50 — REGION ITEMS (~110 unique)
+  16.50.001 — Light sources (10): lantern, hooded_lantern, eternal_flame, glow_stone, shard_torch, choir_candle, ancient_lamp, ghost_light, memory_lantern, void_glimmer
+  16.50.002 — Weapons (15): hollow_blade, choir_blade, ancient_sword, ghost_blade, memory_stealer, void_sword, ancient_spear, hollow_axe, choir_mace, ancient_bow, ghost_bow, memory_dagger, void_dagger, hollow_reaper (unique), ancient_king_blade (unique)
+  16.50.003 — Armor (12): hollow_armor, choir_vestments, ancient_plate, ghost_robes, memory_cloak, void_armor, hollow_helm, choir_circlet, ancient_crown, ghost_helm, memory_visor, void_cape (unique)
+  16.50.004 — Books (15): memory_keeper_tome, council_records, ancient_history, choir_canon, hollow_truth, garden_keeper_notes, ancient_smith_manual, well_keeper_journal, throne_echo_record, covenant_text, void_whispers, etc.
+  16.50.005 — Potions (10): light_potion (extend light radius), memory_potion, void_resist, ghost_resist, etc.
+  16.50.006 — Quest items (20): hollow_crown, ancient_key, memory_stone_x7, covenant_artifact, choir_seal, void_shard, etc.
+  16.50.007 — Valuables (15): ancient_coins, pre_shattering_gold, ghost_pearls, etc.
+  16.50.008 — Crafting (13): ancient_steel, ancient_wood, ghost_essence, memory_crystal, void_dust, etc.
+
+16.60 — REGION CREATURES (~14 types)
+  16.60.001 — Hollow-Shade (level 4, common)
+  16.60.002 — Memory-Wraith (level 5, replays past)
+  16.60.003 — Deep-Shade (level 6)
+  16.60.004 — Council-Echo (level 7, mini-boss)
+  16.60.005 — Hollow Knight (level 8, mini-boss)
+  16.60.006 — Ancient Guardian (level 9, mini-boss)
+  16.60.007 — Void-Touched (level 7)
+  16.60.008 — Memory-Siphon (level 6)
+  16.60.009 — The Dark (level 12, boss or ally)
+  16.60.010 — Hollow-Wraith (level 8)
+  16.60.011 — Throne-Shade (level 9)
+  16.60.012 — Covenant's Shadow (level 11, mini-boss)
+  16.60.013 — Hollow King (level 15, FINAL BOSS)
+  16.60.014 — Void Spawn (level 10, endgame only)
+
+16.70 — REGION LORE BOOKS (15 books)
+  16.70.001 — "Memory Keeper's Archive" — full record, 5000 words
+  16.70.002 — "Council Records: The Last Debate" — pivotal moment, 4000 words
+  16.70.003 — "Choir Canon: Complete" — religious text, 6000 words
+  16.70.004 — "The Hollow Truth" — investigative, 3500 words
+  16.70.005 — "Ancient History of the Cities" — full chronology, 8000 words
+  16.70.006 — "Garden-Keeper's Botany" — natural history, 2000 words
+  16.70.007 — "Ancient Smith's Compendium" — craft, 3500 words
+  16.70.008 — "Well-Keeper's Journal" — memory mechanics, 2500 words
+  16.70.009 — "Throne-Echo: A Day in the Life" — personal, 3000 words
+  16.70.010 — "Covenant Text" — theological, 4500 words
+  16.70.011 — "Void Whispers" — fragments, 1500 words
+  16.70.012 — "Pre-Shattering Daily Life" — ethnography, 4000 words
+  16.70.013 — "The Hollowing: A Theory" — academic, 3000 words
+  16.70.014 — "Choir's True Purpose" — secret text, 2500 words
+  16.70.015 — "Final King's Decree" — last words, 1500 words
+
+16.80 — REGION AUDIO (12 tracks)
+  16.80.001 — Music: ash_hollow_theme.wav, choir_deep_theme.wav, memory_echo_theme.wav, throne_theme.wav, hollow_king_boss.wav, covenant_theme.wav, ending_theme.wav
+  16.80.002 — Ambient: echo_deep.wav, echo_street.wav, echo_pages.wav, deep_silence.wav, breathing.wav, void_silence.wav, heart_song.wav
+  16.80.003 — SFX: torch_light.wav, ghost_wail.wav, memory_view.wav, void_pulse.wav
+
+16.90 — REGION VERIFICATION
+  16.90.001 — All 15 maps load
+  16.90.002 — Darkness mechanic: cannot see without light
+  16.90.003 — Memory echo mechanic: stones replay events
+  16.90.004 — Depth tracker
+  16.90.005 — All NPCs schedule
+  16.90.006 — All quests advance
+  16.90.007 — Final boss beatable
+  16.90.008 — All endings reachable
+  16.90.009 — Performance: 60 FPS in hollow arena
+  16.90.010 — Music transitions correctly
+  16.90.011 — Document phase 16
+
+END PHASE 16
+HOLLOW CITIES REGION COMPLETE: 15 maps, ~100 NPCs, 25 quests, 110+ items, 14 creatures, 15 books, 12 audio tracks
+
+ALL 5 REGIONS COMPLETE:
+- Scoured Coast: 12 maps, 80 NPCs
+- Glasswood: 20 maps, 120 NPCs
+- Riven Spire: 15 maps, 90 NPCs
+- Ash Plains: 18 maps, 80 NPCs
+- Hollow Cities: 15 maps, 100 NPCs
+TOTAL: 80 maps, ~470 NPCs

@@ -1,0 +1,413 @@
+ASH — Directory Layout
+======================
+
+Source tree (created during Phase 0 and grown through Phase 11):
+
+  ~/projects/ash/
+  ├── CMakeLists.txt
+  ├── README.md
+  ├── LICENSE
+  ├── .gitignore
+  ├── .clang-format
+  ├── .clang-tidy
+  ├── .github/
+  │   └── workflows/
+  │       └── build.yml
+  ├── docs/
+  │   ├── code-style.md
+  │   ├── architecture.md
+  │   ├── content-style-guide.md
+  │   └── screenshots/             (gitignored, populated during dev)
+  ├── scripts/
+  │   ├── run.sh                   Launch wrapper
+  │   ├── profile.sh               Tracy capture wrapper
+  │   └── ci-build.sh              CI-friendly build script
+  ├── cmake/
+  │   ├── CPM.cmake                CPM download fallback
+  │   └── CompilerWarnings.cmake   Warning flags
+  ├── src/
+  │   ├── main.cpp                 Entry point
+  │   ├── app/
+  │   │   ├── app.hpp              Top-level application state
+  │   │   ├── app.cpp
+  │   │   ├── cli.hpp              CLI arg parsing
+  │   │   └── cli.cpp
+  │   ├── core/
+  │   │   ├── log.hpp              spdlog wrapper
+  │   │   ├── log.cpp
+  │   │   ├── version.hpp          ASH_VERSION_*
+  │   │   ├── math.hpp             Fixed-point types, vec2, rect
+  │   │   ├── math.cpp
+  │   │   ├── rng.hpp              xoshiro256**
+  │   │   ├── rng.cpp
+  │   │   ├── time.hpp             Game clock
+  │   │   ├── time.cpp
+  │   │   ├── ids.hpp              Strongly-typed IDs (Entity, Map, ...)
+  │   │   ├── string_util.hpp
+  │   │   ├── string_util.cpp
+  │   │   ├── path.hpp             XDG path resolution
+  │   │   └── path.cpp
+  │   ├── render/
+  │   │   ├── cell.hpp             Packed 12-byte cell
+  │   │   ├── cell.cpp
+  │   │   ├── terminal.hpp         Terminal size query
+  │   │   ├── terminal.cpp
+  │   │   ├── ansi.hpp             ANSI escape helpers
+  │   │   ├── ansi.cpp
+  │   │   ├── buffer.hpp           Front+back buffer
+  │   │   ├── buffer.cpp
+  │   │   ├── camera.hpp           World->screen coord
+  │   │   ├── camera.cpp
+  │   │   ├── light.hpp            Light grid, propagation
+  │   │   ├── light.cpp
+  │   │   ├── compositor.hpp       Layer compositing
+  │   │   ├── compositor.cpp
+  │   │   ├── palette.hpp          Color tables, colorblind modes
+  │   │   ├── palette.cpp
+  │   │   ├── animation.hpp        Glyph array animation
+  │   │   ├── animation.cpp
+  │   │   ├── font_metrics.hpp     Cell pixel size query
+  │   │   └── font_metrics.cpp
+  │   ├── rexpaint/
+  │   │   ├── xp_format.hpp        Binary format constants
+  │   │   ├── xp_loader.hpp        Parse .xp from disk
+  │   │   ├── xp_loader.cpp
+  │   │   ├── xp_writer.hpp        Write .xp to disk
+  │   │   ├── xp_writer.cpp
+  │   │   ├── layer_spec.hpp       Layer convention lookup
+  │   │   └── layer_spec.cpp
+  │   ├── world/
+  │   │   ├── map.hpp              Map struct
+  │   │   ├── map.cpp
+  │   │   ├── world.hpp            World = registry of maps
+  │   │   ├── world.cpp
+  │   │   ├── components.hpp       entt components
+  │   │   ├── components.cpp
+  │   │   ├── spawn.hpp            Spawn/despawn helpers
+  │   │   ├── spawn.cpp
+  │   │   ├── query.hpp            Spatial queries
+  │   │   ├── query.cpp
+  │   │   ├── trigger.hpp          Trigger volumes
+  │   │   └── trigger.cpp
+  │   ├── editor/
+  │   │   ├── editor.hpp           In-game editor mode
+  │   │   ├── editor.cpp
+  │   │   ├── tool_paint.hpp       Brush tool
+  │   │   ├── tool_paint.cpp
+  │   │   ├── tool_select.hpp      Selection tool
+  │   │   ├── tool_select.cpp
+  │   │   ├── tool_pick.hpp        Pipette tool
+  │   │   ├── tool_pick.cpp
+  │   │   ├── tool_fill.hpp        Flood fill tool
+  │   │   ├── tool_fill.cpp
+  │   │   ├── tool_entity.hpp      Place entity tool
+  │   │   ├── tool_entity.cpp
+  │   │   ├── tool_warp.hpp        Warp-to tool
+  │   │   ├── tool_warp.cpp
+  │   │   ├── undo.hpp             Command-pattern undo
+  │   │   ├── undo.cpp
+  │   │   ├── clipboard.hpp        Cut/copy/paste
+  │   │   └── clipboard.cpp
+  │   ├── input/
+  │   │   ├── key.hpp              Key codes
+  │   │   ├── key.cpp
+  │   │   ├── input.hpp            Input state, mode stack
+  │   │   ├── input.cpp
+  │   │   ├── keybinds.hpp         Keybind file loader
+  │   │   ├── keybinds.cpp
+  │   │   ├── mouse.hpp            Mouse parsing
+  │   │   └── mouse.cpp
+  │   ├── ui/
+  │   │   ├── mode.hpp             UI mode stack
+  │   │   ├── mode.cpp
+  │   │   ├── menu.hpp             Main menu
+  │   │   ├── menu.cpp
+  │   │   ├── hud.hpp              In-game HUD
+  │   │   ├── hud.cpp
+  │   │   ├── dialogue_ui.hpp      Dialogue screen
+  │   │   ├── dialogue_ui.cpp
+  │   │   ├── inventory_ui.hpp     Inventory screen
+  │   │   ├── inventory_ui.cpp
+  │   │   ├── map_ui.hpp           Map view
+  │   │   ├── map_ui.cpp
+  │   │   ├── journal_ui.hpp       Quest journal
+  │   │   ├── journal_ui.cpp
+  │   │   ├── character_ui.hpp     Character sheet
+  │   │   ├── character_ui.cpp
+  │   │   ├── spell_ui.hpp         Spell list
+  │   │   ├── spell_ui.cpp
+  │   │   ├── barter_ui.hpp        Trading screen
+  │   │   ├── barter_ui.cpp
+  │   │   ├── book_ui.hpp          Readable book viewer
+  │   │   └── book_ui.cpp
+  │   ├── character/
+  │   │   ├── attributes.hpp       9 attributes + derived
+  │   │   ├── attributes.cpp
+  │   │   ├── skills.hpp           24 skills + leveling
+  │   │   ├── skills.cpp
+  │   │   ├── leveling.hpp         XP curves, attribute points
+  │   │   ├── leveling.cpp
+  │   │   ├── inventory.hpp        Item container logic
+  │   │   ├── inventory.cpp
+  │   │   ├── equipment.hpp        Equip slots
+  │   │   ├── equipment.cpp
+  │   │   ├── derived.hpp          HP/VP/SP and other derived
+  │   │   ├── derived.cpp
+  │   │   ├── condition.hpp        Status effects
+  │   │   └── condition.cpp
+  │   ├── combat/
+  │   │   ├── combat.hpp           Combat round manager
+  │   │   ├── combat.cpp
+  │   │   ├── weapon.hpp           Weapon definitions
+  │   │   ├── weapon.cpp
+  │   │   ├── armor.hpp            Armor definitions
+  │   │   ├── armor.cpp
+  │   │   ├── attack.hpp           Attack resolution
+  │   │   ├── attack.cpp
+  │   │   ├── damage.hpp           Damage types, resistance
+  │   │   ├── damage.cpp
+  │   │   ├── status.hpp           Status effect application
+  │   │   ├── status.cpp
+  │   │   ├── path.hpp             Pathfinding
+  │   │   ├── path.cpp
+  │   │   ├── line_of_sight.hpp    LoS queries
+  │   │   ├── line_of_sight.cpp
+  │   │   ├── cover.hpp            Cover calculations
+  │   │   ├── cover.cpp
+  │   │   ├── ai.hpp               AI behaviors
+  │   │   └── ai.cpp
+  │   ├── npc/
+  │   │   ├── npc.hpp              NPC factory from JSON
+  │   │   ├── npc.cpp
+  │   │   ├── schedule.hpp         Schedule parser and runtime
+  │   │   ├── schedule.cpp
+  │   │   ├── disposition.hpp      Disposition rules
+  │   │   ├── disposition.cpp
+  │   │   ├── faction.hpp          Faction membership
+  │   │   ├── faction.cpp
+  │   │   ├── dialogue_run.hpp     Dialogue tree executor
+  │   │   └── dialogue_run.cpp
+  │   ├── dialogue/
+  │   │   ├── dlg_lexer.hpp        Tokenizer
+  │   │   ├── dlg_lexer.cpp
+  │   │   ├── dlg_parser.hpp       Parser
+  │   │   ├── dlg_parser.cpp
+  │   │   ├── dlg_ast.hpp          AST types
+  │   │   ├── dlg_eval.hpp         Runtime evaluator
+  │   │   ├── dlg_eval.cpp
+  │   │   ├── dlg_skill_check.hpp  Skill check resolution
+  │   │   └── dlg_skill_check.cpp
+  │   ├── quest/
+  │   │   ├── flag_store.hpp       Flag persistence
+  │   │   ├── flag_store.cpp
+  │   │   ├── qst_parser.hpp       Quest file parser
+  │   │   ├── qst_parser.cpp
+  │   │   ├── qst_ast.hpp          Quest AST
+  │   │   ├── qst_engine.hpp       Stage machine
+  │   │   ├── qst_engine.cpp
+  │   │   ├── consequence.hpp      Consequence rule runner
+  │   │   ├── consequence.cpp
+  │   │   ├── journal.hpp          Auto-generated journal entries
+  │   │   └── journal.cpp
+  │   ├── save/
+  │   │   ├── save.hpp             Save manager
+  │   │   ├── save.cpp
+  │   │   ├── load.hpp             Load manager
+  │   │   ├── load.cpp
+  │   │   ├── schema_v0.hpp        Schema v0 readers
+  │   │   ├── schema_v0.cpp
+  │   │   ├── migrate.hpp          Migration runner
+  │   │   ├── migrate.cpp
+  │   │   ├── autosave.hpp         Autosave tick
+  │   │   └── autosave.cpp
+  │   ├── settings/
+  │   │   ├── settings.hpp         Settings file loader
+  │   │   ├── settings.cpp
+  │   │   ├── accessibility.hpp    Accessibility options
+  │   │   └── accessibility.cpp
+  │   ├── platform/
+  │   │   ├── signal.hpp           SIGWINCH, SIGINT handlers
+  │   │   └── signal.cpp
+  │   └── content/
+  │       └── content.hpp          Content registry and loader
+  │       └── content.cpp
+  └── tests/
+      ├── CMakeLists.txt
+      ├── test_main.cpp            Catch2 entry
+      ├── render/
+      │   ├── test_cell.cpp
+      │   ├── test_ansi.cpp
+      │   ├── test_buffer.cpp
+      │   ├── test_camera.cpp
+      │   ├── test_light.cpp
+      │   └── test_compositor.cpp
+      ├── rexpaint/
+      │   ├── test_xp_loader.cpp
+      │   ├── test_xp_writer.cpp
+      │   └── test_layer_spec.cpp
+      ├── world/
+      │   ├── test_components.cpp
+      │   ├── test_query.cpp
+      │   └── test_trigger.cpp
+      ├── editor/
+      │   ├── test_undo.cpp
+      │   └── test_clipboard.cpp
+      ├── input/
+      │   ├── test_key.cpp
+      │   └── test_keybinds.cpp
+      ├── character/
+      │   ├── test_attributes.cpp
+      │   ├── test_skills.cpp
+      │   ├── test_inventory.cpp
+      │   ├── test_equipment.cpp
+      │   └── test_derived.cpp
+      ├── combat/
+      │   ├── test_attack.cpp
+      │   ├── test_damage.cpp
+      │   ├── test_status.cpp
+      │   ├── test_path.cpp
+      │   └── test_los.cpp
+      ├── npc/
+      │   ├── test_schedule.cpp
+      │   ├── test_disposition.cpp
+      │   └── test_dialogue_run.cpp
+      ├── dialogue/
+      │   ├── test_dlg_lexer.cpp
+      │   ├── test_dlg_parser.cpp
+      │   └── test_dlg_eval.cpp
+      ├── quest/
+      │   ├── test_flag_store.cpp
+      │   ├── test_qst_parser.cpp
+      │   └── test_qst_engine.cpp
+      ├── save/
+      │   ├── test_save.cpp
+      │   ├── test_load.cpp
+      │   └── test_migrate.cpp
+      └── content/
+          └── test_content_load.cpp
+
+Content tree (created during Phases 12-22):
+
+  content/
+  ├── README.md                    Content authoring guide
+  ├── regions/
+  │   ├── scoured_coast.json
+  │   ├── glasswood.json
+  │   ├── riven_spire.json
+  │   ├── ash_plains.json
+  │   └── hollow_cities.json
+  ├── maps/
+  │   ├── scoured_coast/           12 maps
+  │   │   ├── silvercliff_inn_floor.xp
+  │   │   ├── silvercliff_inn_upstairs.xp
+  │   │   ├── silvercliff_streets.xp
+  │   │   ├── silvercliff_docks.xp
+  │   │   ├── silvercliff_watchtower.xp
+  │   │   ├── silvercliff_outskirts.xp
+  │   │   ├── coast_road_north.xp
+  │   │   ├── coast_road_south.xp
+  │   │   ├── sunken_temple_approach.xp
+  │   │   ├── sunken_temple_entry.xp
+  │   │   ├── sunken_temple_inner.xp
+  │   │   └── sunken_temple_sanctum.xp
+  │   ├── glasswood/               20 maps
+  │   ├── riven_spire/              15 maps
+  │   ├── ash_plains/               18 maps
+  │   └── hollow_cities/            15 maps
+  ├── npcs/
+  │   ├── scoured_coast/            15 NPCs
+  │   ├── glasswood/                ~120 NPCs
+  │   ├── riven_spire/              ~90 NPCs
+  │   ├── ash_plains/               ~110 NPCs
+  │   └── hollow_cities/            ~80 NPCs
+  ├── dialogue/
+  │   ├── scoured_coast/            Full dialogue trees
+  │   ├── glasswood/
+  │   ├── riven_spire/
+  │   ├── ash_plains/
+  │   └── hollow_cities/
+  ├── sched/
+  │   ├── scoured_coast/            Per-NPC schedules
+  │   └── ... (other regions)
+  ├── quests/
+  │   ├── main/
+  │   │   ├── act1_wake.dlq        (quest files)
+  │   │   ├── act1_wake.qst
+  │   │   ├── act1_blade.qst
+  │   │   ├── act1_first.qst
+  │   │   ├── act2_pilgrim.qst
+  │   │   ├── act2_reach.qst
+  │   │   ├── act3_choir.qst
+  │   │   ├── act3_ash.qst
+  │   │   ├── act4_truth.qst
+  │   │   └── act5_god.qst
+  │   ├── factions/
+  │   │   ├── coastal_watch_*.qst
+  │   │   ├── cartographers_*.qst
+  │   │   ├── sky_smiths_*.qst
+  │   │   └── quiet_choir_*.qst
+  │   └── side/
+  │       ├── scoured_coast_*.qst
+  │       ├── glasswood_*.qst
+  │       ├── spire_*.qst
+  │       ├── ash_*.qst
+  │       └── hollow_*.qst
+  ├── items/
+  │   ├── weapons.json
+  │   ├── armor.json
+  │   ├── consumables.json
+  │   ├── books.json
+  │   ├── keys.json
+  │   ├── misc.json
+  │   └── quest_items.json
+  ├── books/
+  │   └── <id>.xp                   ~40 books
+  ├── factions/
+  │   ├── coastal_watch.json
+  │   ├── cartographers.json
+  │   ├── sky_smiths.json
+  │   └── quiet_choir.json
+  ├── bestiary/
+  │   ├── beasts.json
+  │   ├── humanoids.json
+  │   ├── undead.json
+  │   ├── constructs.json
+  │   └── unique.json
+  ├── anim/
+  │   ├── player/
+  │   │   ├── walk_down.json
+  │   │   ├── walk_up.json
+  │   │   ├── walk_left.json
+  │   │   ├── walk_right.json
+  │   │   ├── attack_*.json
+  │   │   ├── spell_cast.json
+  │   │   ├── hurt.json
+  │   │   └── death.json
+  │   ├── npc/
+  │   └── creatures/
+  ├── shaders/                      (none in v1; placeholder)
+  └── locales/
+      └── en/
+          └── strings.json          UI string table
+
+Build outputs (gitignored):
+
+  build/
+  ├── ash                           Executable
+  ├── ash_tests                     Test runner
+  └── compile_commands.json         For IDE
+
+Save data (user-local, gitignored):
+
+  ~/.local/share/ash/
+  ├── saves/
+  │   ├── quicksave/
+  │   ├── autosave/
+  │   └── <savename>/
+  └── logs/
+
+Config (user-local):
+
+  ~/.config/ash/
+  ├── config.json
+  └── keybinds.json

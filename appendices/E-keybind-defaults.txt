@@ -1,0 +1,209 @@
+ASH — Appendix E: Default Keybindings
+=====================================
+
+File: ~/.config/ash/keybinds.json
+
+Encoding: UTF-8 JSON.
+
+Schema:
+
+  {
+    "schema_version": 0,
+    "explore": { ... },
+    "menu":   { ... },
+    "dialogue": { ... },
+    "inventory": { ... },
+    "map": { ... },
+    "spells": { ... },
+    "journal": { ... },
+    "editor": { ... },
+    "global": { ... }
+  }
+
+Each mode maps action names to key strings. Key strings:
+  - Single chars: "a", "A", "?", "5"
+  - Named keys: "up", "down", "left", "right"
+  - Special: "space", "tab", "esc", "enter", "backspace"
+  - Function: "f1" .. "f12"
+  - Modifiers: "ctrl+s", "alt+f4", "shift+tab"
+  - Mouse: "mouse_left", "mouse_right", "mouse_middle",
+           "wheel_up", "wheel_down", "mouse_move"
+
+Default bindings
+----------------
+
+explore (in-world movement and quick actions):
+
+  "move_north":      ["up", "k", "8"]
+  "move_south":      ["down", "j", "2"]
+  "move_east":       ["right", "l", "6"]
+  "move_west":       ["left", "h", "4"]
+  "move_northeast":  ["y", "9"]
+  "move_northwest":  ["u", "7"]
+  "move_southeast":  ["n", "3"]
+  "move_southwest":  ["b", "1"]
+  "wait":            ["."]
+  "interact":        ["e", "space"]
+  "get_items":       ["g"]
+  "open_menu":       ["esc"]
+  "open_inventory":  ["i"]
+  "open_map":        ["m"]
+  "open_journal":    ["j"]   // conflicts with move_south; rebind as needed
+  "open_spells":     ["p"]
+  "open_character":  ["c"]
+  "pause":           ["space", "f1"]
+  "quicksave":       ["f5"]
+  "quickload":       ["f9"]
+  "screenshot":      ["f12"]
+  "rest":            ["r"]   // 1 hour rest if safe
+  "sneak":           ["ctrl+s"]
+  "run":             ["shift"]
+  "jump":            ["ctrl+j"]
+  "look":            ["l"]   // tile inspection (l again to clear)
+  "previous_target": ["q"]
+  "next_target":     ["tab"]
+  "attack":          ["f"]   // attacks current target if hostile
+  "cycle_weapon":    ["w"]
+  "cycle_spell":     ["v"]
+
+menu (main menu and pause menu):
+
+  "resume":          ["esc"]
+  "save":            ["s"]
+  "load":            ["l"]
+  "settings":        ["o"]
+  "quit":            ["q"]
+  "navigate_up":     ["up", "k"]
+  "navigate_down":   ["down", "j"]
+  "navigate_left":   ["left", "h"]
+  "navigate_right":  ["right", "l"]
+  "confirm":         ["enter", "space"]
+  "cancel":          ["esc"]
+
+dialogue (talking to NPCs):
+
+  "next_topic":      ["down", "j", "tab"]
+  "prev_topic":      ["up", "k", "shift+tab"]
+  "select_topic":    ["enter", "space"]
+  "back":            ["esc"]
+  "skill_voice":     ["v"]
+  "bribe":           ["b"]
+  "persuade":        ["p"]
+  "intimidate":      ["i"]
+  "leave":           ["esc", "l"]
+  "scroll_text_up":  ["up", "k"]
+  "scroll_text_down":["down", "j", "space"]
+
+inventory:
+
+  "next_item":       ["down", "j", "tab"]
+  "prev_item":       ["up", "k", "shift+tab"]
+  "next_category":   ["right", "l"]
+  "prev_category":   ["left", "h"]
+  "use_item":        ["u", "enter"]
+  "equip":           ["e"]
+  "unequip":         ["r"]
+  "drop":            ["d"]
+  "examine":         ["x"]
+  "close":           ["esc", "i"]
+  "sort":            ["s"]
+  "filter":          ["f"]
+
+map view:
+
+  "pan_up":          ["up", "k"]
+  "pan_down":        ["down", "j"]
+  "pan_left":        ["left", "h"]
+  "pan_right":       ["right", "l"]
+  "zoom_in":         ["+", "="]
+  "zoom_out":        ["-", "_"]
+  "select_map":      ["enter"]
+  "travel":          ["t"]   // fast-travel to discovered map
+  "close":           ["esc", "m"]
+
+spells:
+
+  "next_spell":      ["down", "j"]
+  "prev_spell":      ["up", "k"]
+  "memorize":        ["m"]
+  "forget":          ["f"]
+  "cast":            ["c"]
+  "close":           ["esc", "p"]
+
+journal:
+
+  "next_quest":      ["down", "j", "tab"]
+  "prev_quest":      ["up", "k", "shift+tab"]
+  "set_active":      ["enter"]
+  "close":           ["esc", "j"]
+  "filter":          ["f"]
+
+editor (in-game authoring tool; gated behind dev flag):
+
+  "tool_paint":      ["b"]
+  "tool_select":     ["v"]
+  "tool_pick":       ["i"]
+  "tool_fill":       ["g"]
+  "tool_entity":     ["e"]
+  "tool_warp":       ["w"]
+  "save_map":        ["ctrl+s"]
+  "load_map":        ["ctrl+o"]
+  "undo":            ["ctrl+z"]
+  "redo":            ["ctrl+y", "ctrl+shift+z"]
+  "copy":            ["ctrl+c"]
+  "cut":             ["ctrl+x"]
+  "paste":           ["ctrl+v"]
+  "select_all":      ["ctrl+a"]
+  "deselect":        ["esc"]
+  "exit_editor":     ["ctrl+q"]
+  "layer_1":         ["1"]
+  "layer_2":         ["2"]
+  "layer_3":         ["3"]
+  "layer_4":         ["4"]
+  "layer_5":         ["5"]
+  "layer_6":         ["6"]
+  "layer_7":         ["7"]
+  "layer_8":         ["8"]
+  "layer_9":         ["9"]
+  "toggle_grid":     ["ctrl+g"]
+  "toggle_layer_visibility": ["ctrl+l"]
+  "test_play":       ["f5"]   // playtest this map
+
+global (work in all modes):
+
+  "toggle_help":     ["?"]
+  "toggle_log":      ["ctrl+l"]   // conflicts with editor; resolves by mode
+  "screenshot":      ["f12"]
+  "quit_to_menu":    ["ctrl+esc"]
+  "force_quit":      ["ctrl+c"]   // SIGINT to terminal
+
+Notes
+-----
+
+- vim-style hjkl is the primary movement scheme.
+- Arrow keys are always available as alternatives.
+- Numpad arrows and diagonals for users who prefer them.
+- Function keys for global actions (save/load/screenshot).
+- Ctrl+ combinations for editor and meta actions.
+- No key has the same binding in every mode; rebinding is per-mode.
+
+Rebinding
+---------
+
+Users can rebind by editing ~/.config/ash/keybinds.json directly.
+A CLI tool "ash-keybind" (post-launch) provides interactive rebinding.
+
+Validation
+----------
+
+On load, keybinds.json is validated:
+  - All keys must be valid key strings.
+  - No action may have duplicate keys within the same mode.
+  - All actions must be defined for their mode (engine warns on unknown).
+  - Schema version checked; migrations applied if needed.
+
+Conflicts (e.g., "j" for move_south AND open_journal) are resolved
+by:
+  1. Mode-specific binding wins (in journal mode, "j" = next_quest).
+  2. Global binding wins if no mode binding matches the action.
+  3. If still ambiguous, last-loaded wins; user warned.

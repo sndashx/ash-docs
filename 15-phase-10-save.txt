@@ -1,0 +1,187 @@
+PHASE 10 — SAVE/LOAD SYSTEM
+==============================
+Goal: Atomic saves with 3-generation backup, schema migrations, autosave, quicksave, multiple slots, corruption detection, manual save anywhere except combat, full state serialization per appendix D.
+Reference: appendices/D-save-schema.txt, decisions.txt D-58..D-62.
+
+10.00 — SAVE LAYOUT & PATHS
+  10.00.001 — Create src/save/SavePaths.hpp/cpp
+    - XDG_DATA_HOME/ash/saves/ as root (fallback to ~/.local/share/ash/saves/)
+    - Per-slot dir: saves/<slot>/ containing meta.json, player.v0.json, world.v0.json, journal.v0.json, maps/<id>.xp, portraits/*.xp, thumbnails/*.xp
+  10.00.002 — Implement get_save_root() via std::filesystem
+  10.00.003 — Implement get_slot_dir(slot) creating if missing
+  10.00.004 — Implement list_slots() returning {slot_id, name, timestamp, level, region} vector
+  10.00.005 — Implement ensure_dir(path) with parents
+
+10.01 — META.JSON
+  10.01.001 — struct SaveMeta { std::string slot_id; std::string character_name; int level; std::string region; std::string location; int playtime_seconds; std::string created_at; std::string updated_at; std::string version; std::string screenshot_path; };
+  10.01.002 — Serialize to JSON (nlohmann/json)
+  10.01.003 — Use ISO 8601 timestamps (UTC)
+  10.01.004 — Version field = "0.1.0" matching game version
+  10.01.005 — Include engine build hash for compatibility check
+  10.01.006 — On load, reject if version major differs
+
+10.02 — PLAYER STATE
+  10.02.001 — struct PlayerSave { Attributes attrs; Skills skills; Stats stats; std::vector<Condition> conditions; Inventory inv; Equipment equip; std::vector<int> spell_known; std::map<std::string, int> var_int; std::map<std::string, std::string> var_str; int xp; int xp_to_next; int level; std::vector<std::string> known_topics; };
+  10.02.002 — Serialize to player.v0.json
+  10.02.003 — Use compact integer IDs for items/conditions (lookup tables in content/)
+  10.02.004 — Round-trip test: serialize then deserialize should equal original
+
+10.03 — WORLD STATE
+  10.03.001 — struct WorldSave { std::map<std::string, bool> flags; std::map<std::string, int> globals; std::vector<QuestSave> quests; std::vector<NpcSave> npcs; std::vector<CreatureSave> creatures; std::vector<ContainerSave> containers; std::vector<DoorSave> doors; std::vector<TriggerSave> triggers; FactionRep factions; TimeOfDay time; };
+  10.03.002 — struct QuestSave { std::string key; QuestState::Phase phase; int stage_index; ObjectiveState obj; float stage_time; };
+  10.03.003 — struct NpcSave { entt::id_type id; Position pos; Stats stats; Inventory inv; FactionRep factions; ScheduleState sched; DialogueFlags dlg_flags; bool alive; };
+  10.03.004 — struct CreatureSave { entt::id_type id; Position pos; Stats stats; bool alive; std::string creature_key; };
+  10.05.005 — struct ContainerSave { entt::id_type id; Position pos; Inventory inv; bool locked; bool opened; };
+  10.03.006 — struct DoorSave { entt::id_type id; Position pos; bool locked; bool open; };
+  10.03.007 — struct TriggerSave { entt::id_type id; bool fired; int fire_count; };
+  10.03.008 — Serialize to world.v0.json
+
+10.04 — MAP SERIALIZATION
+  10.04.001 — Implement save_map(id) writing content/maps/<id>.xp via rexpaint::write_xp
+  10.04.002 — Only save maps with runtime modifications (dirty flag set)
+  10.04.003 — Pristine maps reload from content on load
+  10.04.004 — Save runtime overlay (entities, items) as map.overlays.v0.json with entity positions
+  10.04.005 — Implement load_map(id) reading from save dir first, fallback to content
+  10.04.006 — Compress maps larger than 64KB with zlib (use zlib via CPM)
+
+10.05 — SAVE SYSTEM CORE
+  10.05.001 — Create src/save/SaveSystem.hpp/cpp
+    - class SaveSystem { public: bool save(int slot, const World& world, const Player& player); std::optional<SaveData> load(int slot); void delete_slot(int slot); bool export_slot(int slot, fs::path dest); std::optional<SaveData> import_slot(fs::path src); };
+  10.05.002 — Implement save() with atomic write:
+    - Write to slot_dir/.tmp/
+    - fsync each file
+    - Rename .tmp/ to slot_dir/ (atomic on POSIX)
+    - Update meta.json timestamp
+  10.05.003 — Implement 3-generation backup:
+    - Before overwriting slot, rotate: slot.bak1/ → slot.bak2/, slot/ → slot.bak1/
+    - Keep at most 3 generations (slot, bak1, bak2)
+  10.05.004 — Implement load() with fallback chain: slot → bak1 → bak2
+  10.05.005 — Implement delete_slot() removing dir after confirmation
+  10.05.006 — Implement export/import as .tar.gz archive
+  10.05.007 — Add CRC32 checksum to meta.json for corruption detection
+
+10.06 — AUTOSAVE & QUICKSAVE
+  10.06.001 — Autosave slot: "__autosave__"
+  10.06.002 — Trigger autosave every 10 minutes of game time
+  10.06.003 — Trigger autosave on map transition
+  10.06.004 — Trigger autosave on long-rest / sleep
+  10.06.005 — Quicksave slot: "__quick__" + rotation index (5 slots)
+  10.06.006 — Bind F5 to quicksave, F9 to quickload
+  10.06.007 — Disable save during combat (warn player)
+  10.06.008 — Show "Saving..." indicator for >200ms operations
+  10.06.009 — Pause time during save (TimeScale=0)
+
+10.07 — SCHEMA MIGRATIONS
+  10.07.001 — Create src/save/Migrations.hpp/cpp
+    - class MigrationRegistry { map<int, vector<Migration>> from_version; };
+    - struct Migration { int from; int to; std::function<json(const json&)> transform; };
+  10.07.002 — Implement migrate_player(data, from_v, to_v)
+    - Walk chain from current version to latest
+    - Apply each migration in order
+  10.07.003 — Implement migrate_world(data, from_v, to_v)
+  10.07.004 — Add example migration v0 → v1 (renamed field)
+  10.07.005 — Add migration test: save v0, load, verify migrated to v1
+  10.07.006 — Log all migrations applied during load
+  10.07.007 — Refuse to load if version older than minimum supported (v0)
+  10.07.008 — Backup pre-migration save to slot.migrate_backup/
+
+10.08 — SAVE UI
+  10.08.001 — Create src/save/SaveUi.hpp/cpp
+    - void render_save_menu(Buffer& buf, Rect area, vector<SaveSlotInfo> slots);
+    - void render_load_menu(Buffer& buf, Rect area, vector<SaveSlotInfo> slots);
+  10.08.002 — Save menu shows: slot list (name, level, region, time, screenshot thumb), "New Save" button, "Overwrite" button, "Cancel" button
+  10.08.003 — Load menu shows: same list + "Delete" button + "Import" button
+  10.08.004 — Thumbnails: 40x20 cell render of last in-game frame, stored as .xp in slot dir
+  10.08.005 — Confirmation dialog for overwrite/delete
+  10.08.006 — Show "Save corrupted - try backup?" dialog on CRC failure
+  10.08.007 — Show migration progress if loading older save
+  10.08.008 — Add ASCII character name entry screen
+    - 20 char max, sanitized input
+    - Default name "Wanderer"
+    - Confirmation: "Are you sure? (Y/N)"
+  10.08.009 — Disable F5/F9 during cutscenes + dialogue
+
+10.09 — SERIALIZATION HELPERS
+  10.09.001 — Create src/save/Serialize.hpp
+    - template<typename T> json to_json(const T&);
+    - template<typename T> T from_json(const json&);
+  10.09.002 — Implement for: Attributes, Skills, Stats, Inventory, Equipment, FactionRep, Position, Glyph
+  10.09.003 — Use enum string conversion for type safety
+  10.09.004 — Round-trip property test via Catch2 GENERATE
+  10.09.005 — Add 20 round-trip unit tests
+
+10.10 — LOAD PIPELINE
+  10.10.001 — Implement World::load_from_save(slot)
+    - Read meta.json, validate version
+    - Apply migrations if needed
+    - Load content/ registry (items, NPCs, dialogue, quests, creatures)
+    - Spawn player from player.v0.json
+    - Apply world.v0.json state (flags, globals, NPCs, creatures, containers, doors, triggers)
+    - Load current map (or first map if new game)
+    - Restore time of day
+    - Restore quest journal state
+    - Restore faction reputation
+  10.10.002 — Verify all entity references resolve (orphan detection)
+    - NPCs reference quests, dialogue references quests, triggers reference quests
+    - Log warnings for dangling refs
+  10.10.003 — Validate inventory references (item keys exist in catalog)
+  10.10.004 — Validate quest stages within bounds
+  10.10.005 — Validate map dimensions match expectations
+  10.10.006 — On critical error, refuse to load and show message
+  10.10.007 — On non-critical warning, load with degraded state
+
+10.11 — NEW GAME
+  10.11.001 — Implement new_game(slot, character_name)
+    - Initialize fresh Player with default attributes (5 each)
+    - Place player at start position (Crypt of First Memory, map crypt_start, pos 20,10)
+    - Initialize all flags to false, globals to 0
+    - Initialize quests with appropriate phases (main quest = Hidden)
+    - Set time of day to dawn (6:00)
+    - Initialize faction reputation at 0
+    - Generate unique player ID (UUID v4)
+  10.11.002 — Add character creation screen with:
+    - Name entry (max 20 chars)
+    - Optional birthsign selection (9 options, each grants +5 to one attr + special)
+    - Optional starting region preference (affects first quest trigger)
+  10.11.003 — Confirm screen: "Begin your story as <name>, <birthsign>, of <region>? (Y/N)"
+
+10.12 — SAVE VALIDATION
+  10.12.001 — Implement validate_save(slot) standalone
+    - Returns ValidationResult { ok, errors[], warnings[] }
+  10.12.002 — Check all JSON parses
+  10.12.003 — Check CRC32 on all files
+  10.12.004 — Check entity reference integrity
+  10.12.005 — Check item/spell/quest key existence
+  10.12.006 — CLI flag --validate-save <slot>
+  10.12.007 — Auto-validate on game startup if --strict-saves flag set
+
+10.13 — PERFORMANCE
+  10.13.001 — Save operation should complete in <2 seconds for 100-hour save
+  10.13.002 — Load operation should complete in <4 seconds
+  10.13.003 — Use parallel compression for map files (std::async)
+  10.13.004 — Stream large arrays to JSON (avoid building full tree in memory)
+  10.13.005 — Profile save/load with --profile-save flag
+  10.13.006 — Add 10 performance tests measuring save/load time
+  10.13.007 — Optimize hot paths: avoid string allocations in serializer
+
+10.14 — CORRUPTION RECOVERY
+  10.14.001 — On CRC fail of meta.json, try bak1, then bak2
+  10.14.002 — On CRC fail of player.json, try bak1
+  10.14.003 — On CRC fail of world.json, try bak1
+  10.14.004 — On missing map file, regenerate from content + apply overlay
+  10.14.005 — On parse error, log line number + context, attempt recovery
+  10.14.006 — Show recovery options to user: "Use backup", "Start new game", "Quit"
+  10.14.007 — Never silently corrupt — always surface errors
+
+10.15 — PHASE 10 VERIFICATION
+  10.15.001 — Run tests/save/roundtrip_test.cpp — expect 20/20 pass
+  10.15.002 — Run tests/save/migration_test.cpp — expect all versions migrate correctly
+  10.15.003 — Manual test: save, quit, reload, verify state identical
+  10.15.004 — Manual test: kill mid-save, verify backup recovers
+  10.15.005 — Performance: 100-hour save in <2s
+  10.15.006 — Verify autosave triggers at correct intervals
+  10.15.007 — Verify quicksave rotation works (5 slots)
+  10.15.008 — Verify all serialization helpers round-trip
+  10.15.009 — Document phase 10 completion
+
+END PHASE 10

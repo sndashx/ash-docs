@@ -1,0 +1,271 @@
+ASH — Phase 04: In-Game Authoring Tool
+========================================
+
+Phase goal: a full in-game editor with paint, select, pick, fill,
+entity-placement, warp-to tools. Undo/redo. Cut/copy/paste.
+Layer visibility. Save map back to .xp.
+
+Entry criteria: Phase 3 complete.
+Exit criteria: editor mode lets you author a new 10x10 map
+              entirely in-game, save it, reload it, and have
+              entities spawn correctly.
+
+[ENTRY CRITERIA]
+  - Phase 3 complete.
+
+[EXIT CRITERIA]
+  - Press F7 in EXPLORE mode -> editor opens.
+  - All 9 layers switchable.
+  - Brush, select, pick, fill, entity, warp tools functional.
+  - Undo/redo via ctrl+z / ctrl+y.
+  - Cut/copy/paste works.
+  - ctrl+s saves the current map.
+  - Reloading the saved map yields identical output.
+
+[RISKS]
+  - Editor complexity. Mitigation: phased tools, each in own file.
+  - Undo stack memory. Mitigation: cap at 1000 commands.
+
+Step 0400.00.00. Create src/editor/editor.hpp.
+  - Sub: enum class EditorMode { Paint, Select, Pick, Fill, Entity, Warp };
+  - Sub: struct Editor {
+         EditorMode mode;
+         int active_layer;  // 1-9
+         bool show_layer[9];
+         bool show_grid;
+         bool paused;
+         IRect selection;
+         std::vector<std::unique_ptr<Command>> undo_stack;
+         std::vector<std::unique_ptr<Command>> redo_stack;
+       };
+
+Step 0400.00.01. Implement Editor::init(Map&).
+  - Sub: Set mode=Paint, active_layer=1, all layers visible.
+
+Step 0400.00.02. Implement Editor::handle_key(KeyEvent).
+  - Sub: Switch on mode.
+  - Sub: Common keys (ctrl+s, ctrl+z, layer 1-9) always handled.
+
+Step 0400.00.03. Implement Editor::render(Buffer&, Camera const&).
+  - Sub: Render current layer + selection overlay.
+  - Sub: HUD shows current tool, layer, undo count.
+
+Step 0401.00.00. Create src/editor/command.hpp.
+  - Sub: struct Command { virtual void apply(Map&) = 0;
+         virtual void undo(Map&) = 0; virtual std::string name() = 0; };
+
+Step 0401.00.01. Implement PaintCellCommand.
+  - Sub: Stores (x, y, layer, old_cell, new_cell).
+
+Step 0401.00.02. Implement PaintRectCommand.
+  - Sub: Stores rect, layer, vector of old and new cells.
+
+Step 0401.00.03. Implement FillCommand.
+  - Sub: Stores seed, replacement, affected cells.
+
+Step 0401.00.04. Implement PlaceEntityCommand.
+  - Sub: Stores entity spec and position.
+
+Step 0401.00.05. Implement DeleteEntityCommand.
+  - Sub: Stores entity components for restoration.
+
+Step 0401.00.06. Implement MoveEntityCommand.
+  - Sub: Stores old and new positions.
+
+Step 0402.00.00. Create src/editor/undo.hpp.
+  - Sub: struct UndoStack {
+         std::vector<std::unique_ptr<Command>> undo;
+         std::vector<std::unique_ptr<Command>> redo;
+         size_t max_size = 1000;
+       };
+
+Step 0402.00.01. Implement UndoStack::push(Command).
+  - Sub: Add to undo.
+  - Sub: Clear redo.
+  - Sub: Trim if > max_size (drop oldest).
+
+Step 0402.00.02. Implement UndoStack::undo(Map&).
+  - Sub: Pop from undo, call command->undo.
+  - Sub: Push to redo.
+
+Step 0402.00.03. Implement UndoStack::redo(Map&).
+  - Sub: Pop from redo, call command->apply.
+  - Sub: Push to undo.
+
+Step 0402.00.04. Tests for UndoStack.
+  - Sub: push, undo, redo, push clears redo, max_size trims.
+
+Step 0403.00.00. Create src/editor/clipboard.hpp.
+  - Sub: struct Clipboard {
+         int width, height, layer;
+         std::vector<Cell> cells;
+         std::vector<EntitySpec> entities;
+       };
+
+Step 0403.00.01. Implement Clipboard::copy(Map&, IRect, int layer).
+  - Sub: Snapshot cells in rect on layer.
+  - Sub: Snapshot entities in rect.
+
+Step 0403.00.02. Implement Clipboard::cut(Map&, IRect, int layer).
+  - Sub: Copy + delete.
+
+Step 0403.00.03. Implement Clipboard::paste(Map&, int x, int y).
+  - Sub: Spawn cells at offset.
+  - Sub: Spawn entities at offset.
+  - Sub: Record commands for undo.
+
+Step 0403.00.04. Tests for clipboard.
+
+Step 0404.00.00. Create src/editor/tool_paint.hpp.
+  - Sub: struct PaintTool { Cell current_cell; int brush_size; };
+
+Step 0404.00.01. Implement paint at cursor.
+  - Sub: On click, push PaintCellCommand to undo.
+  - Sub: Apply command.
+
+Step 0404.00.02. Implement drag paint.
+  - Sub: On mouse move with button held, paint along path.
+
+Step 0404.00.03. Implement brush size.
+  - Sub: brush_size=1: single cell.
+  - Sub: brush_size=3: 3x3 square.
+  - Sub: brush_size=N: NxN square.
+
+Step 0405.00.00. Create src/editor/tool_select.hpp.
+  - Sub: struct SelectTool { IVec2 anchor; IRect selection; bool dragging; };
+
+Step 0405.00.01. Implement selection box.
+  - Sub: Click sets anchor.
+  - Sub: Drag updates selection.
+  - Sub: Release commits selection.
+
+Step 0405.00.02. Implement multi-layer select.
+  - Sub: Toggle "select on all layers" key.
+
+Step 0405.00.03. Implement selection actions.
+  - Sub: ctrl+c copy, ctrl+x cut, del delete.
+
+Step 0406.00.00. Create src/editor/tool_pick.hpp.
+  - Sub: struct PickTool { Cell picked; uint8_t picked_flags; };
+
+Step 0406.00.01. Implement pick at cursor.
+  - Sub: Click samples cell from current layer.
+  - Sub: Becomes active paint cell.
+
+Step 0407.00.00. Create src/editor/tool_fill.hpp.
+  - Sub: struct FillTool { Cell replacement; uint8_t replacement_flags; };
+
+Step 0407.00.01. Implement flood fill.
+  - Sub: BFS from seed cell.
+  - Sub: Replace all cells matching (glyph+flags+fg+bg) within layer.
+  - Sub: Record as single FillCommand for undo.
+
+Step 0407.00.02. Tests for flood fill.
+
+Step 0408.00.00. Create src/editor/tool_entity.hpp.
+  - Sub: struct EntityTool { std::string entity_type;
+         json entity_spec; };
+
+Step 0408.00.01. Implement entity type list.
+  - Sub: Sub-menu: NPC, Item, Container, Door, Trigger, Light, Sign.
+  - Sub: Each shows available IDs from content.
+
+Step 0408.00.02. Implement entity placement.
+  - Sub: Click places entity at (x, y).
+  - Sub: Spawn command recorded for undo.
+
+Step 0408.00.03. Implement entity inspection.
+  - Sub: Right-click on entity shows properties.
+  - Sub: Edit fields in side panel.
+
+Step 0408.00.04. Implement entity deletion.
+  - Sub: Del key removes entity.
+
+Step 0409.00.00. Create src/editor/tool_warp.hpp.
+  - Sub: struct WarpTool { std::string target_map; IVec2 target_pos; };
+
+Step 0409.00.01. Implement warp placement.
+  - Sub: Click sets warp target = current player position.
+  - Sub: Prompts for target map.
+  - Sub: Stores (map_id, x, y) in trigger.
+
+Step 0410.00.00. Create src/editor/editor_ui.hpp.
+  - Sub: Render layer panel, tool panel, status bar.
+
+Step 0410.00.01. Implement layer panel.
+  - Sub: Side bar shows 9 layers with visibility toggle.
+  - Sub: Active layer highlighted.
+
+Step 0410.00.02. Implement tool panel.
+  - Sub: Top bar shows current tool + keybinds.
+
+Step 0410.00.03. Implement status bar.
+  - Sub: Bottom shows cursor pos, current cell, undo count.
+
+Step 0411.00.00. Implement save flow.
+  - Sub: ctrl+s opens "save as" prompt.
+  - Sub: Default to current map id.
+  - Sub: Writes .xp via xp_writer.
+  - Sub: Writes sidecar JSON.
+
+Step 0411.00.01. Implement sidecar write.
+  - Sub: Walks entities on layers 4, 5, 6.
+  - Sub: Writes items.json, npcs.json, triggers.json.
+
+Step 0412.00.00. Implement editor validation.
+  - Sub: On save, check map has:
+    - At least one entrance/exit trigger.
+    - No entities outside map bounds.
+    - All referenced IDs exist in content registry.
+
+Step 0412.00.01. Implement editor warnings.
+  - Sub: Show warnings as non-fatal errors.
+  - Sub: Player can save anyway with confirmation.
+
+Step 0413.00.00. Add editor mode to input system.
+  - Sub: F7 toggles editor in EXPLORE.
+  - Sub: Ctrl+Q exits editor.
+
+Step 0413.00.01. Hook editor into app loop.
+  - Sub: When in editor, app delegates to Editor::handle_key, render.
+
+Step 0414.00.00. Tests for editor tools.
+  - Sub: Paint test.
+  - Sub: Select test.
+  - Sub: Fill test.
+  - Sub: Entity place test.
+  - Sub: Undo/redo test.
+  - Sub: Save/reload test.
+
+Step 0415.00.00. Verify build and run.
+  - Sub: cmake --build build -j.
+  - Sub: ctest passes.
+
+Step 0415.00.01. Manual editor test.
+  - Sub: Open editor on test_5x5.
+  - Sub: Add an NPC.
+  - Sub: Save.
+  - Sub: Reload game.
+  - Sub: NPC spawns at correct position.
+
+Step 0415.00.02. Final commit.
+  - Sub: git commit -m "feat(phase-04): in-game authoring tool".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --render-test --map=test_5x5 --editor
+  Editor HUD visible.
+  Press 1-9 to switch layers.
+  Press 'b' for paint, 'v' for select, etc.
+  Paint cells, place entities.
+  ctrl+z undoes.
+  ctrl+s saves.
+  Quit and reload: changes persist.
+
+[PHASE 4 PLAYABLE BUILD]
+
+  Build 04: "Author's Workshop"
+    - Full editor functional.
+    - Can author content from inside the game.
+    - Save/load roundtrip verified.
+    - This is the foundation for all subsequent content authoring.

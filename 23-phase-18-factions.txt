@@ -1,0 +1,209 @@
+PHASE 18 — FACTION QUESTLINES
+===============================
+4 factions × full 5-rank progression × unique abilities × unique quests × exclusive endings.
+Factions: Coastal Watch (steel blue), Cartographers (ochre), Sky-Smiths (violet), Quiet Choir (crimson).
+
+18.00 — FACTION FRAMEWORK
+  18.00.001 — Common struct: Faction { key, name, color, ranks[], abilities[], quests[], vendor[], reputation_table }
+  18.00.002 — Reputation: -100 to +100, ranks at -50, -25, 0, 25, 50, 75
+  18.00.003 — Ranks: Outcast, Stranger, Known, Friend, Confidant, Champion, Leader
+  18.00.004 — Per-rank: title, ability unlock, vendor discount, exclusive quests
+  18.00.005 — All 4 factions have parallel structure but unique flavor
+
+18.10 — COASTAL WATCH (faction_coastal_watch)
+  18.10.001 — Theme: Order, patrol, defense, maritime law
+  18.10.002 — Color: #4682B4 (steel blue)
+  18.10.003 — Home: Scoured Coast (Watchtower, Saltmarket)
+  18.10.004 — Leader: Captain Iola Vesh
+  18.10.005 — Rank 1 Outcast: title "Suspect", no abilities, vendors don't serve
+  18.10.006 — Rank 2 Stranger: title "Traveler", 5% vendor discount
+  18.10.007 — Rank 3 Known: title "Watch-Friend", ability "patrol_pass" (free fast-travel between Watch outposts), 15% discount
+  18.10.008 — Rank 4 Friend: title "Watch-Comrade", ability "summon_patrol" (call 2 guards in combat, 1/day), 25% discount
+  18.10.009 — Rank 5 Confidant: title "Watch-Officer", ability "legal_authority" (can arrest NPCs, force dialogue), 35% discount
+  18.10.010 — Rank 6 Champion: title "Watch-Captain", ability "lead_squad" (control up to 5 allied NPCs), 50% discount, unique blade
+  18.10.011 — Rank 7 Leader: title "Lord-Captain", ability "declare_law" (set regional laws), unique ship
+  18.10.012 — Questline progression (15 quests):
+    - fac_cw_01: "First Patrol" (escort Iola on patrol, learn basics)
+    - fac_cw_02: "Bring the Trespasser" (capture smuggler)
+    - fac_cw_03: "Missing Ship" (investigate disappearance)
+    - fac_cw_04: "Recruit Three" (sq_watch_recruit)
+    - fac_cw_05: "Pass the Patrol Test" (skill check)
+    - fac_cw_06: "Sworn In" (ceremony)
+    - fac_cw_07: "Officer Candidate" (lead patrol)
+    - fac_cw_08: "Defend the Harbor" (defend from attack)
+    - fac_cw_09: "Investigate the Drowned" (dungeon)
+    - fac_cw_10: "Root Out Smugglers" (den raid)
+    - fac_cw_11: "The Ghost Ship" (sea quest)
+    - fac_cw_12: "Officer's Exam" (pass test)
+    - fac_cw_13: "Champion's Trial" (lead 5 NPCs to victory)
+    - fac_cw_14: "Lord-Captain's Mandate" (regional quest)
+    - fac_cw_15: "Declare the New Law" (endgame, set law)
+  18.10.013 — Exclusive rewards:
+    - watch_initiate_armor (rank 3)
+    - watch_officer_blade (rank 5)
+    - watch_captain_armor (rank 6)
+    - watch_ship (rank 7, sailable vessel)
+    - watch_lord_title (rank 7)
+  18.10.014 — Exclusive ending: Watch Champion can become Lord-Captain, settle coast
+
+18.20 — CARTOGRAPHERS (faction_cartographers)
+  18.20.001 — Theme: Knowledge, exploration, mapping the unmappable
+  18.20.002 — Color: #CC8E35 (ochre)
+  18.20.003 — Home: Glasswood (Lodge, Hanging Libraries)
+  18.20.004 — Leader: Archcartographer Senna
+  18.20.005 — Rank 1 Outcast: "Mapless", no abilities
+  18.20.006 — Rank 2 Stranger: "Wanderer", 5% map discount
+  18.20.007 — Rank 3 Known: "Mapper", ability "true_sight" (reveal hidden map elements), 15% discount
+  18.20.008 — Rank 4 Friend: "Cartographer", ability "fast_map" (teleport to any discovered location), 25% discount
+  18.20.009 — Rank 5 Confidant: "Master Mapper", ability "reveal_all" (auto-maps unexplored areas), 35% discount
+  18.20.010 — Rank 6 Champion: "Archcartographer", ability "shard_sense" (locate any sky-shard), 50% discount, unique tool
+  18.20.011 — Rank 7 Leader: "World-Shaper", ability "redraw_map" (change terrain once), unique vessel
+  18.20.012 — Questline progression (15 quests):
+    - fac_car_01: "Draw Your First Map" (tutorial)
+    - fac_car_02: "Map the Forest Edge" (scout gw_01)
+    - fac_car_03: "Find the Mapstone" (gw_03)
+    - fac_car_04: "Study Mirror Lake" (gw_07)
+    - fac_car_05: "Inkwell Apprentice" (alchemy basics)
+    - fac_car_06: "Name Three Shards" (sq_shard_naming reduced)
+    - fac_car_07: "Canopy Vow" (sq_canopy_vow)
+    - fac_car_08: "Living Map Contact" (gw_14)
+    - fac_car_09: "The Lost Surveyor" (rescue)
+    - fac_car_10: "Forbidden Atlas" (gw_18 entry)
+    - fac_car_11: "Master Surveyor" (map 20 new areas)
+    - fac_car_12: "Archcartographer's Test" (full survey)
+    - fac_car_13: "Champion's Atlas" (complete regional map)
+    - fac_car_14: "World-Shaper's Mandate" (decide map future)
+    - fac_car_15: "Redraw the Edges" (endgame, change terrain)
+  18.20.013 — Exclusive rewards:
+    - apprentice_tools (rank 3)
+    - master_compass (rank 5, points to secrets)
+    - archcartographer_lens (rank 6, reveals hidden things)
+    - world-shaper_chair (rank 7, mobile base)
+  18.20.014 — Exclusive ending: Archcartographer can become World-Shaper, decide future of Glasswood
+
+18.30 — SKY-SMITHS (faction_sky_smiths)
+  18.30.001 — Theme: Craft, reforging, shard-working
+  18.30.002 — Color: #6F4E7C (violet)
+  18.30.003 — Home: Riven Spire (Great Anvil, Summit Forge)
+  18.30.004 — Leader: First Smith Hesta
+  18.30.005 — Rank 1 Outcast: "Unhammered", no abilities
+  18.30.006 — Rank 2 Stranger: "Forge-Guest", 5% smithing discount
+  18.30.007 — Rank 3 Known: "Apprentice", ability "basic_temper" (improve weapons), 15% discount
+  18.30.008 — Rank 4 Friend: "Smith", ability "shard_work" (use shards in forging), 25% discount
+  18.30.009 — Rank 5 Confidant: "Master Smith", ability "masterwork" (craft legendary items), 35% discount
+  18.30.010 — Rank 6 Champion: "Shardsmith", ability "shard_speak" (talk to embedded shards), 50% discount, unique hammer
+  18.30.011 — Rank 7 Leader: "First Among Smiths", ability "reforge_world" (repair broken artifacts), unique forge
+  18.30.012 — Questline progression (15 quests):
+    - fac_ss_01: "First Hammer" (tutorial forge)
+    - fac_ss_02: "Mine the Ore" (rs_03)
+    - fac_ss_03: "Strike True" (forge first blade)
+    - fac_ss_04: "Temper the Steel" (basic tempering)
+    - fac_ss_05: "Shardsmith's Apprentice" (learn shard work)
+    - fac_ss_06: "Fire Elemental Cores" (sq)
+    - fac_ss_07: "Cloud Smithing" (Cloud City forge)
+    - fac_ss_08: "Summit Forge Mastery" (use summit forge)
+    - fac_ss_09: "Reforge the Ancient" (repair pre-Shattering)
+    - fac_ss_10: "Masterwork Blade" (craft legendary)
+    - fac_ss_11: "Pass the Smith's Test" (multi-craft trial)
+    - fac_ss_12: "Champion's Forge" (build unique item)
+    - fac_ss_13: "Reforge the Covenant" (main quest item)
+    - fac_ss_14: "First Smith's Mandate" (lead smiths)
+    - fac_ss_15: "Reforge the World" (endgame)
+  18.30.013 — Exclusive rewards:
+    - apprentice_hammer (rank 3)
+    - master_tongs (rank 5)
+    - shardsmith_eye (rank 6, see shard qualities)
+    - first_among_smiths_anvil (rank 7, mobile forge)
+  18.30.014 — Exclusive ending: First Smith can reforge the world itself
+
+18.40 — QUIET CHOIR (faction_quiet_choir)
+  18.40.001 — Theme: Memory, remembrance, preservation of what was
+  18.40.002 — Color: #DC143C (crimson)
+  18.40.003 — Home: All regions + Hollow Cities (Choir Sanctum)
+  18.40.004 — Leader: High Choir Aelis
+  18.40.005 — Rank 1 Outcast: "Unremembered", no abilities
+  18.40.006 — Rank 2 Stranger: "Wanderer", 5% memorial discount
+  18.40.007 — Rank 3 Known: "Listener", ability "memorial_sense" (feel nearby dead), 15% discount
+  18.40.008 — Rank 4 Friend: "Singer", ability "comfort_spirit" (ease ghost encounters), 25% discount
+  18.40.009 — Rank 5 Confidant: "Choir-Singer", ability "memory_walk" (enter memory echoes), 35% discount
+  18.40.010 — Rank 6 Champion: "Choir-Master", ability "preserve_memory" (save any NPC permanently), 50% discount, unique vestments
+  18.40.011 — Rank 7 Leader: "High Choir", ability "rewrite_memory" (change one past event), unique chapel
+  18.40.012 — Questline progression (15 quests):
+    - fac_ch_01: "First Vespers" (attend dawn service)
+    - fac_ch_02: "Brother Wyan's Patient" (heal NPC)
+    - fac_ch_03: "Light a Candle" (donate)
+    - fac_ch_04: "Hear Confession" (skill check)
+    - fac_ch_05: "Sing the Hymn" (perform)
+    - fac_ch_06: "Preserve a Memory" (record NPC's story)
+    - fac_ch_07: "Comfort the Ghosts" (sq_choir_vow reduced)
+    - fac_ch_08: "Memory Walk" (enter memory echo)
+    - fac_ch_09: "The Lost Brother" (find missing choir)
+    - fac_ch_10: "Choir Mastery" (learn all hymns)
+    - fac_ch_11: "Council of Memory" (witness debate)
+    - fac_ch_12: "Champion's Choir" (lead service)
+    - fac_ch_13: "High Choir's Trial" (remember everything)
+    - fac_ch_14: "Master of Memory" (preserve all NPCs)
+    - fac_ch_15: "Rewrite the Shattering" (endgame, change past)
+  18.40.013 — Exclusive rewards:
+    - listener_robe (rank 3)
+    - singer_circlet (rank 5)
+    - choir_master_vestments (rank 6, full set)
+    - high_choir_chapel (rank 7, mobile sanctum)
+  18.40.014 — Exclusive ending: High Choir can rewrite one past event
+
+18.50 — FACTION INTERACTIONS
+  18.50.001 — Cross-faction rivalries:
+    - Coastal Watch vs Smugglers (mutually exclusive paths)
+    - Cartographers vs Sky-Smiths (compete for ancient knowledge)
+    - Quiet Choir vs Coastal Watch (memory vs order)
+    - Sky-Smiths vs Quiet Choir (forge vs preserve)
+  18.50.002 — Alliance possibilities:
+    - Watch + Cartographers (legal mapping)
+    - Sky-Smiths + Choir (preservation through craft)
+    - All four: rare unity ending
+  18.50.003 — Faction rep affects:
+    - NPC dialogue options
+    - Vendor access
+    - Quest availability
+    - Main quest branches
+    - Combat assistance
+    - Fast travel
+  18.50.004 — Reputation decay: 1 rep per week if no engagement
+  18.50.005 — Reputation cap: -100 to +100
+  18.50.006 — Reputation recovery: harder than gaining (intentional)
+
+18.60 — FACTION-SPECIFIC VENDORS
+  18.60.001 — Watch quartermaster (rs_07 Watch outposts): military gear, ships
+  18.60.002 — Cartographer supply (gw_05 Lodge): maps, tools, lenses
+  18.60.003 — Sky-Smith vendor (rs_07 Great Anvil): ingots, weapons, armor
+  18.60.004 — Choir vendor (hc_04 Sanctum): vestments, healing, books
+
+18.70 — FACTION DIALOGUE
+  18.70.001 — Each faction leader has 20+ dialogue variants by rank
+  18.70.002 — Each rank-up triggers dialogue cutscene
+  18.70.003 — Each rank-down (rare) triggers warning dialogue
+  18.70.004 — Cross-faction dialogue: NPCs comment on your rep with rival factions
+  18.70.005 — Hidden dialogue: high-rep players unlock secret topics
+
+18.80 — FACTION UI
+  18.80.001 — Reputation panel: shows all 4 factions with bar graphs
+  18.80.002 — Color-coded by faction
+  18.80.003 — Hover for rank title
+  18.80.004 — Click for full faction info
+  18.80.005 — Notification on rank change
+  18.80.006 — Track rep changes in journal
+
+18.90 — FACTION VERIFICATION
+  18.90.001 — All 4 factions have full rank progression (7 ranks each)
+  18.90.002 — All 60 faction quests (15 per faction) advance correctly
+  18.90.003 — Rank abilities trigger correctly
+  18.90.004 — Exclusive rewards granted at correct ranks
+  18.90.005 — Cross-faction interactions work
+  18.90.006 — Main quest branches by faction rep
+  18.90.007 — Exclusive endings reachable
+  18.90.008 — Faction UI displays correctly
+  18.90.009 — Performance: 4 faction trackers, no frame impact
+  18.90.010 — Document phase 18
+
+END PHASE 18
+FACTION QUESTLINES COMPLETE: 4 factions, 7 ranks each, 60 quests total, exclusive rewards, exclusive endings

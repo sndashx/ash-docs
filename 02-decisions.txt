@@ -1,0 +1,251 @@
+ASH — Architectural Decisions
+=============================
+
+Each decision is recorded with chosen answer and rationale. Reference
+these from phase files when implementing; do not re-litigate.
+
+Language and tooling
+--------------------
+
+D01  Language standard:           C++20
+     Rationale: structured bindings, concepts, ranges, consteval.
+     Do not use C++23 features; toolchain maturity not there yet.
+
+D02  Build system:               CMake 3.21+
+     Rationale: industry standard, IDE support everywhere.
+
+D03  Package manager:            CPM (CMake Package Manager)
+     Rationale: header-only first, no system deps required for v1.
+
+D04  ECS library:                entt v3.13.x
+     Rationale: header-only, fast, no build pain, single-header.
+
+D05  Logging:                    spdlog v1.12.x
+     Rationale: fast, leveled, format-string support.
+
+D06  JSON:                       nlohmann/json v3.11.x
+     Rationale: well-known, header-only, diffable output.
+
+D07  String formatting:          fmt v10.x
+     Rationale: faster than iostreams, used internally by spdlog.
+
+D08  Testing:                    Catch2 v3.x
+     Rationale: header-only option, BDD-style sections.
+
+D09  Profiling:                  Tracy v0.10+ (optional, off by default)
+     Rationale: minimal overhead, frame markers, lock contention views.
+
+D10  License:                    MIT
+     Rationale: maximum reuse, attribution preserved.
+     If you prefer copyleft, swap to GPLv3 — your call.
+
+Windowing and rendering
+-----------------------
+
+D11  Primary render target:      Truecolor ANSI via stdout
+     Rationale: REXPaint-native, works over SSH, smallest dep.
+
+D12  Mouse support:              SGR mouse tracking (toggleable)
+     Rationale: enables drag-drop inventory; not required for play.
+
+D13  Fallback render target:     256-color quantized ANSI
+     Rationale: for older terminals; auto-detected via $TERM.
+
+D14  Authoring grid:             80x24 cells
+     Rationale: REXPaint default; matches original tool.
+
+D15  Render grid:                Variable (terminal size)
+     Rationale: upscale 80x24 by integer factor to fill viewport.
+
+D16  Sub-cell positions:         16 sub-positions per cell (4 bits each)
+     Rationale: smooth motion, 256 positions per cell-pair is overkill.
+
+D17  Light model:                Per-cell uint8 intensity (0-15)
+     Rationale: cheap, looks great with truecolor.
+
+D18  Light propagation:          4-pass radial
+     Rationale: faster than line-of-sight; visually equivalent in ASCII.
+
+D19  Animation:                  Glyph arrays + timing JSON
+     Rationale: no sprite sheets; cells ARE sprites.
+
+D20  CRT scanline post-effect:   Optional, off by default, layer 9
+     Rationale: aesthetic, can be disabled for accessibility.
+
+D21  Sound:                      None in v1
+     Rationale: scope. SDL_mixer can be added post-launch.
+
+World data
+----------
+
+D22  Map format:                 .xp (REXPaint native)
+     Rationale: authoring tool lives inside the game.
+
+D23  World state save format:    Per-map .xp with layer 0 mutated
+     Rationale: authored objects survive save/load unchanged.
+
+D24  NPC and quest state:        world.json (per save)
+     Rationale: human-diffable, mergeable for collaborative testing.
+
+D25  Player state:               player.json (per save)
+     Rationale: separate from world for cleaner migrations.
+
+D26  Save directory:             ~/.local/share/ash/saves/<savename>/
+     Rationale: XDG-compliant.
+
+D27  Save format version:        Integer, in filename world.v3.json
+     Rationale: migrations explicit and orderable.
+
+D28  Mod support:                Deferred to post-launch
+     Rationale: don't build what isn't shipped.
+
+Math and determinism
+--------------------
+
+D29  Game-state math:            Integer fixed-point (16.16)
+     Rationale: deterministic saves across platforms.
+
+D30  RNG:                        xoshiro256** seeded per game
+     Rationale: fast, well-distributed, reproducible seeds.
+
+D31  RNG usage:                  Only for cosmetic randomness (weather,
+                                loot table rolls). NEVER for content
+                                that the player can save-scum against
+                                if we want them to live with outcomes.
+
+D32  Time-of-day:                10 real minutes = 1 game hour
+     Rationale: NPC schedules need it; long enough to feel lived-in.
+
+D33  Calendar:                   30-day months, 12-month year, 4 seasons
+     Rationale: simple, drives seasonal content flags.
+
+Terminal and platform
+---------------------
+
+D34  Minimum terminal:           xterm-256color with truecolor support
+     Rationale: 99%+ of modern terminals.
+
+D35  Primary dev platform:       Linux
+     Rationale: fastest iteration, where the target audience lives.
+
+D36  Secondary platform:         Windows (via WSL or native)
+     Rationale: native Windows build via CMake + MinGW; secondary.
+
+D37  macOS support:              Best-effort, community-tested
+     Rationale: small audience, but should "just work" on Apple silicon.
+
+Content pipeline
+----------------
+
+D38  Dialogue format:            Custom .dlg DSL
+     Rationale: no Lua dep, designed for our exact needs.
+
+D39  Quest format:               Custom .qst DSL
+     Rationale: same parser family as dialogue, share tooling.
+
+D40  Item format:                items.json
+     Rationale: simple, diffable.
+
+D41  NPC format:                 npcs/<region>/<npc>.json
+     Rationale: per-NPC file for parallel editing.
+
+D42  Book format:                books/<id>.xp
+     Rationale: pages ARE maps; layer 0 text, layer 1 decoration.
+
+D43  Animation format:           anim/<id>.json
+     Rationale: structured, diffable, hot-reloadable.
+
+D44  Schedule format:            sched/<npc_id>.json
+     Rationale: per-NPC, time-blocked waypoints.
+
+D45  Faction format:             factions/<id>.json
+     Rationale: shared rank tables, reputation rules.
+
+D46  Region format:              regions/<id>.json
+     Rationale: map list, weather rules, ambient lighting, music.
+
+Gameplay rules
+--------------
+
+D47  Attributes:                 9 (Strength, Endurance, Agility,
+                                Willpower, Intellect, Wit, Charisma,
+                                Luck, Voice)
+     Rationale: Morrowind 8 + Voice as explicit magicka analog.
+
+D48  Skills:                     24
+     Rationale: 6 categories x 4 skills each; under each attribute
+     except Voice which has 0 skills (governs spell capacity).
+
+D49  Skill leveling:             Use-based, with diminishing returns
+     Rationale: classic CRPG feel.
+
+D50  Combat system:              Real-time with pause
+     Rationale: BG3 reference; meets Morrowind weight + modern pacing.
+
+D51  Action economy:             Move + Action + Bonus per round
+     Rationale: standard 5e-style; works in RTwP.
+
+D52  HP/VP/SP:                   Health / Voice / Stamina
+     Rationale: Voice for magicka-analog; thematic to setting.
+
+D53  Carry weight:               Attribute-based, encumbrance at 80%
+     Rationale: forces inventory decisions.
+
+D54  Death persistence:          Named NPCs stay dead; corpses persist
+     Rationale: stakes; world state remembers.
+
+D55  Save anywhere:              Yes, with autosave every 10 minutes
+     Rationale: respect player time; backups prevent loss.
+
+D56  Difficulty modes:           None in v1
+     Rationale: balance pass is hard enough with one setting.
+
+D57  Permadeath mode:            Optional toggle on new game
+     Rationale: appeals to subset of audience; trivial to implement.
+
+User interface
+--------------
+
+D58  Movement keys:              hjkl (vi) + arrows + numpad
+     Rationale: standard for terminal games; hjkl for vim users.
+
+D59  Modal UI:                   EXPLORE / MENU / DIALOGUE / INVENTORY
+                                / MAP / SPELLS / JOURNAL / EDITOR
+     Rationale: clear separation of concerns; tested in classic CRPGs.
+
+D60  Dialogue UI:                Topic list with skill-gated options
+     Rationale: Fallout 1/2 reference; player picks what to ask.
+
+D61  Inventory UI:               Categorized grid with drag-drop
+     Rationale: keyboard-first; mouse enhances.
+
+D62  Map view:                   Region overview showing discovered maps
+     Rationale: discoverable cartography rewards exploration.
+
+D63  Journal UI:                 Quest list with active/ completed/all
+     Rationale: classic structure.
+
+D64  Settings file:              config.json in ~/.config/ash/
+     Rationale: XDG-compliant; documented in appendix E.
+
+D65  Accessibility:              Colorblind palettes, no-color mode,
+                                dyslexic font option, slowed text speed
+     Rationale: terminal games have unique accessibility wins; take them.
+
+Performance budgets
+-------------------
+
+D66  Frame budget:               16ms (60fps) for input and render
+     Rationale: smooth feel; subtick updates for AI logic.
+
+D67  Memory budget:              200MB resident
+     Rationale: reasonable for an indie RPG on modern hardware.
+
+D68  Startup time:               < 2 seconds to title screen
+     Rationale: instant feedback on launch.
+
+D69  Save time:                  < 500ms per save
+     Rationale: imperceptible to player.
+
+D70  Load time:                  < 1.5s to gameplay
+     Rationale: snappy world entry.

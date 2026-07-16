@@ -1,0 +1,317 @@
+ASH — 9 System Pillars
+======================
+
+Pillar 1: World Data Model
+--------------------------
+
+The world is a collection of maps. A map is 80x24 cells arranged in 9
+layers (1=base, 9=top). Maps are loaded from .xp files at startup and
+on demand for transitions.
+
+Each map has associated entities in an entt registry, scoped to that
+map. Entities can be:
+  - ITEMS (pickup-able, may be quest items)
+  - CONTAINERS (chests, crates, corpses; hold items)
+  - DOORS (locked, trapped, scripted)
+  - TRIGGERS (volumes that fire on entry/exit)
+  - LIGHTS (point lights, dynamic)
+  - SIGNS (readable, pre-authored text)
+  - BOOKS (readable, multi-page .xp files)
+  - NPCS (entities with NPC component)
+  - CREATURES (entities with creature component)
+  - PARTICLES (ephemeral VFX)
+  - PROJECTILES (combat, ephemeral)
+
+Cell struct holds:
+  - glyph (uint32_t, UTF-32)
+  - fg/bg colors (RGB888)
+  - flags (walkable, opaque, see-through, interactable)
+  - light intensity override (0-15, NO_LIGHT_OVERRIDE if none)
+
+Components in entt:
+  - Position { cell_x, cell_y, sub_x, sub_y }
+  - Velocity { dx_fp, dy_fp }
+  - Glyph { current, animation_handle }
+  - Faction { id, rank }
+  - Stats { hp, hp_max, vp, vp_max, sp, sp_max }
+  - Attributes { 9 fields }
+  - Skills { 24 fields }
+  - Inventory { vector<ItemId>, equipped map }
+  - Dialogue { npc_id, current_node }
+  - Schedule { schedule_id, current_block }
+  - Disposition { base, modifiers }
+  - LightEmitter { radius, intensity, color }
+  - LightReceiver { 0 }
+  - Container { vector<ItemId>, locked, trapped }
+  - Door { locked, key_id, trapped, script_on_open }
+  - Trigger { event, condition, fired }
+  - Interactable { radius, script_on_use }
+  - Corpse { death_time, inventory_snapshot }
+  - ScriptOwner { vector<ScriptRef> }
+
+Pillar 2: REXPaint Pipeline
+----------------------------
+
+REXPaint .xp format is column-major, gzip-wrapped binary. Header:
+  - 8 bytes magic/version
+  - 4 bytes width (cells)
+  - 4 bytes height (cells)
+  - 4 bytes layer count (1-9)
+
+For each layer:
+  - For each column (x = 0..width-1):
+    - For each row (y = 0..height-1):
+      - 4 bytes glyph (UTF-32)
+      - 3 bytes fg RGB
+      - 3 bytes bg RGB
+  - File ends.
+
+Layer convention (full spec in appendix A):
+  Layer 1: Terrain (walls, floors, doors, ground)
+  Layer 2: Floor details (carpets, debris, stains)
+  Layer 3: Fixtures (furniture, containers, lights, signs)
+  Layer 4: Items on ground, books, pickable objects
+  Layer 5: NPCs and creatures (default positions)
+  Layer 6: Triggers, doors, scripted volumes (invisible to render)
+  Layer 7: Weather and ambient particles
+  Layer 8: Cutscene overrides, dream layers, ghost echoes
+  Layer 9: Post effects (CRT, vignette, fade-to-black)
+
+The REXPaint loader reads a .xp into a Map struct, then the world
+loader walks layers 4-7 to spawn entities into the entt registry.
+
+Pillar 3: Renderer
+------------------
+
+The renderer produces truecolor ANSI output for each frame:
+
+  1. Read front buffer (current frame state).
+  2. Compute diff vs back buffer (previous frame state).
+  3. Emit only changed cells using ANSI escape sequences.
+  4. Move cursor, set colors, write glyph.
+  5. Repeat.
+  6. Swap buffers.
+
+Camera transforms world coordinates to screen coordinates:
+  - Player centered (configurable: top-down, free, follow).
+  - Sub-cell offset for smooth scrolling.
+  - Clamp to map bounds.
+
+Light compositing:
+  - Each cell has base colors.
+  - Multiply by light grid (0-15) and ambient.
+  - Result: shaded RGB.
+
+Animation:
+  - Animation handle references anim/<id>.json.
+  - Frame tick driven by global clock.
+  - Glyph array swap per frame.
+  - Color tweening optional.
+
+Pillar 4: Input
+---------------
+
+Input mode stack: EXPLORE > MENU > DIALOGUE > INVENTORY > MAP >
+SPELLS > JOURNAL > EDITOR.
+
+Each mode has its own key handler. Keys bubble through stack until
+handled.
+
+Mouse support is toggleable. When enabled, SGR mouse tracking
+sequences are parsed into the same input queue as keys.
+
+Keybinds loaded from config; defaults in appendix E. Players can
+rebind any action.
+
+Pillar 5: Character System
+--------------------------
+
+9 attributes (D47):
+  Strength (Str)    - melee damage, carry weight
+  Endurance (End)   - HP, fatigue resistance
+  Agility (Agi)     - speed, ranged damage, defense
+  Willpower (Wil)   - VP, mental resist, fear resist
+  Intellect (Int)   - skill points, identify, lore
+  Wit (Wit)         - initiative, barter, detect traps
+  Charisma (Cha)    - disposition, persuasion, leadership
+  Luck (Luc)        - crit chance, loot rolls, find
+  Voice (Voi)       - VP, spell capacity, voice-related checks
+
+24 skills under attributes (3 each, except Voice which has 0):
+  Combat (under Str): Armorer, Blunt, Blade
+  Combat (under Agi): Marksman, Dodge, Thrown
+  Magic (under Wil):  Mysticism, Restoration, Warding
+  Magic (under Int):  Alchemy, Enchant, Spellcraft
+  Stealth (under Agi): Stealth, Pickpocket, Security
+  Social (under Cha): Speechcraft, Mercantile, Illusion
+  Social (under Wit): Deception, Intimidation, Seduction
+  Knowledge (under Int): History, Theology, Linguistics
+
+Skills level up from use. Each level reduces future gains (diminishing
+returns). Skills affect derived stats and dialogue options.
+
+Derived stats:
+  HP_max = End * 10 + skill_blunt + skill_blade + skill_armorer / 4
+  VP_max = Voi * 8 + skill_mysticism / 2
+  SP_max = End * 6 + skill_armorer / 3
+  Carry = Str * 5
+  Speed = Agi * 10 (cells per real second when walking)
+  Crit%  = Luc / 4
+  Barter = 1 - (Cha + skill_mercantile) / 200
+  Identify = Int + skill_spellcraft
+  Pick   = Agi + skill_security
+  Persuade = Cha + skill_speechcraft
+
+Pillar 6: Combat
+----------------
+
+Real-time with pause. Spacebar pauses/unpauses. While paused:
+  - Time stops.
+  - Player can issue orders, target, browse menus.
+  - AI continues to "think" but does not act.
+
+When unpaused:
+  - Round = 3 real seconds.
+  - On round start, every entity rolls initiative (Wit + Luc/4 + d20).
+  - In initiative order, each entity gets Move + Action + Bonus.
+  - Move: up to Speed/3 cells.
+  - Action: attack, cast, use item, interact.
+  - Bonus: minor action (off-hand attack, quick spell, etc).
+
+Weapons:
+  - Melee: damage type + swing arc + reach.
+  - Ranged: damage type + range + ammo type.
+  - Thrown: damage type + arc + range.
+
+Armor:
+  - Damage reduction by type (slash/pierce/crush/element/voice).
+  - Encumbrance penalty to Speed.
+  - Condition degrades on hit.
+
+Status effects:
+  Bleeding, Stunned, Poisoned, Terrified, Blessed, Cursed, Warded,
+  Slowed, Hasted, Silenced, Rooted, Burning, Frozen, Dazed, Inspired.
+
+AI behaviors (composable):
+  Idle, Patrol, Guard, Flee, Berserk, Caster, Summoner, Support,
+  Ambusher, Coward, Pack_Hunter, Territorial, Pack_Retreat.
+
+Pathfinding: A* on grid with walkability map, including door states.
+
+Pillar 7: NPC Life
+------------------
+
+NPCs are entities with Position, Glyph, Faction, Stats, Attributes,
+Skills, Inventory, Dialogue, Schedule, Disposition, ScriptOwner.
+
+Schedule parsing:
+  - Time blocks in 30-minute increments (game-time).
+  - Each block has: location waypoint, activity, dialogue override.
+  - Conditions gate blocks (e.g., only if flag X set).
+
+Disposition rules:
+  - base: 0-100, set in NPC file.
+  - modifiers from: faction rep, prior interactions, gifts, time, ...
+  - Affects: dialogue options shown, barter prices, willingness to help.
+  - 100 = best friend, 0 = hostile.
+
+Dialogue:
+  - Topic list (Fallout 1/2 style).
+  - Skill-gated options (Speechcraft, Intimidation, etc).
+  - Consequences on topic selection (set flags, give items, etc).
+  - Voiced skills: each skill has a personality voice that occasionally
+    interjects with commentary.
+
+Pillar 8: Quest Engine
+-----------------------
+
+Flag store:
+  - String key → int / bool / string value.
+  - Persisted in save.
+  - Set, clear, increment, decrement, toggle.
+
+Quest file format (.qst):
+  - Metadata: id, name, giver, priority.
+  - Stages: nodes with entry conditions and exit actions.
+  - Branches: conditional paths from a stage.
+  - Consequence rules: trigger on flag change.
+
+Stage machine:
+  - One active stage per quest at a time.
+  - Entry: check entry conditions; if pass, run entry actions.
+  - Tick: player takes action; if exit conditions met, advance.
+  - Branch: select next stage from candidates by conditions.
+
+Journal auto-generation:
+  - Each quest has a template.
+  - Per stage, optional journal text.
+  - Active stages show "current objective" text.
+
+Consequence rules:
+  - On flag set, run actions: spawn, despawn, modify entity, run script.
+  - Used for "world reacts" moments (NPC dies after quest completes,
+    new NPC appears, location unlocks).
+
+Pillar 9: Save/Load
+-------------------
+
+Save structure:
+  ~/.local/share/ash/saves/<savename>/
+  ├── meta.json                  Save metadata (name, time, level, loc)
+  ├── player.v0.json             Player state
+  ├── world.v0.json              NPC/quest/flag state
+  ├── maps/<map_id>.xp           Per-map save (layer 0 mutated)
+  └── thumbnail.txt              ASCII preview
+
+Save triggers:
+  - Manual save (keybind).
+  - Autosave every 10 minutes.
+  - Quicksave (F5).
+  - On entering new map (optional, default on).
+
+Load:
+  - Validate schema version.
+  - Run migrations if needed (D27).
+  - Restore world.json + player.json + map .xp files.
+  - Resume from last position.
+
+Migrations:
+  - Migrations registered per version increment.
+  - Run in order from current to target.
+  - Each migration is a pure function on JSON.
+
+Determinism guarantees:
+  - Same save file always loads to same state.
+  - No floats in game-state math.
+  - RNG seed stored in meta.json for reproducible rolls.
+
+Accessibility
+--------------
+
+Settings in config.json (loaded from ~/.config/ash/config.json):
+  - colorblind_mode: "none" | "protan" | "deutan" | "tritan"
+  - high_contrast: bool
+  - no_color: bool (pure luminance + glyphs)
+  - text_speed: "instant" | "fast" | "normal" | "slow"
+  - font: terminal default or specific name
+  - reduce_motion: bool
+  - screen_shake: bool
+  - subtitle_size: "small" | "normal" | "large"
+  - dyslexic_font: bool
+  - audio_cue_volume: 0-100 (post-launch, no-op in v1)
+
+Performance
+-----------
+
+Frame budget 16ms. Hot paths:
+  - Rendering: dirty-rect diffing.
+  - AI: subtick updates (only entities with AI tick every 16ms).
+  - Pathfinding: A* with caching by (start, end, door_state).
+  - Dialogue evaluation: lazy AST.
+
+Memory budget 200MB. Most memory is maps (.xp) loaded on demand.
+Eviction policy: keep current map + adjacent maps resident.
+
+Startup time <2s. Lazy load everything except menu assets.
+Save time <500ms. Mutate .xp files in place.
+Load time <1.5s. Restore JSON first (gameplay-ready), then maps.

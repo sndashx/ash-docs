@@ -1,0 +1,224 @@
+ASH — Appendix B: Dialogue DSL Grammar
+======================================
+
+File extension: .dlg
+Encoding: UTF-8
+Comments: // line, /* block */
+
+The dialogue DSL is a small expression language embedded in a tree
+structure. Trees are named collections of nodes; one node is the
+entry point.
+
+Top-level structure
+-------------------
+
+  dialogue <id> {
+    meta {
+      speaker: <id>;
+      default_disposition: <int>;
+      auto_close: <bool>;
+    }
+
+    entry: <node_id>;
+
+    node <node_id> {
+      // node body
+    }
+
+    node <node_id> {
+      // node body
+    }
+    ...
+  }
+
+Node types
+----------
+
+  1. TEXT - NPC says a line; player can respond.
+
+     node greet {
+       text: "Maren Vell looks up from polishing a glass.";
+       speaker: maren_vell;
+       emotion: neutral;
+
+       choice "Hello." -> top;
+       choice "Good to see you." -> greet_old_friend;
+       choice "Goodbye." -> exit;
+       choice "What do you know about the blade?" (skill:intimidation >= 30) -> blade_intimidation;
+     }
+
+  2. TOPIC - Player picks from a list of topics to ask about.
+
+     node top {
+       text: "What would you like to ask about?";
+       speaker: maren_vell;
+       topic_list;
+
+       topic "the broken sky" -> sky_topic;
+       topic "silvercliff" -> town_topic;
+       topic "the crypt" -> crypt_topic;
+       topic "rumors" (flag:heard_rumors) -> rumor_topic;
+       topic "yourself" -> self_topic;
+       topic "[Leave]" -> exit;
+     }
+
+  3. BRANCH - Conditional choice with multiple outcomes.
+
+     node disposition_check {
+       branch {
+         if (disposition >= 80) -> trust_path;
+         else if (disposition >= 40) -> neutral_path;
+         else -> hostile_path;
+       }
+     }
+
+  4. ACTION - Run actions then go to next.
+
+     node give_quest {
+       action {
+         give_item player, bread, 1;
+         set_flag quest_silver_started = true;
+         journal add, "Main Quest", "Maren asked me to find her brother.";
+       }
+       next: explain_quest;
+     }
+
+  5. EXIT - End conversation.
+
+     node exit {
+       text: "Maren nods and returns to her glass.";
+       end;
+     }
+
+  6. SKILL_CHECK - Resolve skill check, branch on success/fail.
+
+     node blade_intimidation {
+       text: "You tell Maren about the blade, your hand steady.";
+       speaker: player;
+
+       skill_check {
+         skill: intimidation;
+         difficulty: 30;
+         mod: wit;
+         on_success: maren_intimidated;
+         on_failure: maren_resistant;
+       }
+     }
+
+  7. RANDOM - Pick a node weighted-randomly.
+
+     node weather {
+       random {
+         weight 3, sunny_remark;
+         weight 5, rainy_remark;
+         weight 2, snowy_remark;
+       }
+     }
+
+Expressions
+-----------
+
+  Variables:
+    flag:<flag_id>                          bool, true if flag is set
+    flag:<flag_id> == <value>               true if flag equals value
+    flag:<flag_id> >= <value>               numeric comparison
+    disposition                              current NPC disposition 0-100
+    disposition(<npc_id>)                   specific NPC disposition
+    reputation(<faction_id>)                faction reputation
+    skill:<skill_id>                        0-100
+    attribute:<attr_id>                     1-100
+    stat:<stat_id>                          current stat value (hp, vp, sp)
+    time:<field>                            current game time (hour, day, month, ...)
+    has_item(<item_id>)                     bool
+    has_item(<item_id>, <count>)            bool, count check
+    completed_quest(<quest_id>)             bool
+    active_quest(<quest_id>)                bool
+    player_class                             string compare
+    player_race                              string compare
+    in_combat                                bool
+    weather                                  enum
+
+  Operators:
+    == != < > <= >=                         comparison
+    && || !                                  logical
+    + - * / %                                arithmetic (ints only)
+
+  Literals:
+    <int> <bool> "string"
+
+Actions
+-------
+
+  give_item <target>, <item_id>, <count>;    add to inventory
+  take_item <target>, <item_id>, <count>;   remove from inventory
+  set_flag <flag_id> = <value>;             set int or bool
+  inc_flag <flag_id>, <delta>;              increment
+  toggle_flag <flag_id>;                    toggle bool
+  clear_flag <flag_id>;                     remove
+  start_quest <quest_id>;                   begin quest
+  advance_quest <quest_id>, <stage_id>;     force stage
+  complete_quest <quest_id>;                mark complete
+  fail_quest <quest_id>;                    mark failed
+  journal add, <category>, <text>;          add journal entry
+  journal remove, <entry_id>;               remove
+  disposition <npc_id> += <delta>;          modify disposition
+  disposition <npc_id> = <value>;           set disposition
+  reputation <faction_id> += <delta>;       modify reputation
+  reputation <faction_id> = <value>;        set reputation
+  spawn_npc <npc_id>, <map_id>, <x>, <y>;   spawn
+  despawn_npc <npc_id>;                     remove
+  teleport_player <map_id>, <x>, <y>;       move player
+  start_cutscene <id>;                      play cutscene
+  end_cutscene;                             end active cutscene
+  set_schedule <npc_id>, <schedule_id>;     change schedule
+  play_sfx <sfx_id>;                        post-launch
+  play_music <music_id>;                    post-launch
+  run_script <script_id>;                   trigger named script
+
+Special tokens
+--------------
+
+  [Leave]                                  pseudo-topic, always present
+  [Skill: <skill>]                         pseudo-topic, opens skill menu
+  [Persuade]                               pseudo-topic, opens persuade
+  [Bribe]                                  pseudo-topic, opens barter
+  [Attack]                                 pseudo-topic, attacks NPC
+  [Back]                                   returns to parent node
+
+Skill voice commentary
+----------------------
+
+NPCs may have a "voice" that occasionally interjects. Voices are
+triggered when the player is near a relevant context.
+
+  voice <skill_id> {
+    trigger "entering crypt first time" {
+      line "Mysticism whispers: the air here is wrong.";
+    }
+    trigger "examining corpse" {
+      line "History recalls: this armor was issued to the Watch.";
+    }
+    trigger "low health" {
+      line "Endurance urges: rest. Now.";
+    }
+  }
+
+Persistence
+-----------
+
+Dialogue trees are compiled to AST at content load. Tree IDs and
+node IDs are referenced from NPC JSON files. Player state (which
+nodes have been visited) is NOT stored; dialogue is reproducible
+from flag state. This means reloading a save restores exactly the
+same dialogue options.
+
+Errors
+------
+
+  - Unknown node reference: hard error at content load.
+  - Unknown action target: hard error at content load.
+  - Unknown flag/skill/item reference: warning at load, runtime
+    error if triggered.
+  - Cycle in dialogue graph: hard error (use exit; explicitly).
+
+Examples are in content/dialogue/ in the phase-12 content spec.

@@ -1,0 +1,426 @@
+PHASE 12 — SCOURED COAST (REGION 1)
+=====================================
+Region: Coastal starting area, salt-blasted cliffs, half-sunken cities, smuggler holds.
+Maps: 12 (sc_coast_01 through sc_coast_12)
+Faction primary: Coastal Watch (steel blue)
+Key NPCs: Captain Iola Vesh, Old Maren the Salt-Reader, Pell the Lock-Keeper, Brother Wyan
+Theme: Memory and tides. The waking begins here.
+
+12.00 — REGION OVERVIEW
+  12.00.001 — Region def: content/regions/scoured_coast.json
+    - { key: "scoured_coast", name: "Scoured Coast", description: "...", maps: 12, primary_faction: "coastal_watch", climate: "salt-storm", music_track: "ash_coastal_theme", sky_color: "#5a7080", ground_color: "#404040" }
+  12.00.002 — World map tile: 80x25 region overview .xp showing all 12 maps as small connected rectangles
+  12.00.003 — Region intro screen: title fade-in over 3 seconds with ambient audio swell
+  12.00.004 — Add to world state: region_entered["scoured_coast"] flag
+
+12.01 — MAP sc_coast_01: Crypt of First Memory (player starts here)
+  12.01.001 — Dimensions: 60x40, terrain "stone_dark", light_radius 8, ambient "wind_distant"
+  12.01.002 — Layout: small antechamber (10x10) → descending stairs (5 wide) → main crypt (40x25) with 6 sarcophagi arranged in circle around central plinth
+  12.01.003 — Central plinth holds the player's blade (see 12.01.020)
+  12.01.004 — 6 sarcophagi: 4 closed (lootable: gold x20, ancient coin x3, dust), 2 open (empty, lore)
+  12.01.005 — Walls have carved text (appendix B lore, hints about the shattering)
+  12.01.006 — Triggers: t_crypt_exit (5,20) teleports to sc_coast_02 (20,15)
+  12.01.007 — Lighting: 1 light source at plinth (radius 12), no other ambient light
+  12.01.008 — On map enter: trigger cinematic (no UI, 5s "You wake. Stone. Cold. Breath like smoke...")
+  12.01.009 — Add NPC: Your Own Body (placeholder, the player avatar)
+  12.01.010 — Add Item: Crypt Key (quest item, opens door sc_coast_02_main)
+  12.01.011 — Add Container: 6 sarcophagi (loot tables)
+  12.01.012 — Add Readable: Wall Carving 1-6 (lore fragments)
+  12.01.013 — Add Door: stone_door (opens with Crypt Key)
+  12.01.014 — Sound: ambient cave_drip, footsteps stone
+  12.01.015 — Music: silence (only ambient) — emphasize isolation
+  12.01.016 — On first map load: set flag "woke_in_crypt", start quest main_act1_waking
+  12.01.017 — Dialogue: Player has no dialogue (placeholder until NPCs present)
+  12.01.018 — Quest trigger: t_crypt_first_look (5,5) fires tutorial hint "Press E to examine"
+  12.01.019 — Quest trigger: t_crypt_blade (30,20) when player approaches plinth, plays vision: "The blade hums. The inscriptions move."
+  12.01.020 — THE BLADE: entity at (30,20), item key "blade_moving_tongue", glyph "/", color "#aaccff", indestructible, quest item
+    - On pickup: triggers quest main_act1_blade_acquired
+    - On inspect: shows moving-language text (animated glyphs scrolling across the blade surface)
+    - Special: language_understand skill starts at 25 (unlocked by holding the blade)
+  12.01.021 — Sarcophagus loot table (each): 2d6 gold, 1d3 ancient_coin (vendor trash), 30% chance bone_fragment (alchemy), 10% chance minor_heal_potion
+  12.01.022 — Wall carvings content (6 fragments):
+    - "When the sky broke, the seven who held it fell."
+    - "Memory is the chain; forgetting is the cut."
+    - "The blade remembers what its bearer forgets."
+    - "Below the salt, the cities sleep and dream."
+    - "Read me backwards and I tell the future."
+    - "We were the last to wake; we will be the first to sleep again."
+  12.01.023 — Crypt door: stone_door, opens only with Crypt Key (quest item), locked until quest main_act1_blade_acquired completes
+  12.01.024 — Map connection: sc_coast_01 → sc_coast_02 (crypt door exits east)
+
+12.02 — MAP sc_coast_02: Sea-Worn Stair (exit from crypt)
+  12.02.001 — Dimensions: 50x50, terrain "stone_wet", light_radius 12, ambient "sea_wind"
+  12.02.002 — Layout: crypt door (5,25) opens to long descending stair (zigzag) ending at cliff overlook (40,45) with view of coast
+  12.02.003 — Cliff overlook: first sight of Scoured Coast region, vista with distant ships, broken towers
+  12.02.004 — 3 smuggler NPCs: Hesta, Brook, Tam (Coastal Watch informants, will offer work)
+  12.02.005 — 1 wandering creature: kelpwalker (level 1, hostile, patrols stair)
+  12.02.006 — Trigger t_first_view (40,45): when player reaches overlook, cinematic "The coast unfolds below you like a wound that learned to breathe."
+  12.02.007 — Trigger t_smuggler_meet (10,30): when player approaches first smuggler, ambient dialogue initiates
+  12.02.008 — Loot: rope coil (usable), sailcloth scrap
+  12.02.009 — Readable: shipwreck log (lore, hints at main quest)
+  12.02.010 — Map exit: stair continues to sc_coast_03 (15,48)
+  12.02.011 — Hesta dialogue: "You came up from the crypt? Down below, huh. Names Hesta. Don't ask what I do, ask what I know."
+  12.02.012 — Brook dialogue: offers sidequest sq_smuggler_run (fetch contraband)
+  12.02.013 — Tam dialogue: warns about Coastal Watch patrols
+
+12.03 — MAP sc_coast_03: Saltmarket
+  12.03.001 — Dimensions: 80x60, terrain "plank_wet", light_radius 20, ambient "market_noise"
+  12.03.002 — Layout: market square (40x30) with stalls arranged in grid, surrounded by:
+    - North: Watchtower (sc_coast_04 exit)
+    - East: Docks (sc_coast_05 exit)
+    - South: Smuggler's Den (sc_coast_06, locked)
+    - West: Chapel of the Quiet Choir (sc_coast_07)
+  12.03.003 — 18 named NPCs (full schedules):
+    - Captain Iola Vesh (Coastal Watch, quest giver main_act1_meet_watch)
+    - Old Maren the Salt-Reader (sage, lore)
+    - Pell the Lock-Keeper (vendor, lockpicks)
+    - Brother Wyan (Choir, healer)
+    - 9 market vendors (food, general, smith, alchemist, scribe, chandler, fishmonger, weaver, tinker)
+    - 5 background NPCs (patrons, children, dog)
+  12.03.004 — 4 wandering guards (Coastal Watch patrol routes)
+  12.03.005 — 1 wandering creature: stray dog (friendly, follows if fed)
+  12.03.006 — 12 vendor stalls with full inventories (see 12.20 vendor spec)
+  12.03.007 — Trigger t_market_first_enter: cinematic introduction to Saltmarket
+  12.03.008 — Trigger t_watch_recruit (45,5): initiates main_act1_meet_watch dialogue
+  12.03.009 — Loot: coin purses on ground (1-5 gold each), lost item notes (quest hooks)
+  12.03.010 — Readable: posted bounties (side quests), market rules (lore)
+  12.03.011 — Time-based: market busy 8am-6pm, quiet at night, vendors close
+  12.03.012 — Weather: rain in afternoon (visual effect on tiles, no gameplay impact)
+  12.03.013 — Music: market_theme (cheerful fiddle + drums)
+  12.03.014 — Add reputation reward: +1 Coastal Watch on first dialogue with Iola
+
+12.04 — MAP sc_coast_04: Watchtower
+  12.04.001 — Dimensions: 40x40, terrain "stone_clean", light_radius 15, ambient "watch_quiet"
+  12.04.002 — Layout: ground floor (mess hall + cells), spiral stairs, top floor (captain's office + lookout)
+  12.04.003 — 5 named NPCs: Captain Iola Vesh (main), Lieutenant Breck, Sergeant Dona, 2 soldiers
+  12.04.004 — Top floor: tactical map table (interactive, shows patrol routes)
+  12.04.005 — Captain's office: quest hub, 3 quest givers available
+  12.04.006 — Loot: weapons rack (training swords), old maps (lore)
+  12.04.007 — Readable: patrol logs (current side quests), captain's journal (main quest reveals)
+  12.04.008 — Map exit: connects back to sc_coast_03, also rooftop exit to sc_coast_05 (sneak path)
+  12.04.009 — Quest trigger: main_act1_join_watch (offered after first conversation with Iola)
+  12.04.010 — Side quest: sq_watch_recruit (recruit 3 NPCs to Watch)
+
+12.05 — MAP sc_coast_05: Docks
+  12.05.001 — Dimensions: 90x30, terrain "plank_salt", light_radius 18, ambient "dock_creak"
+  12.05.002 — Layout: 4 piers extending into water, ships moored (some wrecks), warehouses, harbormaster office
+  12.05.003 — 6 named NPCs: Harbormaster Ost, 3 dockworkers, 1 shipwright, 1 suspicious "merchant"
+  12.05.004 — 2 wandering creatures: seaborn_ghouls (level 2, come out at night)
+  12.05.005 — Ships: 1 sailable (if quest allows), 3 moored (lore), 2 wrecked (loot)
+  12.05.006 — Wreck loot: captain's log, valuable cargo, drowned corpse (lore)
+  12.05.007 — Readable: harbormaster's ledger (faction reveals), notice of missing ship
+  12.05.008 — Trigger t_ghost_ship: at night, distant ghost ship visible on horizon
+  12.05.009 — Side quest: sq_missing_ship (investigate disappearance)
+  12.05.010 — Vendor: shipwright sells maritime gear
+
+12.06 — MAP sc_coast_06: Smuggler's Den
+  12.06.001 — Dimensions: 50x40, terrain "wood_dark", light_radius 8, ambient "den_murmur"
+  12.06.002 — Layout: hidden basement accessed via trapdoor in Saltmarket, multiple rooms, secret tunnels
+  12.06.003 — 4 named NPCs: Brook (already met), 2 smugglers, 1 fence
+  12.06.004 — 2 wandering guards (smuggler sentries)
+  12.06.005 — Smuggler king: revealed only with high reputation
+  12.06.006 — Loot: smuggled goods (rare), contraband chests
+  12.06.007 — Readable: smuggler codes (skill book), wanted posters
+  12.06.008 — Side quest: sq_smuggler_run (from Brook), sq_contraband_heist
+  12.06.009 — Faction: Coastal Watch hostile if reputation < -2
+
+12.07 — MAP sc_coast_07: Chapel of the Quiet Choir
+  12.07.001 — Dimensions: 50x50, terrain "marble_pale", light_radius 25, ambient "choir_hymn"
+  12.07.002 — Layout: nave (pews), altar, choir loft, crypt below (locked), meditation garden
+  12.07.003 — 6 named NPCs: Brother Wyan (healer, main Choir contact), 4 choir brothers/sisters
+  12.07.004 — Choir mechanics: NPCs sing during dawn/dusk services, schedule-aware
+  12.07.005 — Altar: donation box (rep +1 Choir per 50 gold donated)
+  12.07.006 — Meditation garden: herb garden, alchemy ingredients
+  12.07.007 — Loot: holy water, healing potions, blessed weapon (once)
+  12.07.008 — Readable: hymnal (lore), brother's journal (Choir philosophy)
+  12.07.009 — Side quest: sq_choir_vow (join Choir, special reward)
+  12.07.010 — Quest trigger: main_act1_meet_choir
+
+12.08 — MAP sc_coast_08: Sunken Quarter (exploration)
+  12.08.001 — Dimensions: 70x70, terrain "stone_flooded", light_radius 10, ambient "underwater_distant"
+  12.08.002 — Layout: flooded streets, partially submerged buildings, accessible via causeway at low tide
+  12.08.003 — Tide mechanic: map accessible 4 in-game hours per day (low tide)
+  12.08.004 — 3 named NPCs: drowned survivors (ghosts with dialogue)
+  12.08.005 — 5 wandering creatures: drowned dead (level 3, tide-resistant)
+  12.08.006 — Loot: pre-Shattering artifacts (valuable), ancient documents
+  12.08.007 — Readable: survivor's tale (main quest lore), city records
+  12.08.008 — Side quest: sq_sunken_archive (retrieve documents)
+  12.08.009 — Environmental puzzle: water level rises, must time movement
+
+12.09 — MAP sc_coast_09: Old Lighthouse
+  12.09.001 — Dimensions: 30x60, terrain "stone_wind", light_radius 30 (at top), ambient "lighthouse_hum"
+  12.09.002 — Layout: ground (keeper's quarters), spiral stairs, top (light mechanism)
+  12.09.003 — 1 named NPC: Old Maren the Salt-Reader (also at market, schedules between)
+  12.09.004 — Top of lighthouse: panoramic view, can see all 12 maps
+  12.09.005 — Loot: salt-crystal (alchemy), beacon oil
+  12.09.006 — Readable: keeper's log (main quest foreshadowing)
+  12.09.007 — Side quest: sq_lighthouse_repair (restore light, gain Lighthouse Keeper title)
+  12.09.008 — Quest trigger: t_lighthouse_vision (top, at dawn, reveals shard location)
+
+12.10 — MAP sc_coast_10: Bone Beach
+  12.10.001 — Dimensions: 80x40, terrain "sand_bone", light_radius 25, ambient "sea_calm"
+  12.10.002 — Layout: open beach, scattered whale bones (ancient), tidal pools, hidden cave
+  12.10.003 — 2 named NPCs: Bone-Pickers (gatherers, neutral)
+  12.10.004 — 4 wandering creatures: salt-crabs (level 1, skittish), 1 bonewyrm (level 4, mini-boss)
+  12.10.005 — Hidden cave (requires perception check): ancient burial site
+  12.10.006 — Loot: bone weapons (primitive but strong), whale amber (valuable)
+  12.10.007 — Readable: bone-pickers' tales, sea-shanty collection
+  12.10.008 — Side quest: sq_bonewyrm_hunt
+  12.10.009 — Random encounter: shipwreck survivor washes ashore (one-time)
+
+12.11 — MAP sc_coast_11: Kelp Forest (transition to Glasswood)
+  12.11.001 — Dimensions: 90x60, terrain "kelp_thick", light_radius 6, ambient "kelp_sway"
+  12.11.002 — Layout: dense kelp, narrow paths, 3 groves, deep forest center
+  12.11.003 — 4 named NPCs: Kelp-Witches (herbalists, faction-neutral), 1 lost child (escort quest)
+  12.11.004 — 8 wandering creatures: kelpwalkers, 1 deep-stalker (level 5)
+  12.11.005 — Witch huts: hidden in groves, alchemy ingredients
+  12.11.006 — Loot: kelp potions, witch charms, forest herbs
+  12.11.007 — Readable: witch grimoire (alchemy recipes), child's letter
+  12.11.008 — Side quest: sq_lost_child (escort), sq_witch_brew (fetch ingredients)
+  12.11.009 — Map exit: transitions to Glasswood region
+
+12.12 — MAP sc_coast_12: The Black Harbor (endgame area)
+  12.12.001 — Dimensions: 100x80, terrain "stone_black", light_radius 5, ambient "harbor_silent"
+  12.12.002 — Layout: ruined harbor, half-sunk ships, central keep, underground vault
+  12.12.003 — 3 named NPCs: Captain Vesh (final meeting), Smuggler King, Maren (vision)
+  12.12.004 — 10 wandering creatures: black tide soldiers (level 6-8, mini-bosses)
+  12.12.005 — 1 boss: The Drowned King (level 10, main quest Act 1 climax)
+  12.12.006 — Loot: black pearls (rare), tide blade (unique weapon), royal armor
+  12.12.007 — Readable: king's dying words (main quest reveal)
+  12.12.008 — Side quest: sq_black_harbor_secret (hidden vault)
+  12.12.009 — Quest trigger: main_act1_climax (boss fight + choice)
+  12.12.010 — Boss arena: tidal mechanics (water rises/falls during fight)
+
+12.20 — REGION NPCs (full dialogue trees, schedules)
+  12.20.001 — Captain Iola Vesh (Coastal Watch captain)
+    - Schedule: 06:00 watchtower office, 12:00 mess hall, 14:00 patrol docks, 18:00 watchtower, sleep 22:00
+    - Faction: Coastal Watch rank 4
+    - Dialogue tree: greeting (4 branches by rep), reports (3 sub-topics), quests (5 available), ask_about_watch, ask_about_covenant, ask_about_blade, ask_about_shards
+    - Topics: bounties, patrol routes, recent incidents, missing ships, ghost stories
+    - Disposition: starts at 0, +5 per quest completed for Watch, -3 per smuggler quest
+  12.20.002 — Old Maren the Salt-Reader (sage)
+    - Schedule: 08:00 lighthouse top, 14:00 market, 18:00 chapel, sleep 21:00
+    - Faction: none (independent)
+    - Dialogue: greeting (3 branches), lore (8 topics: Shattering, Old Gods, Moving Language, Blade, Salt-Reading, Lost Cities, Beacons, Time)
+    - Salt-reading mechanic: tells player about future based on flag state
+    - Special: teaches language_understand skill levels (up to 50)
+  12.20.003 — Pell the Lock-Keeper (vendor)
+    - Schedule: 09:00-18:00 market stall, sleep 21:00
+    - Inventory: lockpicks (10), skeleton keys (3), tool kit, trap disarmer, master key (rare, after rep 3)
+    - Quests: sq_lock_training, sq_vault_access
+    - Lore: knows about every lock in region, hints at hidden areas
+  12.20.004 — Brother Wyan (Choir healer)
+    - Schedule: 05:00 dawn prayers, 07:00 healing services, 12:00 lunch, 14:00 confession, 18:00 vespers, sleep 21:00
+    - Faction: Quiet Choir rank 3
+    - Services: healing (free for Choir rep >2, 25 gold otherwise), remove curses, bless water
+    - Dialogue: 5 greeting variants, 8 theology topics, 4 Choir quest hooks
+  12.20.005 — Brook (smuggler, info broker)
+    - Schedule: 10:00 market, 14:00 den, 20:00 den
+    - Faction: Smugglers rank 2 (hidden)
+    - Dialogue: greeting (rep-gated), jobs (5 available), rumors (10), gossip (rotating)
+    - Special: sells information as items (one-time-use notes)
+  12.20.006 — Harbormaster Ost (vendor, info)
+    - Schedule: 06:00 docks, 18:00 home
+    - Inventory: maritime gear, ship supplies, maps (regional)
+    - Quests: sq_missing_ship, sq_harbormaster_debt
+  12.20.007 — 12 Market Vendors (background but fully scripted)
+    - Each has: schedule, inventory (20-40 items), 3-5 dialogue topics, 1-2 quests
+    - Food: Marra (stews, bread)
+    - General: Dunn (misc goods)
+    - Smith: Korren (weapons, repair)
+    - Alchemist: Liss (potions, ingredients)
+    - Scribe: Penn (scrolls, books)
+    - Chandler: Vel (candles, oil)
+    - Fishmonger: Roan (fresh fish, dried)
+    - Weaver: Tass (cloth, basic armor)
+    - Tinker: Fip (tools, gadgets)
+    - Jeweler: Gilt (baubles, gems)
+    - Tailor: Sew (repairs, formal wear)
+    - Apothecary: Brin (herbs, tonics)
+  12.20.008 — Background NPCs (named, schedule, minimal dialogue)
+    - Old Tam, Young Tam, Dog, Cart-horse, Street-sweeper, 3 children, 2 cats, 1 beggar, 1 fortune-teller, 4 guards (patrol routes)
+  12.20.009 — Kelp-Witches (4 named: Bracken, Marsh, Tide, Whisper)
+    - Schedule: dawn gather, noon hut, dusk ritual
+    - Each teaches 1 alchemy recipe
+    - Faction: Witches Coven (hidden)
+    - Dialogue: cryptic, lore-heavy
+  12.20.010 — Bone-Pickers (2 named: Sal, Mun)
+    - Schedule: dawn beach, dusk beach
+    - Sell: bonecraft items
+    - Quest: sq_bone_relic
+
+12.30 — REGION DIALOGUE FILES (per appendix B grammar)
+  12.30.001 — content/dialogue/sc/iola_vesh.dlg (main dialogue, ~200 lines)
+  12.30.002 — content/dialogue/sc/maren_salt_reader.dlg (lore, ~150 lines)
+  12.30.003 — content/dialogue/sc/pell_lockkeeper.dlg (vendor, ~80 lines)
+  12.30.004 — content/dialogue/sc/brother_wyan.dlg (~120 lines)
+  12.30.005 — content/dialogue/sc/brook.dlg (~100 lines)
+  12.30.006 — content/dialogue/sc/harbormaster_ost.dlg (~70 lines)
+  12.30.007 — content/dialogue/sc/market_vendors.dlg (12 vendors, ~600 lines total)
+  12.30.008 — content/dialogue/sc/background_npcs.dlg (~300 lines)
+  12.30.009 — content/dialogue/sc/kelp_witches.dlg (~200 lines)
+  12.30.010 — content/dialogue/sc/bone_pickers.dlg (~60 lines)
+
+12.40 — REGION QUESTS
+  12.40.001 — Main: main_act1_waking (Crypt investigation)
+    - Stages: 1) Wake, 2) Find blade, 3) Exit crypt, 4) Find first ally
+    - XP: 200, Reputation: Coastal Watch +2
+  12.40.002 — Main: main_act1_meet_watch (Meet Iola)
+    - Stages: 1) Reach Saltmarket, 2) Speak with Iola, 3) Accept or decline recruitment
+    - Branches: join_watch (Coastal Watch rep +5) vs decline (free choice)
+    - XP: 150
+  12.40.003 — Main: main_act1_blade_acquired (Find purpose)
+    - Stages: 1) Examine blade, 2) Learn moving language, 3) Find sage
+    - XP: 100
+  12.40.004 — Main: main_act1_first_shard (Clue to shard location)
+    - Stages: 1) Lighthouse vision, 2) Travel to Black Harbor, 3) Drowned King fight
+    - XP: 1000, Faction rep: all +3
+  12.40.005 — Main: main_act1_climax (Boss + choice)
+    - Stages: 1) Enter Black Harbor, 2) Fight Drowned King, 3) Make choice (spare/kill/banish), 4) Receive shard or knowledge
+    - Branches: spare (Choir rep +5, Watch rep -2), kill (Watch rep +5, Choir rep -2), banish (neutral, secret reward)
+    - XP: 2000, Items: tide_blade or black_pearl_8
+  12.40.006 — Side: sq_smuggler_run (Brook)
+    - Fetch 3 contraband items, deliver to den
+    - XP: 100, Gold: 150, Rep: Watch -1, Smuggler +3
+  12.40.007 — Side: sq_missing_ship (Ost)
+    - Investigate wreck, find captain's log, return to Ost
+    - XP: 150, Gold: 200
+  12.40.008 — Side: sq_lighthouse_repair (Maren)
+    - Find 5 beacon oil, 3 crystal lenses, repair mechanism
+    - XP: 200, Item: lighthouse_keeper_ring (light radius +2 permanently)
+  12.40.009 — Side: sq_bonewyrm_hunt (Bone-Pickers)
+    - Kill bonewyrm in Bone Beach, bring spine
+    - XP: 250, Gold: 300, Item: bonewyrm_fang (trophy + 1 Str)
+  12.40.010 — Side: sq_lost_child (Kelp Witch)
+    - Escort child from forest to market
+    - XP: 100, Rep: Witches Coven +3, Gold: 50
+  12.40.011 — Side: sq_choir_vow (Brother Wyan)
+    - Donate 500 gold, attend 7 dawn services, learn Choir secret
+    - XP: 300, Rep: Choir +10, Ability: blessed_sight (see invisible 1/day)
+  12.40.012 — Side: sq_sunken_archive (Maren)
+    - Retrieve 5 documents from Sunken Quarter during low tide
+    - XP: 200, Item: ancient_lore_book (+2 language_understand permanently)
+  12.40.013 — Side: sq_witch_brew (Kelp Witch)
+    - Fetch 10 alchemy ingredients for potion
+    - XP: 150, Item: witch_brew_potion (full heal + buff)
+  12.40.014 — Side: sq_black_harbor_secret (Pell)
+    - Find hidden vault in Black Harbor
+    - XP: 300, Gold: 500, Items: 3 rare
+  12.40.015 — Faction: fac_coastal_watch_initiate (recruit with Watch)
+    - Stages: 1) Talk to Iola, 2) Complete sq_watch_recruit (recruit 3 NPCs), 3) Pass patrol test, 4) Sworn in
+    - XP: 500, Title: Watch Initiate, Rep: Watch +5
+  12.40.016 — Faction: fac_coastal_watch_officer (promotion)
+    - Stages: 1) Reach Watch rep 5, 2) Complete 5 Watch quests, 3) Pass officer exam
+    - XP: 1000, Title: Watch Officer, Rep: Watch +10, Item: officer_blade
+  12.40.017 — Misc: sq_stray_dog (find lost dog, adopt)
+    - XP: 50, Companion: loyal_dog (light combat helper)
+  12.40.018 — Misc: sq_ship_in_bottle (deliver to child)
+    - XP: 25, Gold: 10, Rep: misc +1
+  12.40.019 — Misc: sq_chapel_donation (donate to altar)
+    - Donate 100 gold, get blessed token
+    - XP: 25, Item: blessed_token (single use revive)
+  12.40.020 — Misc: sq_fortune_reading (visit Maren)
+    - Listen to prophecy
+    - XP: 50, Flag set, hidden foreshadowing
+
+12.50 — REGION ITEMS
+  12.50.001 — Weapons (15): rusted_dagger, sailor_knife, watch_short_sword, watch_long_sword, smuggler_stiletto, bone_dagger, kelp_blade, lighthouse_axe, chapel_mace, witch_staff, dock_hook, coral_spear, salt-encrusted_sabre, black_harbor_cutlass, tide_blade (unique)
+  12.50.002 — Armor (12): leather_jerkin, watch_leather, watch_chain, smuggler_leather, bone_armor, kelp_vest, chapel_robes, witch_harness, dock_worker_gear, coral_plate, salt-stained_mail, black_harbor_armor (unique)
+  12.50.003 — Shields (5): wooden_round, watch_kite, smuggler_buckler, bone_shield, black_harbor_tower
+  12.50.004 — Potions (10): minor_heal, heal, greater_heal, full_heal, mana_potion, stamina_potion, antitoxin, cure_disease, water_breathing (4hr), witch_brew
+  12.50.005 — Scrolls (8): fire_scroll, frost_scroll, lightning_scroll, light_scroll, heal_scroll, shield_scroll, cure_scroll, identify_scroll
+  12.50.006 — Food (15): bread, cheese, dried_fish, salt_pork, stew, kelp_soup, witch_brew_food, honey_cake, apple, ration, trail_rations, bone_marrow, lighthouse_oil_bread, chapel_bread, captain's_meal
+  12.50.007 — Books (10): keeper's_log, captain's_journal, smuggler_codes, hymnal, brother's_journal, witch_grimoire, salt-reading_manual, shipwright's_notes, city_records, bone-pickers' tales
+  12.50.008 — Quest items (20): crypt_key, blade_moving_tongue, tide_blade_shard, lighthouse_keeper_ring, black_pearl_8, ancient_coin, captain's_log, smuggled_goods_x5, blessed_token, choir_vow_scroll, sunken_documents_x5, lighthouse_oil_x5, crystal_lens_x3, bonewyrm_spine, lighthouse_keeper_ring, bonewyrm_fang, ancient_lore_book, ship_in_bottle, royal_signet, lost_child_letter
+  12.50.009 — Valuables (20): gold pieces (denominations 1, 5, 10, 50), silver pieces, ancient_coin, black_pearl, whale_amber, salt_crystal, coral, beach-glass, brass_button, captain's_insignia, smuggler's_token, choir_pin, lighthouse_lens, bone_fragment, ancient_bone, shrine_relic, sunken_gem, royal_seal, ghost_shell, witch_charm
+  12.50.010 — Crafting (15): rope, sailcloth, salt, kelp, bone, wood, iron_ingot, steel_ingot, lockpick_blank, lantern_oil, candle, torch, flint, herb_basic, herb_rare
+
+12.60 — REGION CREATURES
+  12.60.001 — Kelpwalker (level 1, common)
+    - HP 15, AC 12, dmg 1d4, abilities: ambush, water-walk
+    - Loot: kelp_sample (10%)
+  12.60.002 — Stray Dog (level 0, friendly)
+    - HP 8, AC 10, no attack, follows if fed
+    - Loot: nothing (companion if befriended)
+  12.60.003 — Seaborn Ghoul (level 2, night)
+    - HP 30, AC 13, dmg 1d6+1, abilities: water-breath, disease_bite
+    - Loot: ghoul_ichor (30%), bone (50%)
+  12.60.004 — Salt Crab (level 1, skittish)
+    - HP 10, AC 14, dmg 1d3, abilities: burrow, flee
+    - Loot: crab_meat (food), crab_shell (crafting)
+  12.60.005 — Drowned Dead (level 3, tide-resistant)
+    - HP 45, AC 14, dmg 1d8+2, abilities: drown_grab, undead
+    - Loot: drowned_coin, salt-rotted cloth
+  12.60.006 — Bonewyrm (level 4, mini-boss)
+    - HP 80, AC 16, dmg 2d6+3, abilities: bone_throw, quake
+    - Loot: bonewyrm_fang (trophy), bonewyrm_spine (quest), 50 gold
+  12.60.007 — Deep-Stalker (level 5, hidden)
+    - HP 60, AC 15, dmg 1d10+2, abilities: stealth, ambush, poison
+    - Loot: stalker_hide (rare)
+  12.60.008 — Black Tide Soldier (level 6-8, mini-boss x5)
+    - HP 100-150, AC 17-18, dmg 2d8+4, abilities: tide_armor (regen in water), spear_throw
+    - Loot: black_armor_fragment, tide_coin
+  12.60.009 — The Drowned King (level 10, BOSS)
+    - HP 400, AC 20, dmg 3d8+6 melee, abilities: tidal_wave, summon_tide_soldiers, crown_of_salt, death_chorus
+    - Mechanics: 3 phases, summons adds, arena floods
+    - Loot: tide_blade (unique weapon), royal_armor (unique), black_pearl_8, 1000 gold, XP 2000
+    - Music: boss_theme_drowned_king (custom track)
+
+12.70 — REGION LORE BOOKS (full prose)
+  12.70.001 — "The Shattering, As I Saw It" — survivor's account, 3000 words
+  12.70.002 — "Of Salt and Memory" — Maren's treatise on reading the coast, 1500 words
+  12.70.003 — "The Seven Who Held" — pre-Shattering history of the gods, 4000 words
+  12.70.004 — "Coastal Watch Standing Orders" — faction lore, 800 words
+  12.70.005 — "Hymns of the Quiet Choir" — theological text, 2500 words
+  12.70.006 — "Smuggler's Cant" — coded language reference, 600 words
+  12.70.007 — "Bone-Pickers' Tales" — folklore collection, 1500 words
+  12.70.008 — "The Witch's Garden" — herbalism manual, 1000 words
+  12.70.009 — "Lighthouse Keeper's Log" — multi-year journal, 3500 words
+  12.70.010 — "City Records of the Sunken Quarter" — census + news fragments, 2000 words
+
+12.80 — REGION AUDIO
+  12.80.001 — Music tracks:
+    - ash_coastal_theme.wav (exploration)
+    - market_theme.wav (Saltmarket)
+    - chapel_hymn.wav (Choir service)
+    - smuggler_jig.wav (Den)
+    - boss_theme_drowned_king.wav (boss)
+    - main_quest_act1.wav (cinematic)
+  12.80.002 — Ambient loops:
+    - sea_wind.wav
+    - cave_drip.wav
+    - market_noise.wav
+    - dock_creak.wav
+    - kelp_sway.wav
+    - underwater_distant.wav
+    - harbor_silent.wav
+    - lighthouse_hum.wav
+  12.80.003 — SFX:
+    - footsteps_stone.wav, footsteps_wood.wav, footsteps_water.wav
+    - door_wood.wav, door_stone.wav, door_locked.wav
+    - sword_clash.wav, sword_sheath.wav, arrow_thwack.wav
+    - ui_click.wav, ui_hover.wav, ui_error.wav
+    - quest_complete.wav, quest_update.wav
+    - pickup_coin.wav, pickup_item.wav
+  12.80.004 — Implement spatial audio (distance attenuation, panning)
+  12.80.005 — Implement day/night ambient crossfade
+
+12.90 — REGION VERIFICATION
+  12.90.001 — All 12 maps load without error
+  12.90.002 — All NPC schedules trigger correctly across 24 in-game hours
+  12.90.003 — All 20 quests advance/complete/fail correctly
+  12.90.004 — All 80+ items have correct stats and descriptions
+  12.90.005 — All 9 creatures have working AI and loot tables
+  12.90.006 — All 10 books have full prose with proper pagination
+  12.90.007 — All 16 audio tracks load and loop seamlessly
+  12.90.008 — Tide mechanic works (sc_coast_08 accessible only at low tide)
+  12.90.009 — Boss fight beatable, all 3 endings reachable
+  12.90.010 — Performance: 60 FPS in Saltmarket with 18 NPCs + 4 guards + 18 vendors
+  12.90.011 — Region feels "Morrowind-dense": no empty corridors, every NPC has purpose
+  12.90.012 — Cross-region transition to Glasswood works seamlessly
+  12.90.013 — All dialogue trees parseable by dlg_parser
+  12.90.014 — All quest conditions evaluated correctly
+  12.90.015 — Document phase 12 completion
+
+END PHASE 12
+SCOUR COAST REGION COMPLETE: 12 maps, ~80 NPCs, 20 quests, 80+ items, 9 creatures, 10 books, 16 audio tracks

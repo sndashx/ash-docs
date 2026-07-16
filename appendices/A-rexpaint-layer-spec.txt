@@ -1,0 +1,211 @@
+ASH — Appendix A: REXPaint Layer Specification
+==============================================
+
+REXPaint .xp files hold up to 9 layers per map. ASH uses a strict
+convention to make maps self-describing and machine-parsable.
+
+Layer roles
+-----------
+
+Layer 1 - TERRAIN
+  Purpose: solid geometry the player walks on and through.
+  Authoring rules:
+    - Cells are walkable (set flag WALK) or blocking (set flag BLOCK).
+    - Glyphs are typically wall chars: # (full), - (horiz), | (vert),
+      + (corner), = (double horiz), || (double vert).
+    - Doors are placed on layer 1 as their closed glyph (D);
+      the engine swaps the glyph and removes WALK when opened.
+  Spawn rules:
+    - The world loader does NOT spawn entities from layer 1.
+    - Walkability is read directly into the map's collision grid.
+
+Layer 2 - FLOOR DETAILS
+  Purpose: visual texture, not interactive.
+  Authoring rules:
+    - Glyphs: . , : ; ' ` ~ for floor details; "  for grass tufts.
+    - All cells flagged TRANSPARENT and WALK.
+    - No entities spawn from this layer.
+  Render rules:
+    - Drawn before entities on layer 4+ but after terrain.
+    - Subject to lighting.
+
+Layer 3 - FIXTURES
+  Purpose: non-pickable, non-NPC interactive objects.
+  Examples: tables, chairs, beds, bookshelves, fireplaces, statues,
+            signs (non-readable), light sources, containers (chests).
+  Authoring rules:
+    - Cells flagged TRANSPARENT unless they block movement (set BLOCK).
+    - "Hot" cells flagged INTERACT.
+    - Light sources flagged LIGHT with radius and intensity.
+  Spawn rules:
+    - The world loader walks layer 3 and spawns entities for cells
+      flagged INTERACT or LIGHT.
+
+Layer 4 - ITEMS
+  Purpose: items lying on the ground, readable books, pickable objects.
+  Authoring rules:
+    - Each cell is one item.
+    - Glyph encodes item type (see item-glyph table below).
+    - Item metadata (id, count, condition) stored in a sidecar JSON
+      per map: items/<map_id>.json, keyed by (x, y).
+  Spawn rules:
+    - Spawn one ITEM entity per cell, linking to sidecar JSON.
+
+Layer 5 - NPCS / CREATURES (default)
+  Purpose: starting positions and base glyphs for living entities.
+  Authoring rules:
+    - Each cell is one NPC or creature.
+    - Glyph is the entity's base glyph (animations overlay).
+    - Foreground color encodes faction (see color-faction table).
+    - Entity data in sidecar JSON: npcs/<map_id>.json, keyed by (x,y).
+  Spawn rules:
+    - Spawn NPC or CREATURE entity, linking to sidecar JSON.
+    - NPC schedules loaded separately from sched/<npc_id>.json.
+
+Layer 6 - TRIGGERS / DOORS (invisible in default render)
+  Purpose: volumes, doors (scripted), and special interactions.
+  Authoring rules:
+    - All cells flagged INVISIBLE (rendered only in editor).
+    - Glyph encodes trigger type (T=transition, D=door, E=event, ...).
+    - Trigger metadata in sidecar JSON: triggers/<map_id>.json.
+  Render rules:
+    - Hidden in EXPLORE mode.
+    - Visible in EDITOR mode as colored outlines.
+
+Layer 7 - WEATHER / AMBIENT
+  Purpose: animated ambient effects (rain, snow, dust, motes).
+  Authoring rules:
+    - Cells flagged TRANSPARENT.
+    - Glyphs and colors picked by weather system; layer 7 is overlay.
+  Spawn rules:
+    - None; runtime particle system reads layer 7 for density/color.
+
+Layer 8 - CUTSCENE OVERRIDES
+  Purpose: temporary state changes for cutscenes, dreams, ghost echoes.
+  Authoring rules:
+    - Usually empty.
+    - Engine writes to layer 8 for active sequences.
+    - Cleared on sequence end.
+  Render rules:
+    - If layer 8 has non-transparent cells, those cells override
+      the lower layers' rendering.
+
+Layer 9 - POST EFFECTS
+  Purpose: full-screen effects (CRT scanlines, vignette, fade).
+  Authoring rules:
+    - Should not be hand-authored; runtime writes here.
+  Render rules:
+    - Composited last; if vignette mask, darkens edges.
+
+Item glyph table (subset; full table grows with content)
+-------------------------------------------------------
+
+  Weapons:
+    !  melee one-handed       -  dagger, short sword, cleaver
+    Y  melee two-handed       -  longsword, battleaxe, warhammer
+    }  melee polearm          -  spear, halberd, staff
+    /  ranged bow              -  shortbow, longbow
+    {  ranged crossbow         -  light crossbow, heavy crossbow
+    }  ranged firearm          -  pistol, rifle (rare)
+    *  thrown                 -  javelin, throwing axe
+  Armor:
+    [  chest                  -  leather, chain, plate
+    (  shield                 -  buckler, kite, tower
+    ]  helm                   -  cap, helm, great helm
+    }  boots                  -  shoes, greaves
+    |  gloves                 -  bracers, gauntlets
+  Consumables:
+    ?  potion                 -  healing, voice, stamina
+    %  scroll                 -  spell scroll
+    =  food                   -  bread, meat, fruit
+  Books:
+    +  readable book          -  lore, journal, manual
+  Misc:
+    $  currency               -  silver, gold (denomination by color)
+    o  orb                    -  misc valuable
+    *  gem                    -  gem cut
+    x  trap visible           -  detected trap
+  Keys:
+    k  key                    -  opens door of matching id
+
+Faction color table
+-------------------
+
+  Faction             RGB              Sample
+  --------------------+----------------+--------
+  Coastal Watch       80,140,200       steel blue
+  Cartographers       200,180,80       ochre
+  Sky-Smiths          180,80,200       violet
+  Quiet Choir         200,80,80        crimson
+  Civilian            200,200,200      light gray
+  Bandit              180,40,40        dark red
+  Creature neutral    120,180,120      green
+  Creature hostile    200,80,40        orange
+  Creature undead     180,180,220      pale lavender
+  Player              255,220,80       gold
+
+Walkability and rendering flags
+-------------------------------
+
+Stored as 8-bit flag byte on each cell:
+
+  bit 0 WALK        walkable
+  bit 1 BLOCK       blocks movement
+  bit 2 OPAQUE      blocks line of sight
+  bit 3 TRANSPARENT visually transparent (light passes)
+  bit 4 INTERACT    interactable
+  bit 5 LIGHT       emits light
+  bit 6 INVISIBLE   not rendered in EXPLORE mode
+  bit 7 ANIMATED    glyph animates (lookup anim/<id>.json)
+
+Defaults:
+  - Layer 1 cells: BLOCK unless explicitly WALK.
+  - Layers 2-5: WALK + TRANSPARENT unless explicitly BLOCK.
+  - Layer 6: INVISIBLE always.
+  - Layer 7: WALK + TRANSPARENT.
+  - Layer 8: TRANSPARENT.
+  - Layer 9: TRANSPARENT.
+
+Light authoring
+---------------
+
+Layer 3 cells with LIGHT flag emit light. Properties encoded in
+sidecar JSON:
+  - radius: int (cells)
+  - intensity: uint8 (0-15)
+  - flicker: bool (flickers torch-style)
+  - color: rgb (warm = torch, cool = mage-light)
+
+Maps without explicit lights rely on ambient light (region default).
+Region ambient ranges 4 (night) to 12 (day).
+
+Reading order for the engine
+----------------------------
+
+  1. Layer 1: collision grid + wall glyphs.
+  2. Layer 2: floor details (visual).
+  3. Layer 3: fixtures + light sources (spawn entities).
+  4. Layer 4: items (spawn entities).
+  5. Layer 5: NPCs/creatures (spawn entities).
+  6. Layer 6: triggers (spawn invisible entities).
+  7. Layer 7: ambient particles (engine handles).
+  8. Layer 8: cutscene override (engine handles).
+  9. Layer 9: post effects (engine handles).
+
+Saving mutation
+---------------
+
+When the world state changes (e.g., a chest is opened), the engine
+mutates layer 0 (TERRAIN) in memory and writes the .xp file back.
+Layer 0 is reserved for engine-written state to keep authoring and
+runtime state visually separate in the editor.
+
+Specifically, engine-written state lives on layer 1 (renamed TERRAIN
+runtime; the LAYER 1 in original REXPaint becomes layer 1 authoring
+but the engine uses layer 0 as a runtime overlay for doors, levers,
+switches).
+
+Authoring note: in REXPaint, layer 1 IS the base layer. We add a
+separate runtime overlay layer (also called layer 0 in the engine's
+internal numbering) to avoid mutating author content. Implementation
+detail in phase 03.

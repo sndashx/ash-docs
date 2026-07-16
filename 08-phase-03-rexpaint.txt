@@ -1,0 +1,200 @@
+ASH — Phase 03: REXPaint Pipeline
+===================================
+
+Phase goal: load and write .xp files. World loader spawns entities
+from layers per Appendix A.
+
+Entry criteria: Phase 2 complete.
+Exit criteria: a 5x5 test .xp file loads into a Map, entities
+              spawn from layers, save roundtrip is byte-identical.
+
+[ENTRY CRITERIA]
+  - Phase 2 complete.
+
+[EXIT CRITERIA]
+  - Load 5x5 test .xp -> Map struct.
+  - Spawn entities per layer convention.
+  - Write Map struct -> .xp file byte-identical to input.
+  - Roundtrip preserves all cell data.
+
+[RISKS]
+  - .xp format quirks (column-major, gzip header). Mitigation:
+    test against known REXPaint output.
+  - Sidecar JSON consistency. Mitigation: schema validation.
+
+Step 0300.00.00. Create src/rexpaint/xp_format.hpp.
+  - Sub: constexpr int XP_MAGIC = ... (REXPaint magic number).
+  - Sub: constexpr int XP_VERSION = ... (REXPaint version).
+  - Sub: struct XpHeader { int version; int width; int height;
+         int layer_count; };
+
+Step 0300.00.01. Document .xp binary format.
+  - Sub: Magic 8 bytes (specific pattern).
+  - Sub: Version 4 bytes int.
+  - Sub: Width 4 bytes int.
+  - Sub: Height 4 bytes int.
+  - Sub: Layer count 4 bytes int (1-9).
+  - Sub: For each layer, column-major:
+    - For x in [0, width):
+      - For y in [0, height):
+        - glyph 4 bytes uint32 (UTF-32)
+        - fg 3 bytes RGB
+        - bg 3 bytes RGB
+
+Step 0300.00.01. Create src/rexpaint/xp_loader.hpp.
+  - Sub: XpHeader read_header(std::istream&).
+  - Sub: std::vector<Cell> read_layer(std::istream&, XpHeader const&,
+         int layer_idx).
+
+Step 0300.00.01. Implement XpHeader read_header.
+  - Sub: Read 8 bytes, verify magic.
+  - Sub: Read 4 bytes version.
+  - Sub: Read width, height, layer_count.
+  - Sub: Validate layer_count in [1, 9].
+
+Step 0300.00.02. Implement read_layer.
+  - Sub: Allocate width*height Cell vector.
+  - Sub: For x in [0, width):
+    - For y in [0, height):
+      - Read 4 bytes glyph.
+      - Read 3 bytes fg.
+      - Sub: 3 bytes bg.
+
+Step 0300.00.03. Implement full loader.
+  - Sub: struct LoadedMap { XpHeader header;
+         std::array<std::vector<Cell>, 9> layers; };
+  - Sub: LoadedMap load_xp(std::filesystem::path const&).
+
+Step 0300.00.04. Create src/rexpaint/xp_writer.hpp.
+  - Sub: void write_xp(std::filesystem::path const&, Map const&).
+
+Step 0300.00.05. Implement write_xp.
+  - Sub: Write magic, version, dims, layer count.
+  - Sub: For each layer, write cells column-major.
+
+Step 0300.00.06. Roundtrip test.
+  - Sub: Load .xp, write back, compare bytes.
+  - Sub: Test against hand-crafted test .xp file.
+
+Step 0301.00.00. Create src/rexpaint/layer_spec.hpp.
+  - Sub: enum class LayerRole { Terrain, FloorDetails, Fixtures,
+         Items, Npcs, Triggers, Weather, Cutscene, PostEffect };
+
+Step 0301.00.01. Implement role_for_layer(int).
+  - Sub: 1=Terrain, 2=FloorDetails, 3=Fixtures, 4=Items, 5=Npcs,
+         6=Triggers, 7=Weather, 8=Cutscene, 9=PostEffect.
+
+Step 0301.00.02. Implement parse_flags(Cell).
+  - Sub: Read high bits of glyph or special markers.
+  - Sub: Convention: glyph >= 0x100000 indicates special flag.
+
+Step 0302.00.00. Create sidecar JSON schema.
+  - Sub: schema/items.json: array of {x, y, item_id, count, condition}.
+  - Sub: schema/npcs.json: array of {x, y, npc_id, glyph, fg, ...}.
+  - Sub: schema/triggers.json: array of {x, y, type, event, ...}.
+
+Step 0302.00.01. Implement sidecar loader.
+  - Sub: Sidecar<Items> load_items(json const&).
+  - Sub: Returns map<Position, ItemEntry>.
+
+Step 0302.00.02. Implement sidecar validator.
+  - Sub: All positions within map bounds.
+  - Sub: All referenced IDs exist.
+
+Step 0303.00.00. Create src/world/loader.hpp.
+  - Sub: Map load_map_from_xp(std::filesystem::path const&).
+
+Step 0303.00.01. Implement loader.
+  - Sub: 1. Load .xp file.
+  - Sub: 2. Allocate Map.
+  - Sub: 3. Copy layer cells into Map.layers.
+  - Sub: 4. Build collision grid from layer 1.
+
+Step 0303.00.02. Build collision grid.
+  - Sub: For each cell in layer 1:
+    - If glyph in wall set (#-|+etc): set BLOCK flag.
+    - If glyph in floor set (.,etc): set WALK flag.
+    - Default: walkable.
+
+Step 0303.00.03. Spawn entities from layer 3 (Fixtures).
+  - Sub: For each cell flagged INTERACT:
+    - Determine type from glyph.
+    - Spawn appropriate entity.
+
+Step 0303.00.04. Spawn entities from layer 4 (Items).
+  - Sub: For each cell, look up in sidecar.
+  - Sub: Spawn Item entity with metadata.
+
+Step 0303.00.05. Spawn entities from layer 5 (NPCs).
+  - Sub: For each cell, look up in sidecar.
+  - Sub: Spawn NPC entity with components.
+
+Step 0303.00.06. Spawn entities from layer 6 (Triggers).
+  - Sub: For each cell, look up in sidecar.
+  - Sub: Spawn Trigger entity (invisible).
+
+Step 0304.00.00. Create runtime overlay layer.
+  - Sub: Map.layers[0] reserved for engine mutations.
+  - Sub: All door states, lever states, switches tracked here.
+  - Sub: Original layer 1 stays read-only.
+
+Step 0304.00.01. Implement runtime overlay write.
+  - Sub: When door opens, write open glyph to layers[0].
+  - Sub: When lever flips, write flipped glyph.
+
+Step 0304.00.02. Implement save mutation.
+  - Sub: On save, write layers[0] into saved .xp at original layer 1.
+
+Step 0305.00.00. Tests for xp_loader.
+  - Sub: Load known-good .xp.
+  - Sub: Verify header.
+  - Sub: Verify cell data.
+
+Step 0305.00.01. Tests for xp_writer.
+  - Sub: Write map, reload, compare.
+
+Step 0305.00.02. Tests for roundtrip.
+  - Sub: Load -> Write -> Load -> compare bytes.
+
+Step 0306.00.00. Create test .xp files.
+  - Sub: tests/data/test_5x5.xp (5x5 test map).
+  - Sub: tests/data/test_complex.xp (with all layers populated).
+
+Step 0306.00.01. Generate test .xp programmatically.
+  - Sub: In test setup, build a Map in code and write to .xp.
+  - Sub: Use as fixture.
+
+Step 0307.00.00. Loader integration with world.
+  - Sub: World::load_map now reads .xp and spawns entities.
+
+Step 0307.00.01. Wire --render-test --map=test_5x5.
+  - Sub: Loads from tests/data/.
+
+Step 0308.00.00. Verify build.
+  - Sub: cmake --build build -j.
+  - Sub: All tests pass.
+
+Step 0308.00.01. Verify end-to-end.
+  - Sub: Roundtrip test_5x5.xp -> Map -> .xp -> byte-equal.
+
+Step 0308.00.02. Final commit.
+  - Sub: git commit -m "feat(phase-03): REXPaint .xp loader and writer".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash_tests --test-case="xp roundtrip"
+  Loads test_5x5.xp.
+  Writes to /tmp/test_5x5_out.xp.
+  Compares bytes: identical.
+
+  $ ./build/ash --render-test --map=test_5x5
+  Same behavior as Phase 2 but loads from .xp file instead of
+  hardcoded data.
+
+[PHASE 3 PLAYABLE BUILD]
+
+  Build 03: "Authored Room"
+    - 5x5 room loaded from .xp file.
+    - Player can move.
+    - Save writes mutated .xp back.
+    - First real authored content exists in content/maps/.

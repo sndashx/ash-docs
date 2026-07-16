@@ -1,0 +1,324 @@
+ASH — Appendix D: Save Schema v0
+================================
+
+Save directory layout
+---------------------
+
+  ~/.local/share/ash/saves/<savename>/
+  ├── meta.json
+  ├── player.v0.json
+  ├── world.v0.json
+  ├── maps/
+  │   ├── <map_id>.xp
+  │   └── ...
+  └── thumbnail.txt
+
+Schema version is encoded in the filename. Future migrations:
+  world.v0.json -> world.v1.json (after migration)
+
+meta.json
+---------
+
+  {
+    "version": 0,
+    "schema_version": 0,
+    "save_name": "Maren's Stranger",
+    "created_at": "2026-07-15T14:32:11Z",
+    "last_played_at": "2026-07-15T18:21:09Z",
+    "play_time_seconds": 14231,
+    "player_level": 7,
+    "player_location": {
+      "map_id": "silvercliff_inn_floor",
+      "x": 12,
+      "y": 8
+    },
+    "rng_seed": 12345678,
+    "game_time": {
+      "year": 220,
+      "month": 4,
+      "day": 12,
+      "hour": 14,
+      "minute": 30
+    },
+    "weather": "overcast",
+    "difficulty": "normal",
+    "permadeath": false
+  }
+
+player.v0.json
+--------------
+
+  {
+    "schema_version": 0,
+    "name": "Stranger",
+    "race": "human",
+    "background": "woke_in_crypt",
+    "level": 7,
+    "experience": 4200,
+    "attribute_points_unspent": 0,
+    "attributes": {
+      "str": 8, "end": 7, "agi": 6, "wil": 8,
+      "int": 9, "wit": 7, "cha": 6, "luc": 5, "voi": 10
+    },
+    "skills": {
+      "armorer": 12, "blunt": 8, "blade": 25,
+      "marksman": 5, "dodge": 18, "thrown": 4,
+      "mysticism": 35, "restoration": 22, "warding": 14,
+      "alchemy": 28, "enchant": 6, "spellcraft": 31,
+      "stealth": 14, "pickpocket": 3, "security": 19,
+      "speechcraft": 26, "mercantile": 12, "illusion": 9,
+      "deception": 7, "intimidation": 4, "seduction": 2,
+      "history": 38, "theology": 19, "linguistics": 27
+    },
+    "stats": {
+      "hp": 64, "hp_max": 84,
+      "vp": 78, "vp_max": 88,
+      "sp": 51, "sp_max": 64
+    },
+    "conditions": [],
+    "inventory": {
+      "items": [
+        { "id": "iron_sword", "count": 1, "condition": 87 },
+        { "id": "bread", "count": 5, "condition": 100 },
+        { "id": "moonstone_dust", "count": 3, "condition": 100 },
+        { "id": "gold", "count": 142 }
+      ],
+      "equipped": {
+        "weapon": "iron_sword",
+        "off_hand": null,
+        "chest": "leather_jerkin",
+        "helm": null,
+        "boots": "worn_boots",
+        "gloves": null,
+        "ring_left": "silver_ring",
+        "ring_right": null,
+        "amulet": "lucky_pendant"
+      }
+    },
+    "spells_known": [
+      "mend", "light", "detect_life", "calm",
+      "ward", "firebolt", "heal"
+    ],
+    "spell_book": {
+      "mend": "well_worn",
+      "light": "memorized",
+      "firebolt": "memorized"
+    },
+    "thought_cabinet": [
+      { "thought_id": "the_moving_language", "level": 2 },
+      { "thought_id": "broken_sky_origin", "level": 1 }
+    ],
+    "journal": {
+      "active_quests": ["main_act1_wake", "coastal_watch_intro"],
+      "completed_quests": ["tutorial_wake", "side_silver_lost_cat"],
+      "failed_quests": [],
+      "entries": [
+        {
+          "id": "jrnl_001",
+          "category": "Main Quest",
+          "timestamp": "2026-07-15T14:32:11Z",
+          "text": "I woke in the crypt. I don't know who I am.",
+          "objective": "Find out who I am."
+        }
+      ]
+    },
+    "map_discovered": [
+      "silvercliff_inn_floor", "silvercliff_streets",
+      "silvercliff_docks", "sunken_temple_approach"
+    ],
+    "blade_language": {
+      "characters_known": ["kha", "ren", "oth", "ven"],
+      "current_text": "kha ren oth ven ... kha ren oth",
+      "pages_read": 3
+    }
+  }
+
+world.v0.json
+-------------
+
+  {
+    "schema_version": 0,
+    "flags": {
+      "maren_met": true,
+      "rellan_met": false,
+      "coastal_watch_recruited": true,
+      "blade_first_word": "kha",
+      "rumors_heard": 7,
+      "npcs_killed": ["skull_harric", "tunnel_thief_01"]
+    },
+    "quests": {
+      "main_act1_wake": {
+        "state": "ACTIVE",
+        "current_stage": "find_brother",
+        "visited_stages": ["wake", "maren_meet", "find_brother"],
+        "started_at": "2026-07-15T14:35:00Z"
+      },
+      "coastal_watch_intro": {
+        "state": "ACTIVE",
+        "current_stage": "first_patrol",
+        "visited_stages": ["intro", "sworn_in", "first_patrol"],
+        "started_at": "2026-07-15T15:12:00Z"
+      }
+    },
+    "factions": {
+      "coastal_watch": { "reputation": 35, "rank": "sworn" },
+      "cartographers": { "reputation": 0, "rank": "stranger" },
+      "sky_smiths": { "reputation": 5, "rank": "customer" },
+      "quiet_choir": { "reputation": -10, "rank": "outsider" }
+    },
+    "npcs": {
+      "maren_vell": {
+        "alive": true,
+        "current_map": "silvercliff_inn_floor",
+        "x": 12, "y": 8,
+        "schedule_id": "maren_vell",
+        "schedule_offset_min": 45,
+        "disposition": 65,
+        "inventory": ["iron_cleaver", "leather_apron"],
+        "flags": ["knows_player_secret"],
+        "killed_by_player": false
+      }
+    },
+    "creatures": {
+      "tunnel_rat_01": {
+        "alive": false,
+        "killed_by_player": true,
+        "death_time": "2026-07-15T15:30:00Z",
+        "corpse_looted": true
+      }
+    },
+    "containers": {
+      "chest_silvercliff_inn_01": {
+        "locked": false,
+        "trapped": false,
+        "contents": ["bread", "gold:23"]
+      }
+    },
+    "doors": {
+      "door_silvercliff_inn_upstairs": {
+        "state": "closed",
+        "locked": false,
+        "key_id": null
+      }
+    },
+    "triggers": {
+      "trig_silvercliff_to_docks": {
+        "fired_count": 2,
+        "last_fired": "2026-07-15T15:30:00Z"
+      }
+    },
+    "global_counters": {
+      "kills_total": 17,
+      "kills_by_faction": {
+        "creature_hostile": 12,
+        "bandit": 3,
+        "undead": 2
+      },
+      "books_read": 4,
+      "secrets_found": 2,
+      "npc_conversations": 47
+    }
+  }
+
+maps/<map_id>.xp
+----------------
+
+  Identical format to REXPaint-authored .xp, with these mutations:
+
+  - Layer 1 (TERRAIN): door glyphs reflect current open/closed state.
+  - Layer 3 (FIXTURES): containers reflect current open/locked state
+    (broken glyph if smashed).
+  - Layer 4 (ITEMS): removed items are blank (or replaced with debris
+    glyph if engine prefers visual feedback).
+  - Layer 5 (NPCS/CREATURES): dead NPCs show corpse glyph; moved NPCs
+    are blank (they exist in world.json, not in layer 5 anymore).
+  - Layer 8 (CUTSCENE): empty unless mid-cutscene.
+
+  The save-write process:
+    1. For each map present in world.json's dirty set:
+       a. Take the original .xp from content/ (cached at startup).
+       b. Apply all current world state mutations to a working copy.
+       c. Write the working copy to saves/<name>/maps/<map_id>.xp.
+    2. If no mutations, skip writing that map.
+
+  At load:
+    1. Copy original .xp files from content/ into the live map cache.
+    2. For each map in saves/<name>/maps/, overlay it onto the cache.
+    3. Live state now reflects saved mutations.
+
+thumbnail.txt
+-------------
+
+  Plain-text ASCII art of the last rendered frame, written on save.
+  80x24 cells. Truecolor is omitted; pure glyphs for portability.
+  Used by the load-game menu.
+
+Migrations
+----------
+
+  // world.v0.json  -> world.v1.json  (hypothetical)
+  {
+    "from_version": 0,
+    "to_version": 1,
+    "description": "Rename flag X to flag Y.",
+    "migrate": [](json w) {
+      if (w["flags"].contains("old_name")) {
+        w["flags"]["new_name"] = w["flags"]["old_name"];
+        w["flags"].erase("old_name");
+      }
+      return w;
+    }
+  }
+
+  Migrations run in version order. Each migration is a pure function.
+  Migrations are registered in src/save/migrations/.
+
+Atomic save
+-----------
+
+  1. Write all files to saves/<name>.tmp/.
+  2. fsync the directory.
+  3. Rename saves/<name>.tmp to saves/<name>.
+  4. fsync the parent directory.
+
+  This ensures a crash mid-save cannot corrupt the existing save.
+
+Backup policy
+-------------
+
+  Each save keeps:
+    saves/<name>/         current
+    saves/<name>.bak1/    previous
+    saves/<name>.bak2/    before that
+
+  Rotation: on successful save, rename .bak2 -> delete, .bak1 -> .bak2,
+  current -> .bak1, new -> current. Keeps 3 generations.
+
+Autosave
+--------
+
+  Every 10 real minutes, write to saves/autosave/.
+  If a save exists, overwrite (no backup chain for autosave to
+  avoid filling disk).
+  Show "Autosaved" notification in HUD.
+
+Quicksave
+---------
+
+  F5: save to saves/quicksave/. Single slot, overwrites.
+
+Schema version enforcement
+--------------------------
+
+  - On load, if schema_version < engine_min: error, refuse.
+  - If schema_version > engine_max: error, refuse (forward-compat).
+  - If between: run migrations up to engine_max.
+  - After load, save back as engine_max version.
+
+Errors
+------
+
+  Save corruption (bad JSON, missing files, invalid .xp):
+    - Show error to user.
+    - Offer to load .bak1 or .bak2.
+    - Offer to start new game.

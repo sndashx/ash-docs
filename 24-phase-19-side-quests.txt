@@ -1,0 +1,136 @@
+PHASE 19 — SIDE QUESTS (~80 TOTAL)
+====================================
+Comprehensive side quest catalog across all regions. Mix of fetch, kill, escort, investigate, timed, faction, and unique quests.
+
+19.00 — QUEST DESIGN PRINCIPLES
+  19.00.001 — Every side quest has: story, conflict, choice, consequence
+  19.00.002 — No "kill 10 rats" filler — every quest advances world or character
+  19.00.003 — Side quests affect: NPC disposition, faction rep, region state, main quest (rare)
+  19.00.004 — Quests interweave: completing one unlocks another
+  19.00.005 — Some quests only available at certain times, conditions, or rep
+
+19.10 — SCOURED COAST SIDE QUESTS (15)
+  19.10.001 — sq_sc_01: "The Missing Brother" (find Hesta's missing brother)
+  19.10.002 — sq_sc_02: "Smuggler's Conscience" (Brook wants out, help him escape)
+  19.10.003 — sq_sc_03: "The Lighthouse Wife" (Maren's lost love story)
+  19.10.004 — sq_sc_04: "Old Wounds" (Iola's past mistake)
+  19.10.005 — sq_sc_05: "The Drowned Sailor" (ghost of captain wants news)
+  19.10.006 — sq_sc_06: "Beach Wreck Salvage" (salvage cargo, split with Ost)
+  19.10.007 — sq_sc_07: "Bone Trade" (sell bones for alchemy)
+  19.10.008 — sq_sc_08: "Kelp-Witch's Bargain" (witch offers power for memory)
+  19.10.009 — sq_sc_09: "The Chapel Bell" (repair the bell, Choir favor)
+  19.10.010 — sq_sc_10: "Sister's Letter" (deliver to distant outpost)
+  19.10.011 — sq_sc_11: "The Cartographer's Wife" (sketch artist needs model)
+  19.10.012 — sq_sc_12: "Shipwreck Wine" (rare vintage to recover)
+  19.10.013 — sq_sc_13: "Tide Reader's Apprentice" (learn skill from Maren)
+  19.10.014 — sq_sc_14: "The Stray's Pack" (find dog's original owner)
+  19.10.015 — sq_sc_15: "Salt and Iron" (defend coast from pirates)
+
+19.20 — GLASSWOOD SIDE QUESTS (20)
+  19.20.001 — sq_gw_01: "Lost in the Whisper" (find lost scout)
+  19.20.002 — sq_gw_02: "Cartographer's First Mark" (tutorial mapping)
+  19.20.003 — sq_gw_03: "The Spider's Bargain" (glass-spider intelligence deal)
+  19.20.004 — sq_gw_04: "Ink of Memory" (retrieve specific ink)
+  19.20.005 — sq_gw_05: "Library's Missing Page" (find stolen page)
+  19.20.006 — sq_gw_06: "Mirror's Truth" (lake reflects player's past)
+  19.20.007 — sq_gw_07: "Thornhold Prisoner" (rescue captive in reaver fort)
+  19.20.008 — sq_gw_08: "Petrified Giant's Heart" (retrieve from stone-bear cave)
+  19.20.009 — sq_gw_09: "The Atlas Fragment" (find for archivist)
+  19.20.010 — sq_gw_10: "Echo-Mad's Request" (fetch specific sound)
+  19.20.011 — sq_gw_11: "Sunken Relic" (dive for Cathedral artifact)
+  19.20.012 — sq_gw_12: "Living Map's Question" (answer riddle for entity)
+  19.20.013 — sq_gw_13: "Glassblower's Test" (craft specific item)
+  19.20.014 — sq_gw_14: "The Canopy Hermit" (bring supplies)
+  19.20.015 — sq_gw_15: "Sky-Shard Names" (5 shards, lore)
+  19.20.016 — sq_gw_16: "Witch's True Name" (learn real name)
+  19.20.017 — sq_gw_17: "Root-Dweller Peace" (diplomacy quest)
+  19.20.018 — sq_gw_18: "The Shattered Atlas Page" (rare book page)
+  19.20.019 — sq_gw_19: "Cartographer's Funeral" (attend ceremony, learn lore)
+  19.20.020 — sq_gw_20: "The First Map" (Senna's origin story)
+
+19.30 — RIVEN SPIRE SIDE QUESTS (15)
+  19.30.001 — sq_rs_01: "First Hammer" (forge tutorial)
+  19.30.002 — sq_rs_02: "The Apprentice's Blade" (craft for student)
+  19.30.003 — sq_rs_03: "Mountain Rescue" (save climber)
+  19.30.004 — sq_rs_04: "Ore Run" (deliver rare ore)
+  19.30.005 — sq_rs_05: "Ancient Forges" (reactivate dormant forge)
+  19.30.006 — sq_rs_06: "Smith's Honor" (settle dispute between smiths)
+  19.30.007 — sq_rs_07: "The Shard Melody" (learn shard song)
+  19.30.008 — sq_rs_08: "Cloud City's Ghost" (help ghost pass on)
+  19.30.009 — sq_rs_09: "Frost Wolf Pelt" (hunt for coat)
+  19.30.010 — sq_rs_10: "Summit Beer" (deliver to hermit)
+  19.30.011 — sq_rs_11: "Gate Activation Help" (multi-stage assist)
+  19.30.012 — sq_rs_12: "Fire Core Harvest" (collect cores)
+  19.30.013 — sq_rs_13: "Magma Heart" (retrieve from depths)
+  19.30.014 — sq_rs_14: "First Smith's Memory" (reminisce with Hesta)
+  19.30.015 — sq_rs_15: "The Shattered Crown Repair" (quest item)
+
+19.40 — ASH PLAINS SIDE QUESTS (15)
+  19.40.001 — sq_ap_01: "Water for the Dying" (deliver water to hermit)
+  19.40.002 — sq_ap_02: "Bone Collector's Bargain" (trade bones)
+  19.40.003 — sq_ap_03: "Caravan Guard" (escort merchant)
+  19.40.004 — sq_ap_04: "Stone-Singer's Audience" (hear prophecy)
+  19.40.005 — sq_ap_05: "Hermit Council" (gather hermits)
+  19.40.006 — sq_ap_06: "Smuggler's Cache" (find hidden goods)
+  19.40.007 — sq_ap_07: "Battle Relic Recovery" (ancient weapon)
+  19.40.008 — sq_ap_08: "Oasis Defense" (protect from attackers)
+  19.40.009 — sq_ap_09: "Drake Hunt" (collect drake parts)
+  19.40.010 — sq_ap_10: "Ash-Storm Survivor" (endure storm)
+  19.40.011 — sq_ap_11: "Buried Treasure Map" (find dig site)
+  19.40.012 — sq_ap_12: "The Wandering Cartographer" (find Lone Cartographer)
+  19.40.013 — sq_ap_13: "Storm-Walker's Gift" (give item)
+  19.40.014 — sq_ap_14: "Plain's Edge Warning" (warn Spire of danger)
+  19.40.015 — sq_ap_15: "The Lost Surveyor" (find corpse, recover maps)
+
+19.50 — HOLLOW CITIES SIDE QUESTS (15)
+  19.50.001 — sq_hc_01: "Memory-Keeper's Apprentice" (organize library)
+  19.50.002 — sq_hc_02: "Council Truth" (witness memory)
+  19.50.003 — sq_hc_03: "Garden Seed" (plant in underground garden)
+  19.50.004 — sq_hc_04: "Ancient Smith Commission" (craft from ancient materials)
+  19.50.005 — sq_hc_05: "Well Memory View" (witness specific past)
+  19.50.006 — sq_hc_06: "Dark Diplomacy" (talk to The Dark entity)
+  19.50.007 — sq_hc_07: "Ghost's Last Wish" (help ghost pass on)
+  19.50.008 — sq_hc_08: "Throne Relinquish" (give up throne memory)
+  19.50.009 — sq_hc_09: "Choir Secret" (learn Choir's true purpose)
+  19.50.010 — sq_hc_10: "Pre-Shattering Relic" (deliver to surface)
+  19.50.011 — sq_hc_11: "Memory Archaeology" (excavate specific find)
+  19.50.012 — sq_hc_12: "Ancient Currency Collection" (200-year coins)
+  19.50.013 — sq_hc_13: "Light in the Dark" (keep lamp lit)
+  19.50.014 — sq_hc_14: "Void Whisper" (hear the void)
+  19.50.015 — sq_hc_15: "Covenant's Last Words" (deliver message)
+
+19.60 — CROSS-REGION SIDE QUESTS (5)
+  19.60.001 — sq_xr_01: "The Merchant's Journey" (escort across all 5 regions)
+  19.60.002 — sq_xr_02: "The Lost Letter" (deliver across regions)
+  19.60.003 — sq_xr_03: "Sky-Shard Hunt" (find 7 shards total)
+  19.60.004 — sq_xr_04: "Cartographer's Survey" (map 50 areas total)
+  19.60.005 — sq_xr_05: "The Covenant's Messengers" (deliver to all factions)
+
+19.70 — QUEST CONTENT STRUCTURE
+  19.70.001 — Each quest file: .qst with stages, conditions, rewards
+  19.70.002 — Each quest has associated NPC dialogue (.dlg)
+  19.70.003 — Each quest has failure conditions and recovery
+  19.70.004 — Each quest tracked in journal with full text
+  19.70.005 — Each quest has flavor text variations by class/race (if applicable)
+
+19.80 — QUEST BALANCE
+  19.80.001 — XP rewards scale 50-2000 by difficulty
+  19.80.002 — Gold rewards scale 50-2000
+  19.80.003 — Item rewards tied to level (no over-level items)
+  19.80.004 — Faction rep rewards 1-10 per quest
+  19.80.005 — Quest completion time: 10-60 minutes each
+  19.80.006 — Total side quest content: ~30-40 hours
+  19.80.007 — Optional content should feel valuable, not filler
+
+19.90 — SIDE QUEST VERIFICATION
+  19.90.001 — All 80 side quests have full .qst files
+  19.90.002 — All quests advance correctly
+  19.90.003 — No two quests conflict unless intended
+  19.90.004 — Cross-region quests work
+  19.90.005 — Journal tracks all correctly
+  19.90.006 — Rewards granted properly
+  19.90.007 — Performance: many quests active, no slowdown
+  19.90.008 — Document phase 19
+
+END PHASE 19
+SIDE QUESTS COMPLETE: 80 quests, ~30-40 hours content, all regions covered

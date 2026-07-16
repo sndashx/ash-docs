@@ -1,0 +1,205 @@
+PHASE 09 — QUEST ENGINE
+==========================
+Goal: Implement .qst DSL parser, quest journal, objective tracking, branching, simultaneous stages, escorts, investigations, timed objectives, kill/fetch counters, quest givers, hooks into dialogue and triggers.
+Reference: appendices/C-quest-format.txt, decisions.txt D-44..D-52.
+
+09.00 — QUEST COMPONENTS (entt)
+  09.00.001 — Create src/quest/QuestComponents.hpp
+    - struct QuestId { entt::id_type value; std::string key; };
+    - struct QuestState { enum Phase { Hidden, Offered, Active, Completed, Failed }; Phase phase; int stage_index; float stage_time; };
+    - struct ObjectiveState { std::vector<int> counters; std::set<std::string> flags; std::set<entt::entity> targets; };
+    - struct QuestLog { std::vector<entt::entity> active; std::vector<entt::entity> completed; std::vector<entt::entity> failed; std::map<entt::entity, int> unread; };
+    - struct QuestGiver { entt::entity npc; std::vector<std::string> quest_keys; };
+    - struct EscortState { entt::entity follower; entt::entity destination; float max_distance; bool arrived; };
+    - struct InvestigationState { std::vector<entt::entity> clue_entities; int clues_found; int clues_required; };
+  09.00.002 — Add to entt registry in World init
+    - Register QuestState, ObjectiveState, EscortState, InvestigationState
+  09.00.003 — Create src/quest/QuestTypes.hpp
+    - enum class StageKind { Objective, Branch, Simultaneous, Escort, Investigate, Timed, Kill, Fetch };
+    - struct Stage { std::string id; StageKind kind; std::string text; std::vector<Condition> conditions; };
+    - struct QuestDef { std::string key; std::string title; std::string category; std::vector<Stage> stages; std::vector<Stage> branches; int xp_reward; std::vector<ItemRef> item_rewards; std::vector<FactionRep> faction_rewards; };
+    - struct Condition { enum Op { HasFlag, FlagEquals, HasItem, Killed, ArrivedAt, TimeOfDay, FactionRank, QuestPhase, VarEquals }; Op op; std::vector<std::string> args; };
+
+09.01 — QUEST DEFINITION LOADER
+  09.01.001 — Create src/quest/QuestDef.hpp/cpp
+    - struct ParsedQuest { QuestDef def; std::map<std::string, int> stage_index; };
+  09.01.002 — Implement qst_lexer (tokenize .qst files)
+    - Tokens: QUEST, STAGE, BRANCH, ON_ENTER, ON_COMPLETE, ON_FAIL, OBJECTIVE, BRANCH_KW, SIMULTANEOUS, ESCORT, INVESTIGATE, TIMED, KILL, FETCH, IF, COND, REWARD, FACTION, ITEM, XP, TEXT, ID, TIME, DISTANCE, COUNTER, FLAG, TARGET, IDENT, STRING, NUMBER, COLON, LBRACE, RBRACE, LPAREN, RPAREN, ARROW, EQUALS, COMMA, EOF
+  09.01.003 — Implement qst_parser (recursive descent)
+    - parse_quest(): parse header, stages, branches, rewards
+    - parse_stage(): dispatch on stage kind
+    - parse_condition(): parse IF/COND expressions
+    - parse_reward(): parse REWARD block
+  09.01.004 — Implement qst_eval (validate parsed AST, build stage_index)
+  09.01.005 — Add 30 unit tests for qst_parser in tests/quest/parser_test.cpp
+    - Empty quest, single objective, branch, simultaneous, timed, kill counter, fetch counter, nested conditions
+  09.01.006 — Hook loader into World::load_quests(path)
+    - Glob content/quests/*.qst, parse each, store in registry indexed by key
+  09.01.007 — Add QuestCatalog (singleton) holding map<key, ParsedQuest>
+
+09.02 — QUEST JOURNAL SYSTEM
+  09.02.001 — Create src/quest/QuestJournal.hpp/cpp
+    - class QuestJournal { entt::registry& reg; QuestCatalog& catalog; public: void offer(entity qid); void accept(entity qid); void abandon(entity qid); void complete(entity qid); void fail(entity qid); void update(float dt); };
+  09.02.002 — Implement offer()
+    - Add to QuestLog.active, set QuestState.phase=Offered, set QuestState.stage_index=0, fire quest_offered signal
+  09.02.003 — Implement accept()
+    - phase=Active, fire quest_accepted signal, play journal sound
+  09.02.004 — Implement abandon()
+    - phase=Failed, move to failed list, fire quest_abandoned signal
+  09.02.005 — Implement complete() / fail()
+    - Apply XP, items, faction rewards, fire quest_completed/quest_failed signal
+  09.02.006 — Implement update(dt)
+    - Iterate active quests, evaluate current stage, decrement timers, check kill/fetch counters, advance on completion
+  09.02.007 — Add save/load hooks for QuestJournal state
+    - Serialize QuestLog.active/completed/failed, each QuestState, ObjectiveState
+
+09.03 — STAGE EVALUATION
+  09.03.001 — Create src/quest/StageEvaluator.hpp/cpp
+    - bool evaluate_stage(const QuestDef& def, const Stage& stage, QuestState& state, ObjectiveState& obj);
+  09.03.002 — Implement StageKind::Objective
+    - Check obj.counters and obj.flags, return true when satisfied
+  09.03.003 — Implement StageKind::Branch
+    - Evaluate conditions in order, return first matching stage id
+  09.03.004 — Implement StageKind::Simultaneous
+    - All sub-stages must be complete
+  09.03.005 — Implement StageKind::Escort
+    - Check follower alive + within max_distance + arrived at destination
+  09.03.006 — Implement StageKind::Investigate
+    - Check clues_found >= clues_required
+  09.03.007 — Implement StageKind::Timed
+    - Check state.stage_time <= 0
+  09.03.008 — Implement StageKind::Kill
+    - Check obj.targets contains required kills (deduped by entity)
+  09.03.009 — Implement StageKind::Fetch
+    - Check inventory contains required items
+
+09.04 — QUEST EVENT HOOKS
+  09.04.001 — Create src/quest/QuestEvents.hpp
+    - enum class QuestEvent { OnKill, OnItemPickup, OnDialogueEnd, OnMapEnter, OnFlagSet, OnTimeTick, OnNpcDeath, OnTrigger };
+    - struct QuestEventData { variant<entity, string, int> payload; };
+  09.04.002 — Implement dispatch(event, data)
+    - For each active quest, evaluate stages against event, advance if matched
+  09.04.003 — Wire OnKill from CombatSystem::on_kill
+  09.04.004 — Wire OnItemPickup from InventorySystem::on_pickup
+  09.04.005 — Wire OnDialogueEnd from DialogueSystem::on_close
+  09.04.006 — Wire OnMapEnter from World::on_map_change
+  09.04.007 — Wire OnFlagSet from World::set_flag
+  09.04.008 — Wire OnNpcDeath from NPC death handler
+  09.04.009 — Wire OnTrigger from TriggerSystem::on_activate
+
+09.05 — QUEST GIVERS
+  09.05.001 — Create src/quest/QuestGivers.hpp/cpp
+    - void assign_quests_to_npc(entity npc, vector<string> quest_keys);
+  09.05.002 — Hook into DialogueSystem::start_conversation
+    - When player greets NPC, check QuestGiver component, offer each quest if conditions met
+  09.05.003 — Add conditional offering: quest offered only if prerequisites met (quest_phase, faction_rank, flag)
+  09.05.004 — Add "ask about work" dialogue topic that lists available quests
+  09.05.005 — Add quest auto-offer on map enter (for scripted sequences)
+  09.05.006 — Add quest reveal via item pickup (readable books, notes)
+
+09.06 — ESCORT QUESTS
+  09.06.001 — Create src/quest/EscortSystem.hpp/cpp
+    - void start_escort(entity follower, entity destination);
+    - void update_escort(entity quest, float dt);
+  09.06.002 — Spawn follower NPC near player with EscortFollower component
+    - Follower pathfinds toward player if distance > 4 cells, waits otherwise
+  09.06.003 — Set follower faction to "Escort" so combat AI doesn't attack them
+  09.06.004 — If follower dies, fail escort quest with message
+  09.06.005 — If follower strays beyond max_distance, warn player, then fail after 30s
+  09.06.006 — On arrival at destination, fire quest_completed stage trigger
+  09.06.007 — Add EscortFollower AI: idle near player, no wandering, flee if low HP
+  09.06.008 — Display follower name + distance in HUD when escort active
+  09.06.009 — Add 10 unit tests for EscortSystem (follow, death, distance, arrival)
+
+09.07 — INVESTIGATION QUESTS
+  09.07.001 — Create src/quest/InvestigationSystem.hpp/cpp
+    - void register_clue(entity quest, entity clue_entity);
+    - void on_clue_examined(entity quest, entity clue_entity);
+  09.07.002 — Spawn clue entities (glyph + flag byte) hidden in environment
+    - Some clues visible on screen, others require detect_value skill
+  09.07.003 — When player examines clue (E key on entity), add to InvestigationState.clues_found
+  09.07.004 — Update journal text to show "Clues found: 3/5"
+  09.07.005 — Show clue text in journal when found
+  09.07.006 — On all clues found, advance stage
+
+09.08 — TIMED QUESTS
+  09.08.001 — Create src/quest/TimedQuest.hpp/cpp
+    - void start_timer(entity quest, float seconds);
+  09.08.002 — QuestState.stage_time counts down via QuestJournal::update(dt)
+  09.08.003 — When timer expires, fire stage_complete or quest_failed per spec
+  09.08.004 — HUD shows remaining time as bar + numeric when quest active
+  09.08.005 — Pause timer when game paused (TimeScale=0)
+  09.08.006 — Add 6 unit tests for timer logic (start, pause, expire, scope)
+
+09.09 — KILL/FETCH COUNTERS
+  09.09.001 — On CombatSystem::on_kill, find active quests with Kill stage matching target creature type
+    - Increment ObjectiveState.counters[stage_id], add to targets set if dedup
+  09.09.002 — On InventorySystem::on_pickup, find active quests with Fetch stage matching item
+    - Decrement ObjectiveState.counters[stage_id] or add to targets
+  09.09.003 — Show "Glimmerwolves slain: 4/7" in journal entry
+  09.09.004 — Persist counters across save/load
+  09.09.005 — Add 8 unit tests (kill counter increment, fetch, persist, dedup)
+
+09.10 — QUEST UI
+  09.10.001 — Create src/quest/QuestUi.hpp/cpp
+    - void render_journal(Buffer& buf, Rect area, QuestLog& log, QuestCatalog& catalog);
+    - void render_objective_panel(Buffer& buf, Rect area, entity quest, int stage_index);
+  09.10.002 — Journal list shows: category icon, quest title, current objective text, completion checkbox
+  09.10.003 — Color: active=white, completed=green, failed=red, unread=yellow
+  09.10.004 — Active quest highlighted in left panel; details in right panel
+  09.10.005 — Sort: active first by category, then completed, then failed
+  09.10.006 — Filter by category (Main, Faction, Side, Misc)
+  09.09.007 — Search by keyword (matches title and current objective text)
+  09.10.008 — Show quest giver NPC name when hovering entry
+  09.10.009 — Show rewards preview on selection
+  09.10.010 — Track read/unread state, mark read on view
+  09.10.011 — Add "Set Active Quest" button (pins objective to HUD compass)
+  09.10.012 — HUD compass shows current objective direction + distance (no map marker, only direction)
+
+09.11 — QUEST SCRIPTING
+  09.11.001 — Implement ON_ENTER/ON_COMPLETE/ON_FAIL callbacks in .qst files
+    - Run arbitrary Lua-like script snippet (variable set, item give, faction rep, flag set)
+  09.11.002 — Create src/quest/QuestScript.hpp/cpp
+    - void run_callback(const std::string& script, World& world, entity quest);
+    - Tokenize and execute: SET flag x = y, GIVE item, REP faction amount, START_QUEST, FAIL_QUEST, TELEPORT map x y
+  09.11.003 — Add 12 unit tests for scripting (set, give, rep, chained)
+
+09.12 — QUEST INTEGRATION
+  09.12.001 — Wire QuestJournal into main game loop update
+  09.12.002 — Wire quest events into all source systems
+  09.12.003 — Add 50 integration tests in tests/quest/integration_test.cpp
+    - Full quest flows from offer to completion
+    - Branching paths
+    - Multi-stage simultaneous objectives
+    - Escort death/fail
+    - Investigation completion
+    - Timed fail
+    - Kill counter dedup
+    - Fetch counter
+    - Save/load quest state
+  09.12.004 — Add CLI flag --quest-test to run scripted quest validation
+  09.12.005 — Add CLI flag --quest-list to dump all loaded quests with stages
+  09.12.006 — Performance: 100 active quests should update in <1ms per frame
+
+09.13 — SAVE/LOAD INTEGRATION (preview, full impl in phase 10)
+  09.13.001 — Add to QuestJournal::serialize/deserialize
+    - All QuestLog entries with QuestState + ObjectiveState
+  09.13.002 — Hook into save system scheduled for phase 10
+
+09.14 — QUEST EXAMPLE FILE
+  09.14.001 — Create content/quests/example_intro.qst
+    - QUEST example_intro "The Waking"
+    - STAGE 1: OBJECTIVE "Find the Cartographer" ON_FLAG met_cartographer
+    - STAGE 2: BRANCH IF FACTION coastal_watch >= 2 "Trust" ELSE "Suspicion"
+    - REWARD XP 100 FACTION coastal_watch +1
+
+09.15 — PHASE 09 VERIFICATION
+  09.15.001 — Run tests/quest/parser_test.cpp — expect 30/30 pass
+  09.15.002 — Run tests/quest/integration_test.cpp — expect 50/50 pass
+  09.15.003 — Run --quest-test on example_intro.qst — expect stages advance correctly
+  09.15.004 — Verify save/load roundtrip preserves quest state
+  09.15.005 — Verify UI renders all quest types
+  09.15.006 — Performance benchmark 100 active quests <1ms/frame
+  09.15.007 — Document phase 09 completion in progress.md
+
+END PHASE 09

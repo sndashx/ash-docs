@@ -1,0 +1,170 @@
+ASH — Phase 05: Input & Camera
+================================
+
+Phase goal: input mode stack, modal UI, configurable keybinds,
+mouse support, follow camera, sub-cell smoothing.
+
+Entry criteria: Phase 4 complete.
+Exit criteria: a player can walk around a 20x20 map with smooth
+              camera follow, mouse picks up items, keybinds are
+              rebindable.
+
+[ENTRY CRITERIA]
+  - Phase 4 complete.
+
+[EXIT CRITERIA]
+  - Mode stack works: EXPLORE > MENU > DIALOGUE etc.
+  - Camera follows player smoothly.
+  - Mouse clicks pick up items.
+  - Keybinds load from ~/.config/ash/keybinds.json.
+  - Custom rebinds take effect on restart.
+
+[RISKS]
+  - Modal stack correctness. Mitigation: explicit mode transitions
+    with assertions.
+  - Mouse capture reliability. Mitigation: SGR mode + tested
+    terminals.
+
+Step 0500.00.00. Create src/ui/mode.hpp.
+  - Sub: enum class UiMode { Explore, Menu, Dialogue, Inventory,
+         Map, Spells, Journal, Character, Barter, Book, Editor,
+         Settings, GameOver, MainMenu };
+
+Step 0500.00.01. Implement ModeStack.
+  - Sub: std::stack<UiMode> stack.
+  - Sub: push(mode), pop(), current().
+
+Step 0500.00.02. Implement ModeStack::transition.
+  - Sub: Checks if transition is allowed (e.g., can't open inventory
+         from combat without pausing).
+  - Sub: Calls on_exit on current, on_enter on new.
+
+Step 0501.00.00. Create src/input/keybinds.hpp.
+  - Sub: struct Keybinds { std::map<std::string, std::vector<std::string>> binds; };
+
+Step 0501.00.01. Implement Keybinds::load(json).
+  - Sub: Parse keybinds.json.
+  - Sub: Validate against schema.
+
+Step 0501.00.02. Implement Keybinds::get(mode, action).
+  - Sub: Returns vector of key strings for action in mode.
+
+Step 0501.00.03. Implement Keybinds::set(mode, action, key).
+  - Sub: Replace bind.
+  - Sub: Validate no conflict.
+
+Step 0501.00.04. Implement Keybinds::save(json).
+  - Sub: Write to ~/.config/ash/keybinds.json.
+
+Step 0501.00.05. Tests for Keybinds.
+  - Sub: Load defaults.
+  - Sub: Get/set.
+  - Sub: Conflict detection.
+
+Step 0502.00.00. Wire input into mode system.
+  - Sub: Each mode has handle_key(event, world) -> bool.
+  - Sub: Bubble to global if not handled.
+
+Step 0502.00.01. Implement EXPLORE mode handler.
+  - Sub: Movement keys -> player.move.
+  - Sub: Interact -> world.try_interact.
+  - Sub: Open menu -> push Menu.
+
+Step 0502.00.02. Implement MENU mode handler.
+  - Sub: Arrow keys navigate.
+  - Sub: Enter selects.
+  - Sub: Esc pops.
+
+Step 0502.00.03. Implement DIALOGUE mode handler.
+  - Sub: Topic list navigation.
+  - Sub: Skill checks.
+  - Sub: Push/pop on conversation start/end.
+
+Step 0503.00.00. Update camera with follow behavior.
+  - Sub: Camera::follow(target_pos, dt).
+  - Sub: Lerp factor = 0.15 (slow follow).
+
+Step 0503.00.01. Implement smooth camera.
+  - Sub: Camera position lerps toward target.
+  - Sub: dt-aware so framerate-independent.
+
+Step 0503.00.02. Implement camera bounds.
+  - Sub: Camera clamped to map edges.
+  - Sub: If map smaller than viewport, center map.
+
+Step 0503.00.03. Implement camera shake.
+  - Sub: Add random offset for duration ms.
+  - Sub: Used on impact, explosions, etc.
+
+Step 0504.00.00. Mouse support integration.
+  - Sub: Toggle: ctrl+M enables SGR mouse.
+  - Sub: Default off in v1.
+
+Step 0504.00.01. Implement mouse hover.
+  - Sub: Track last mouse pos.
+  - Sub: Render hover indicator on entities.
+
+Step 0504.00.02. Implement mouse click in explore.
+  - Sub: Click on entity -> interact or attack.
+  - Sub: Click on item -> pick up.
+
+Step 0504.00.03. Implement mouse click in menus.
+  - Sub: Click on menu item -> select.
+
+Step 0504.00.04. Implement mouse drag in inventory.
+  - Sub: Drag item to slot or other inventory.
+
+Step 0505.00.00. Sub-cell motion smoothing.
+  - Sub: Player position interpolates between cells.
+  - Sub: Velocity * dt.
+
+Step 0505.00.01. Implement movement input -> velocity.
+  - Sub: Hold direction -> velocity.
+  - Sub: Release -> velocity = 0.
+
+Step 0505.00.02. Implement velocity -> position.
+  - Sub: position += velocity * dt.
+  - Sub: Snap to cell on collision.
+
+Step 0506.00.00. Implement look mode.
+  - Sub: 'l' key enters look.
+  - Sub: Cursor moves with arrow keys.
+  - Sub: Tooltip shows entity info.
+  - Sub: 'l' or esc exits.
+
+Step 0507.00.00. Implement pause toggle.
+  - Sub: Spacebar pauses.
+  - Sub: While paused, time doesn't advance.
+  - Sub: AI doesn't act.
+  - Sub: UI updates still work.
+
+Step 0507.00.01. Implement pause overlay.
+  - Sub: "PAUSED" text in center.
+  - Sub: Time controls visible.
+
+Step 0508.00.00. Tests for input system.
+  - Sub: Mode stack transitions.
+  - Sub: Keybinds loading.
+  - Sub: Movement input -> position change.
+
+Step 0509.00.00. Verify build.
+
+Step 0509.00.01. Final commit.
+  - Sub: git commit -m "feat(phase-05): input mode stack and camera".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --render-test --map=test_20x20
+  Player walks smoothly with arrow keys.
+  Camera follows.
+  Resize window, camera recalibrates.
+  Mouse hover highlights entities.
+  Esc opens menu.
+
+[PHASE 5 PLAYABLE BUILD]
+
+  Build 05: "Wandering"
+    - Larger test map.
+    - Smooth camera.
+    - All input modes accessible.
+    - Ready for UI work.

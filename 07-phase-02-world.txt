@@ -1,0 +1,333 @@
+ASH — Phase 02: World Data Model
+==================================
+
+Phase goal: an entt-based world representation. Maps hold cells,
+entities, components. Spatial queries work. Triggers fire.
+
+Entry criteria: Phase 1 complete.
+Exit criteria: a 5x5 test map with 3 entities (player, NPC, item)
+              loads; player can walk into the NPC's trigger and
+              see it fire in the log.
+
+[ENTRY CRITERIA]
+  - Phase 1 complete.
+
+[EXIT CRITERIA]
+  - Map struct loads from struct (not yet from .xp).
+  - Entity components registered.
+  - Player can move with collision detection.
+  - NPC has schedule (stub) and disposition.
+  - Item can be picked up and added to inventory.
+  - Trigger fires on entry; logs event.
+
+[RISKS]
+  - entt signal handling and lifecycle. Mitigation: clear ownership
+    of registry.
+  - Collision detection cost at large entity counts. Mitigation:
+    spatial hash grid (later optimization).
+
+Step 0200.00.00. Create src/core/ids.hpp.
+  - Sub: struct MapId { std::string value; };
+  - Sub: struct NpcId { std::string value; };
+  - Sub: struct ItemId { std::string value; };
+  - Sub: struct QuestId { std::string value; };
+  - Sub: struct FactionId { std::string value; };
+  - Sub: struct AnimId { std::string value; };
+  - Sub: Each has operator==, operator<, std::hash.
+  - Sub: Tests for id types.
+
+Step 0201.00.00. Create src/world/components.hpp.
+  - Sub: namespace ash::world.
+  - Sub: All components in one header for now (split later if needed).
+
+Step 0201.00.01. Define Position component.
+  - Sub: struct Position { int cell_x, cell_y; uint8_t sub_x, sub_y; };
+  - Sub: 8 bytes.
+  - Sub: sub_x, sub_y in [0, 15].
+
+Step 0201.00.02. Define Velocity component.
+  - Sub: struct Velocity { math::Vec2<Fixed> v; };
+  - Sub: Per-tick movement delta.
+
+Step 0201.00.03. Define Glyph component.
+  - Sub: struct Glyph { uint32_t current; uint32_t base;
+         AnimId anim_id; uint8_t fg_r, fg_g, fg_b; };
+  - Sub: Animation updates current over time.
+
+Step 0201.00.04. Define Faction component.
+  - Sub: struct Faction { FactionId id; int rank; };
+
+Step 0201.00.05. Define Stats component.
+  - Sub: struct Stats { int hp, hp_max, vp, vp_max, sp, sp_max; };
+
+Step 0201.00.06. Define Attributes component.
+  - Sub: struct Attributes {
+         int str, end, agi, wil, int_, wit, cha, luc, voi;
+       };
+  - Sub: Each in [1, 100].
+
+Step 0201.00.07. Define Skills component.
+  - Sub: struct Skills {
+         int armorer, blunt, blade, marksman, dodge, thrown,
+             mysticism, restoration, warding,
+             alchemy, enchant, spellcraft,
+             stealth, pickpocket, security,
+             speechcraft, mercantile, illusion,
+             deception, intimidation, seduction,
+             history, theology, linguistics;
+       };
+  - Sub: Each in [0, 100].
+
+Step 0201.00.08. Define Inventory component.
+  - Sub: struct Inventory {
+         std::vector<ItemId> items;
+         std::map<EquipSlot, ItemId> equipped;
+       };
+  - Sub: EquipSlot enum: Weapon, OffHand, Chest, Helm, Boots, Gloves,
+         RingLeft, RingRight, Amulet.
+
+Step 0201.00.09. Define Dialogue component.
+  - Sub: struct Dialogue { NpcId npc_id; std::string current_node; };
+
+Step 0201.00.10. Define Schedule component.
+  - Sub: struct Schedule { std::string schedule_id;
+         int current_block_index; int minute_offset; };
+
+Step 0201.00.11. Define Disposition component.
+  - Sub: struct Disposition { int base;
+         std::vector<std::pair<std::string, int>> modifiers; };
+  - Sub: effective = base + sum(modifiers).
+
+Step 0201.00.12. Define LightEmitter component.
+  - Sub: struct LightEmitter { uint8_t radius;
+         uint8_t intensity; bool flicker; uint8_t r, g, b; };
+
+Step 0201.00.13. Define LightReceiver component.
+  - Sub: struct LightReceiver {}; // marker
+
+Step 0201.00.14. Define Container component.
+  - Sub: struct Container { std::vector<ItemId> contents;
+         bool locked; bool trapped; ItemId key_id; };
+
+Step 0201.00.15. Define Door component.
+  - Sub: struct Door { bool open; bool locked; ItemId key_id;
+         bool trapped; std::string script_on_open; };
+
+Step 0201.00.16. Define Trigger component.
+  - Sub: struct Trigger { std::string event;
+         std::string condition;
+         int fired_count; bool one_shot; };
+
+Step 0201.00.17. Define Interactable component.
+  - Sub: struct Interactable { uint8_t radius;
+         std::string script_on_use; };
+
+Step 0201.00.18. Define Corpse component.
+  - Sub: struct Corpse { double death_time;
+         std::vector<ItemId> inventory_snapshot;
+         bool looted; };
+
+Step 0201.00.19. Define ScriptOwner component.
+  - Sub: struct ScriptOwner { std::vector<std::string> scripts; };
+
+Step 0201.00.20. Define Marker components.
+  - Sub: struct Player {};
+  - Sub: struct Npc {};
+  - Sub: struct Creature {};
+  - Sub: struct Item {};
+  - Sub: struct Light {};
+  - Sub: struct Sign {};
+  - Sub: struct Book {};
+
+Step 0202.00.00. Create src/world/map.hpp.
+  - Sub: struct Map {
+         MapId id;
+         std::string display_name;
+         uint16_t width_cells, height_cells;
+         AmbientLight ambient;
+         Weather weather;
+         entt::registry entities;  // entities scoped to this map
+         std::array<Layer, 9> layers;
+         CollisionGrid collision;
+       };
+
+Step 0202.00.01. Define AmbientLight.
+  - Sub: struct AmbientLight { uint8_t level; Color tint; };
+
+Step 0202.00.02. Define Weather enum.
+  - Sub: enum class Weather { Clear, Overcast, Rain, Storm, Fog, Snow };
+
+Step 0202.00.03. Define Layer.
+  - Sub: struct Layer { std::vector<Cell> cells;
+         bool visible; bool locked; };
+
+Step 0202.00.04. Define CollisionGrid.
+  - Sub: struct CollisionGrid {
+         std::vector<uint8_t> flags;  // 1 bit WALK, 1 bit BLOCK, etc.
+         uint16_t width, height;
+       };
+  - Sub: bool is_walkable(int x, int y) const.
+  - Sub: bool is_blocking(int x, int y) const.
+  - Sub: bool is_opaque(int x, int y) const.
+
+Step 0202.00.05. Implement CollisionGrid::resize(w, h).
+  - Sub: Default all to WALK.
+
+Step 0202.00.06. Implement CollisionGrid::set_flag(x, y, flag).
+  - Sub: Set or clear bit.
+
+Step 0202.00.07. Tests for CollisionGrid.
+
+Step 0203.00.00. Create src/world/world.hpp.
+  - Sub: struct World {
+         std::map<MapId, std::unique_ptr<Map>> maps;
+         entt::registry global_entities;  // for player, global flags
+         MapId current_map;
+       };
+
+Step 0203.00.01. Implement World::load_map(MapId).
+  - Sub: If not loaded, load from disk (later phase 03).
+  - Sub: Return reference to Map.
+
+Step 0203.00.02. Implement World::unload_map(MapId).
+  - Sub: If not adjacent to current map, unload.
+  - Sub: Save state if dirty.
+
+Step 0203.00.03. Implement World::current().
+  - Sub: Return current Map reference.
+
+Step 0203.00.04. Implement World::set_current(MapId).
+  - Sub: Trigger map entry events.
+
+Step 0204.00.00. Create src/world/spawn.hpp.
+  - Sub: entt::entity spawn_player(World&, Position const&,
+         Attributes const&, Skills const&, Inventory const&).
+
+Step 0204.00.01. Implement spawn_player.
+  - Sub: Attach Position, Velocity, Glyph, Attributes, Skills,
+         Inventory, Stats, Player marker.
+  - Sub: Place in global_entities (player persists across maps).
+
+Step 0204.00.02. Implement spawn_npc(Map&, NpcSpec const&).
+  - Sub: Attach all NPC components from spec.
+
+Step 0204.00.03. Implement spawn_item(Map&, ItemId, Position).
+  - Sub: Attach Position, Glyph, Item marker.
+
+Step 0204.00.04. Implement spawn_container(Map&, ContainerSpec).
+  - Sub: Attach Position, Glyph, Container.
+
+Step 0204.00.05. Implement spawn_door(Map&, DoorSpec).
+  - Sub: Attach Position, Glyph, Door.
+
+Step 0204.00.06. Implement spawn_trigger(Map&, TriggerSpec).
+  - Sub: Attach Position, Glyph (invisible flag), Trigger.
+
+Step 0204.00.07. Implement spawn_light(Map&, LightSpec).
+  - Sub: Attach Position, Glyph, LightEmitter.
+
+Step 0204.00.08. Implement despawn.
+  - Sub: entt::entity handle, world.registry.destroy(entity).
+  - Sub: Drop components, log if persistent.
+
+Step 0205.00.00. Create src/world/query.hpp.
+  - Sub: std::vector<entt::entity> entities_in_rect(
+         entt::registry&, IRect);
+
+Step 0205.00.01. Implement entities_in_rect.
+  - Sub: Loop all entities with Position.
+  - Sub: Check if in rect.
+  - Sub: Return list.
+
+Step 0205.00.02. Implement entity_at(registry, x, y).
+  - Sub: Returns first entity at (x, y), or null.
+
+Step 0205.00.03. Implement entities_with(registry, Component).
+  - Sub: Returns view of entities with Component.
+
+Step 0205.00.04. Implement closest_entity_to(registry, Position, Component).
+  - Sub: Find nearest entity with Component.
+
+Step 0205.00.05. Tests for queries.
+
+Step 0206.00.00. Create src/world/trigger.hpp.
+  - Sub: void check_triggers(Map&, entt::entity who, Position const&).
+
+Step 0206.00.01. Implement trigger checker.
+  - Sub: For each Trigger entity, check if who is inside.
+  - Sub: If condition met, run event script.
+  - Sub: Increment fired_count.
+  - Sub: If one_shot, disable after first fire.
+
+Step 0206.00.02. Implement trigger event log.
+  - Sub: Log "trigger fired: <id>" at info level.
+
+Step 0207.00.00. Create src/world/movement.hpp.
+  - Sub: enum class MoveResult { Ok, Blocked, OutOfBounds };
+
+Step 0207.00.01. Implement try_move(World&, entt::entity, IVec2 delta).
+  - Sub: Compute new position.
+  - Sub: Check collision grid.
+  - Sub: Check entity blocking.
+  - Sub: Return result.
+
+Step 0207.00.02. Implement move_with_collision.
+  - Sub: Sub-cell motion: convert cell delta to sub-cell delta.
+  - Sub: Move entity, snap to cell on collision.
+
+Step 0207.00.03. Tests for movement.
+
+Step 0208.00.00. Create test world map in code.
+  - Sub: 5x5 grid, walls on border, floor inside.
+  - Sub: Spawn player at (2, 2).
+  - Sub: Spawn NPC at (4, 2) with trigger.
+  - Sub: Spawn item at (2, 4).
+
+Step 0208.00.01. Render test map in render-test mode.
+  - Sub: --render-test --map=test_5x5.
+
+Step 0208.00.02. Implement player movement with input.
+  - Sub: Arrow keys move player.
+  - Sub: Collision stops movement.
+
+Step 0208.00.03. Implement item pickup.
+  - Sub: Player walks onto item.
+  - Sub: Item added to inventory.
+  - Sub: Item despawned.
+
+Step 0208.00.04. Implement trigger firing.
+  - Sub: Player walks into NPC's trigger area.
+  - Sub: Log fires.
+
+Step 0209.00.00. Tests for full world lifecycle.
+
+Step 0209.00.01. Integration test.
+  - Sub: Load map, spawn entities, move player, fire trigger, log.
+
+Step 0210.00.00. Verify build and run.
+  - Sub: cmake --build build -j.
+  - Sub: ./build/ash --render-test --map=test_5x5.
+  - Sub: Visual verification.
+
+Step 0210.00.01. Final commit.
+  - Sub: git commit -m "feat(phase-02): world data model with entt".
+
+[EXIT VERIFICATION]
+
+  $ ./build/ash --render-test --map=test_5x5
+  5x5 grid rendered.
+  Player (gold V) at center.
+  NPC (cyan M) at east.
+  Item (cyan !) at south.
+  Arrow keys move player.
+  Cannot walk through walls.
+  Walking onto item removes it from map, adds to inventory.
+  Walking into NPC fires trigger, log shows "trigger fired: npc_greet".
+
+[PHASE 2 PLAYABLE BUILD]
+
+  Build 02: "Test Room"
+    - 5x5 room.
+    - Player moves with arrow keys.
+    - Items pickable.
+    - Triggers fire.

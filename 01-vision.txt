@@ -1,0 +1,169 @@
+ASH — Vision
+============
+
+One-paragraph pitch
+-------------------
+
+Ash of the Shattered Covenant is a single-player, hand-authored ASCII RPG
+set 200 years after a god-war that broke the sky into permanent floating
+shards. The player wakes in a crypt with no memory, holding a blade
+inscribed in a language that moves. Across five regions — the Scoured
+Coast, the Glasswood, the Riven Spire, the Ash Plains, and the Hollow
+Cities — they unravel who broke the sky and why their blade carries the
+language of the gods. The game is presented in a truecolor terminal
+using REXPaint as its authoring format, with Morrowind-level density of
+named NPCs, Fallout 1/2-style dialogue, Baldur's Gate 3-style real-time-
+with-pause combat, and Disco Elysium-style skill voices.
+
+Why REXPaint + C++
+------------------
+
+REXPaint provides a CP437 + 24-bit color authoring format that maps
+directly to a truecolor terminal. Hand-authored .xp files are both the
+in-game world data and the artist's canvas — no separate asset pipeline,
+no sprite-atlas packing, no compression pipeline. The in-game editor
+is the same tool that ships with the game; there is no export step.
+
+C++ is chosen because:
+  - The game must own every byte for deterministic save/load.
+  - Hand-authored content (200+ maps, ~600 NPCs, ~400 items, ~40 books)
+    demands zero-copy serialization, which C++20 gives for free via
+    structured bindings and consteval where useful.
+  - The rendering pipeline is custom (truecolor terminal compositor),
+    so a high-level engine (Godot/Unity) would be in the way.
+  - entt provides ECS with no runtime overhead and no build-system pain.
+
+What we are explicitly NOT building
+-----------------------------------
+
+  - Procedural generation. Every map is hand-authored. The world has
+    edges and seams on purpose.
+  - Voice acting. NPCs speak in text.
+  - Sound. The slice is silent. (Post-launch: optional ambient via SDL.)
+  - Multiplayer. Single-player only, always.
+  - Mod tools in v1. File formats are documented for future modding
+    but no official toolchain is shipped.
+  - Cutscenes. Plot advances via dialogue, journal entries, and
+    environmental state changes.
+
+Reference points and what we steal from each
+--------------------------------------------
+
+  Morrowind
+    - Hand-authored density over procedural size.
+    - NPCs with daily schedules and names.
+    - No quest markers; journals give directions.
+    - Joinable factions with reputation.
+    - Slow, weighty first-person movement.
+
+  Fallout 1/2
+    - Dialogue as topic list with skill-gated options.
+    - Every NPC killable, death persists.
+    - Special stats (Strength, Perception, ...) that gate dialogue.
+    - Reputation with towns as currency.
+    - Dark humor in item descriptions and dialogue.
+
+  Fallout 3 (and the metro levels specifically)
+    - Environmental storytelling via object placement.
+    - Skeletons with named journals and personal effects.
+    - Factional graffiti and propaganda in urban ruins.
+    - Loading-screen lore as a deliberate device.
+
+  Baldur's Gate 3
+    - Real-time-with-pause combat.
+    - Action economy (move + action + bonus).
+    - Verticality in maps.
+    - Party members with strong voiced identities.
+      (We substitute: party members with strong written identities.)
+
+  Dark Souls
+    - Item descriptions that imply history.
+    - Lore in load screens.
+    - Weapons and armor as named artifacts with stories.
+    - Difficulty as atmosphere, not punishment.
+
+  Disco Elysium
+    - Skill voices that comment on the world.
+    - Failure states that are content, not punishment.
+    - Thought cabinet as progression.
+    - Conversation as the core mechanic.
+
+  Ultima VII
+    - Single contiguous world with no loading screens between regions.
+    - NPCs who work, eat, sleep, gossip.
+    - Karma as emergent property, not a number.
+
+  Planescape: Torment
+    - Dialogue as the primary content type.
+    - "What can change the nature of a man?" — identity as theme.
+    - Recurring NPCs across the game who remember.
+
+What is unique to ASH
+---------------------
+
+  - The moving-language on the player's blade changes as the plot
+    progresses. Reading it reveals hints. It is not a menu.
+  - The world is *smaller* than Bethesda-scale but *denser* than
+    anything since Ultima VII. You can read every book, talk to
+    every named NPC, and the world responds.
+  - Every NPC has at least one line of dialogue that changes based
+    on a flag you may never know about. There are easter eggs that
+    require specific combinations of actions across multiple regions.
+  - Death of named NPCs is persistent and *load-bearing*. Kill the
+    blacksmith before he finishes the sword he was making for you,
+    and that sword is gone forever. Some NPCs carry plot items.
+  - The four factions are not good/evil. They are correct in
+    different ways, and the player is asked to choose which
+    correctness they can live with.
+
+Target audience
+---------------
+
+  - Players who finish Morrowind and want another 80 hours of that.
+  - Players who replay Fallout 1/2 every few years.
+  - Terminal-native developers and engineers.
+  - ASCII art enthusiasts and roguelike players.
+  - Lore-hungry readers who want every book to be worth reading.
+
+Non-target audience
+-------------------
+
+  - Players who want voice acting, cutscenes, or 3D graphics.
+  - Players who want procedurally generated content.
+  - Players who want matchmaking or social features.
+  - Players on phones. (The game requires a real keyboard.)
+
+Scope realism
+-------------
+
+  Full game as specified: 3-5 years solo, 2-3 years small team.
+
+  The plan in this directory is the complete design document. It is
+  the artifact a studio would commission before greenlighting
+  production. Executing it is a separate, long-term effort.
+
+  Recommended execution cadence:
+    - 2-week phases
+    - Playable build at end of each phase
+    - Public demo after Phase 11 (polish) covers the Scoured Coast
+    - Early access after Phase 18 (factions) covers 2 regions
+    - 1.0 after Phase 23 (release) covers all 5 regions + main quest
+
+Tone
+----
+
+  The tone is solemn but not humorless. The world is broken; the people
+  in it are not. NPCs tell jokes, gossip, complain about their jobs,
+  fall in love, get drunk, and grieve. The moving-language on the
+  blade is the only explicitly supernatural element the player sees
+  in the first hour.
+
+  Violence is consequential. Combat is not the point of the game;
+  it is the obstacle course through which the player carries the
+  story.
+
+  Beauty is in the world. The Glasswood at noon is a forest of
+  frozen sky-shards humming in the wind; the Riven Spire at dusk
+  is a vertical city lit from below by lava-channels. The Ash
+  Plains at dawn are red-gold and silent. The Hollow Cities are
+  always dark.

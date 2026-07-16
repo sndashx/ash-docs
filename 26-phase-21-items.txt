@@ -1,0 +1,118 @@
+PHASE 21 — ITEM CATALOG (~400 ITEMS)
+======================================
+Complete item catalog: weapons, armor, consumables, books, quest items, valuables, crafting.
+Reference: phases 12-16 region specs for distribution.
+
+21.00 — ITEM STRUCTURE
+  21.00.001 — Each item: { key, name, type, weight, value, description, stats, effects, stackable, unique, quest_item }
+  21.00.002 — Type enum: weapon, armor, shield, consumable, scroll, book, quest, valuable, crafting, food, drink, key, light, misc
+  21.00.003 — Weapon subtypes: dagger, sword, axe, mace, spear, bow, staff, throwing
+  21.00.004 — Armor subtypes: helm, chest, legs, boots, gauntlets, shield, cloak, robe, ring, amulet
+  21.00.005 — Consumable subtypes: potion, scroll, food, drink
+  21.00.006 — Books handled separately in phase 20
+  21.00.007 — Items stored in: content/items/<type>/<key>.json
+  21.00.008 — Master catalog: content/items/_catalog.json
+
+21.10 — WEAPONS (100 total)
+  21.10.001 — Daggers (15): rusted_dagger, sailor_knife, smuggler_stiletto, bone_dagger, glass_dagger, ancient_dagger, shard_dagger, witch_dagger, choir_dagger, watch_dagger, kelp_dagger, ash_dagger, hollow_dagger, etc.
+  21.10.002 — Swords (20): watch_short_sword, watch_long_sword, smuggler_sabre, bone_sword, glass_sword, shard_sword, ancient_sword, hollow_sword, coral_spear, tide_blade (unique), magma_axe (unique), frost_hammer (unique), sky_spear (unique), firebrand (unique), icebrand (unique), stormbrand (unique), etc.
+  21.10.003 — Axes (15): lighthouse_axe, bone_axe, glass_axe, shard_axe, ancient_axe, magma_axe, hollow_axe, frost_axe, etc.
+  21.10.004 — Maces (10): chapel_mace, bone_mace, shard_mace, ancient_mace, hollow_mace, etc.
+  21.10.005 — Spears (10): coral_spear, ash_spear, ancient_spear, hollow_spear, shard_spear, etc.
+  21.10.006 — Bows (10): plains_bow, glass_bow, ancient_bow, hollow_bow, shard_bow, etc.
+  21.10.007 — Staves (10): witch_staff, glass_staff, ancient_staff, hollow_staff, shard_staff, etc.
+  21.10.008 — Throwing (10): glass_throwing_star, bone_throwing, shard_throwing, etc.
+  21.10.009 — Uniques (10): tide_blade, ash_chief_blade, master_breath, hollow_reaper, ancient_king_blade, sky_smith's_pride, choir_master_crook, cartographer_knife, storm_walker's_gift, void_cleaver
+
+21.20 — ARMOR (80 total)
+  21.20.001 — Helms (15): leather_cap, watch_helm, glass_helm, shard_helm, ancient_helm, hollow_helm, magma_helm, frost_helm, choir_circlet, cartographer_hat, witch_hood, smuggler_bandana, etc.
+  21.20.002 — Chest (20): leather_jerkin, watch_leather, watch_chain, smuggler_leather, bone_armor, kelp_vest, chapel_robes, witch_harness, dock_worker_gear, coral_plate, salt-stained_mail, glass_chest, shard_chest, ancient_plate, hollow_armor, magma_armor, frost_armor, etc.
+  21.20.003 — Legs (15): leather_pants, watch_leggings, glass_leggings, shard_leggings, etc.
+  21.20.004 — Boots (15): leather_boots, watch_boots, ash_boots, glass_boots, shard_boots, ancient_boots, hollow_boots, etc.
+  21.20.005 — Gauntlets (10): leather_gloves, watch_gauntlets, glass_gauntlets, smith_gloves, shard_gauntlets, etc.
+  21.20.006 — Shields (5): wooden_round, watch_kite, smuggler_buckler, bone_shield, black_harbor_tower, glass_shield, shard_shield, etc.
+  21.20.007 — Cloaks (10): leather_cloak, ash_cloak, glass_cloak, witch_cloak, choir_cloak, memory_cloak, void_cape (unique), etc.
+  21.20.008 — Robes (5): chapel_robes, choir_vestments, choir_master_vestments (unique), etc.
+  21.20.009 — Accessories (10): rings (5), amulets (5)
+
+21.30 — CONSUMABLES (80 total)
+  21.30.001 — Healing potions (10): minor_heal, heal, greater_heal, full_heal, greater_full_heal, supreme_heal, witch_brew, choir_blessed_water, ancient_heal, void_heal
+  21.30.002 — Mana/spell potions (5): minor_mana, mana, greater_mana, full_mana, supreme_mana
+  21.30.003 — Stamina potions (5): minor_stamina, stamina, greater_stamina, full_stamina, supreme_stamina
+  21.30.004 — Resistance potions (15): fire_resist, frost_resist, lightning_resist, poison_resist, magic_resist, void_resist, fear_resist, charm_resist, sleep_resist, paralysis_resist, disease_resist, curse_resist, water_breathing, light_potion, ash_storm_resist
+  21.30.005 — Buff potions (15): strength_potion, agility_potion, intelligence_potion, wisdom_potion, charisma_potion, luck_potion, voice_potion, attack_potion, defense_potion, speed_potion, accuracy_potion, evasion_potion, regeneration_potion, night_vision, water_walk
+  21.30.006 — Cure potions (10): cure_poison, cure_disease, cure_curse, cure_paralysis, cure_silence, cure_blindness, cure_confusion, remove_drain, restore_attribute, cleanse
+  21.30.007 — Skill potions (10): armorer_potion, blade_potion, blunt_potion, etc. (each grants +5 to skill for 1 hour)
+  21.30.008 — Food (15): bread, cheese, dried_fish, salt_pork, stew, kelp_soup, witch_brew_food, honey_cake, apple, ration, trail_rations, bone_marrow, lighthouse_oil_bread, chapel_bread, captain's_meal
+  21.30.009 — Drinks (10): water, ale, wine, mead, whiskey, tea, herbal_tea, potions (overlap), coffee, milk
+
+21.40 — SCROLLS (15)
+  21.40.001 — Combat: fire_scroll, frost_scroll, lightning_scroll, light_scroll, dark_scroll, magic_missile, fireball, ice_storm, chain_lightning, meteor
+  21.40.002 — Utility: shield_scroll, heal_scroll, cure_scroll, identify_scroll, repair_scroll, enchant_scroll
+
+21.50 — QUEST ITEMS (60)
+  21.50.001 — Act 1 (15): crypt_key, blade_moving_tongue, blade_tempered (upgraded), shard_1_first, tide_blade_shard, lighthouse_keeper_ring, black_pearl_8, captain's_log, smuggled_goods_x5, blessed_token, choir_vow_scroll, sunken_documents_x5, lighthouse_oil_x5, crystal_lens_x3, bonewyrm_spine, etc.
+  21.50.002 — Act 2 (15): atlas_fragment, living_map_piece, mirror_of_truth, sunken_relic, complete_atlas, map_rare_x5, ink_rare_x5, cartographer_seal, shard_2_mapping, etc.
+  21.50.003 — Act 3 (15): shard_at_the_gate, forge_artifact, summit_relic, cloud_key, ancient_forge_key, shard_3_forge, sky_smith_seal, summit_water, magma_heart, etc.
+  21.50.004 — Act 4 (15): buried_map, storm_eye_crystal, drake_horn_x5, ash_chief_relic, lone_cartographer_letter, plains_compass, ash_artifact, water_purifier, etc.
+  21.50.005 — Act 5 (15): hollow_crown, ancient_key, memory_stone_x7, covenant_artifact, choir_seal, void_shard, throne_memory, council_echo, well_water, etc.
+
+21.60 — VALUABLES (50)
+  21.60.001 — Coins: gold_1, gold_5, gold_10, gold_50, silver_1, silver_5, silver_10, copper_1
+  21.60.002 — Ancient currency: ancient_coin, pre_shattering_coin, royal_coin, smuggler_token, watch_token, choir_pin, cartographer_pin, sky_smith_pin
+  21.60.003 — Gems (15): ruby, sapphire, emerald, diamond, amethyst, topaz, onyx, opal, pearl, black_pearl, ghost_pearl, ash_pearl, void_gem, fire_gem, shard_gem
+  21.60.004 — Valuables (20): brass_button, captain's_insignia, lighthouse_lens, bone_fragment, ancient_bone, shrine_relic, sunken_gem, royal_seal, ghost_shell, witch_charm, glass-beads, whale_amber, salt_crystal, coral, beach-glass, etc.
+
+21.70 — CRAFTING MATERIALS (50)
+  21.70.001 — Ores & ingots (20): iron_ore, steel_ingot, sky-steel, shard-steel, magma-steel, frost-steel, gold_ore, silver_ore, copper_ore, tin_ore, mithril, adamant, orichalcum, star-iron, shard_ingot, fire_core, frost_core, lightning_core, void_core, ancient_steel
+  21.70.002 — Wood (10): wood, ancient_wood, charred_wood, glass-wood, petrified_wood, root_wood, sky_wood, ash_wood, thorn_wood, shard_wood
+  21.70.003 — Cloth/Leather (10): cloth, leather, smuggler_leather, ancient_leather, ash-cloth, glass-cloth, choir-cloth, witch-cloth, void-cloth, ancient_wool
+  21.70.004 — Components (15): rope, sailcloth, salt, kelp, bone, sinew, glue, ink, paper, parchment, lockpick_blank, lantern_oil, candle, torch, flint
+  21.70.005 — Herbs (15): herb_basic, herb_rare, glass-flower, mirror-water, echo-stone, root-tea, thorn-essence, ink-of-truth, shard-dust, sun-mote, moon-drop, star-shard, blood-moss, witch_grass, ancient_herb
+  21.70.006 — Magical (10): living_ink, shard_dust, void_dust, ghost_essence, memory_crystal, fire_core, frost_core, lightning_core, void_core, ancient_artifact
+
+21.80 — LIGHTS (10)
+  21.80.001 — torch, lantern, hooded_lantern, eternal_flame, glow_stone, shard_torch, choir_candle, ancient_lamp, ghost_light, memory_lantern, void_glimmer
+
+21.90 — KEYS (20)
+  21.90.001 — Generic keys: rusty_key, iron_key, silver_key, golden_key, ancient_key, shard_key, void_key
+  21.90.002 — Specific keys: crypt_key, chapel_key, lodge_key, lodge_master_key, watch_armory_key, watch_captain_key, choir_chapel_key, choir_high_key, sky_smith_great_key, sky_smith_summit_key, hollow_key, throne_key, covenant_key, etc.
+
+21.100 — MISC ITEMS (15)
+  21.100.001 — Map, compass, spyglass, sextant, rope, grappling_hook, lockpick, skeleton_key, disguise, false_id, love_letter, threatening_letter, anonymous_note, journal (empty), sketch_pad
+
+21.110 — ITEM BALANCE
+  21.110.001 — Common items: 60% (value 1-50 gold)
+  21.110.002 — Uncommon items: 25% (value 50-500)
+  21.110.003 — Rare items: 10% (value 500-2000)
+  21.110.004 — Unique items: 4% (value 2000-20000)
+  21.110.005 — Artifact items: 1% (value 20000+)
+  21.110.006 — Item scaling by level: stats scale with level brackets
+  21.110.007 — No overpowered items: all balanced within ±20% of best-in-slot
+  21.110.008 — Unique items have special abilities that justify rarity
+
+21.120 — ITEM UI
+  21.120.001 — Inventory grid: 6x10 cells
+  21.120.002 — Item icons: ASCII glyph per item type
+  21.120.003 — Item colors: by rarity (white, green, blue, purple, gold)
+  21.120.004 — Tooltip: name, stats, description, value, weight
+  21.120.005 — Compare: highlight better/worse stats vs equipped
+  21.120.006 — Sort: by type, name, value, weight
+  21.120.007 — Filter: by type, rarity
+  21.120.008 — Search: by name
+  21.120.009 — Quick-use: hotkey for potions
+  21.120.010 — Stacking: similar items stack up to 99
+
+21.130 — ITEM VERIFICATION
+  21.130.001 — All ~400 items have correct data
+  21.130.002 — All items render with correct glyph + color
+  21.130.003 — All items have stats within balance range
+  21.130.004 — All items have descriptions
+  21.130.005 — All quest items trigger correctly
+  21.130.006 — All unique items have unique names
+  21.130.007 — All item types covered
+  21.130.008 — Total ~400 items as specified
+  21.130.009 — Document phase 21
+
+END PHASE 21
+ITEM CATALOG COMPLETE: ~400 items across all types, balanced, unique, complete
