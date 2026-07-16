@@ -15,9 +15,20 @@ option(ASH_WARNINGS_AS_ERRORS     "Treat warnings as errors" OFF)
 option(ASH_HOT_RELOAD_CONTENT     "Hot-reload content files" OFF)
 option(ASH_PROFILE                "Enable Tracy profiler"    OFF)
 
-# CPM.cmake stub. The user will replace cmake/CPM.cmake with a real
-# CPM bootstrap; until then we no-op so configure succeeds offline.
+# CPM.cmake — real bootstrap (downloaded on first configure).
 include(cmake/CPM.cmake)
+
+# Phase 00 third-party dependencies (spec step 0002).
+# CPM 0.38.7 auto-prepends 'v' to VERSION. Upstreams vary on whether
+# tags use the v-prefix, so we pass GIT_TAG explicitly to lock the ref.
+CPMAddPackage(NAME entt   GIT_TAG v3.13.0 GITHUB_REPOSITORY skypjack/entt)
+CPMAddPackage(NAME spdlog GIT_TAG v1.12.0 GITHUB_REPOSITORY gabime/spdlog)
+CPMAddPackage(NAME fmt    GIT_TAG 10.1.1  GITHUB_REPOSITORY fmtlib/fmt)
+CPMAddPackage(NAME json   GIT_TAG v3.11.3 GITHUB_REPOSITORY nlohmann/json)
+
+if(ASH_BUILD_TESTS)
+    CPMAddPackage(NAME Catch2 GIT_TAG v3.5.3 GITHUB_REPOSITORY catchorg/Catch2)
+endif()
 
 # Optional: ASan / UBSan
 if(ASH_ENABLE_ASAN)
@@ -40,6 +51,20 @@ add_library(ash_lib STATIC ${ASH_LIB_SOURCES})
 target_include_directories(ash_lib PUBLIC src)
 target_compile_features(ash_lib PUBLIC cxx_std_20)
 ash_set_project_warnings(ash_lib)
+
+# Phase 00 third-party link targets (public so consumers inherit).
+if(TARGET entt::entt)
+    target_link_libraries(ash_lib PUBLIC entt::entt)
+endif()
+if(TARGET spdlog::spdlog)
+    target_link_libraries(ash_lib PUBLIC spdlog::spdlog)
+endif()
+if(TARGET fmt::fmt)
+    target_link_libraries(ash_lib PUBLIC fmt::fmt)
+endif()
+if(TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(ash_lib PUBLIC nlohmann_json::nlohmann_json)
+endif()
 
 # Executable
 add_executable(ash src/main.cpp)

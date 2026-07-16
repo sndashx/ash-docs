@@ -2,5 +2,5 @@
 
 int main(int argc, char** argv)
 {
-    return ash::app::cli_main(argc, argv);
+    return ash::cli::cli_main(argc, argv);
 }

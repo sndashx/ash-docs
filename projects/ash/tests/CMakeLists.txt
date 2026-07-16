@@ -57,6 +57,8 @@ target_link_libraries(ash_tests PRIVATE ash_lib)
 # runnable test executable (the stubs return immediately).
 if(TARGET Catch2::Catch2WithMain)
     target_link_libraries(ash_tests PRIVATE Catch2::Catch2WithMain)
+    list(APPEND CMAKE_MODULE_PATH
+        "${CMAKE_CURRENT_BINARY_DIR}/../_deps/catch2-src/extras")
     include(Catch)
     catch_discover_tests(ash_tests)
 endif()

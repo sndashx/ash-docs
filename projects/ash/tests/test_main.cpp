@@ -20,5 +20,5 @@ int main(int /*argc*/, char** /*argv*/)
 
 TEST_CASE("smoke test", "[core]")
 {
-    REQUIRE(true);
+    REQUIRE(1 + 1 == 2);
 }
