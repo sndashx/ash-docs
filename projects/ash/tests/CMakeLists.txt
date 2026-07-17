@@ -52,6 +52,7 @@ set(ASH_TEST_SOURCES
 
 add_executable(ash_tests ${ASH_TEST_SOURCES})
 target_link_libraries(ash_tests PRIVATE ash_lib)
+target_include_directories(ash_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Hook Catch2 in once CPM provides it. Without Catch2 we still build a
 # runnable test executable (the stubs return immediately).

@@ -1,5 +1,9 @@
 #include "app/app.hpp"
 
+#include "character/attributes.hpp"
+#include "character/derived.hpp"
+#include "character/inventory.hpp"
+#include "character/skills.hpp"
 #include "core/log.hpp"
 #include "core/version.hpp"
 #include "platform/signal.hpp"
@@ -47,6 +51,41 @@ int App::run() {
     }
     if (args_.show_help) {
         cli::usage(std::cout);
+        return 0;
+    }
+    if (args_.render_test) {
+        /// Wired up by Phase 1. For now, same banner stub.
+        write_banner_line1(std::cout);
+        std::cout << "\n"
+                  << ansi::set_fg(80, 200, 255)
+                  << "(render-test stub)"
+                  << ansi::reset() << std::flush;
+        return 0;
+    }
+    if (args_.char_test) {
+        /// Spawn a player with starting attrs (40 across the board) and
+        /// starting skills (5 across the board), empty inventory, print
+        /// the derived stat block per Pillar 5.
+        using namespace ash::character;
+        Attributes a;
+        for (auto& v : a.values) { v = 40; }
+        Skills s;
+        for (auto& v : s.values) { v = 5; }
+        Inventory inv;
+        auto const d = recompute(a, s, inv);
+        std::cout << "Character sheet (starting player, all attrs=40, all skills=5)\n"
+                  << "  HP_max              = " << d.hp_max              << "\n"
+                  << "  VP_max              = " << d.vp_max              << "\n"
+                  << "  SP_max              = " << d.sp_max              << "\n"
+                  << "  carry_capacity      = " << d.carry_capacity      << "\n"
+                  << "  speed_cells_per_sec = " << d.speed_cells_per_sec << "\n"
+                  << "  crit_chance_pct     = " << d.crit_chance_pct     << "\n"
+                  << "  barter_discount     = " << d.barter_discount     << "\n"
+                  << "  identify_skill      = " << d.identify_skill      << "\n"
+                  << "  pick_skill          = " << d.pick_skill          << "\n"
+                  << "  persuade_skill      = " << d.persuade_skill      << "\n"
+                  << "  encumbered          = " << (d.encumbered ? "yes" : "no") << "\n"
+                  << std::flush;
         return 0;
     }
 
