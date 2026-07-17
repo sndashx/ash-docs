@@ -1,0 +1,45 @@
+quest main_act1_wake {
+    meta {
+        name: "The Wake in the Crypt";
+        category: "Main Quest";
+        priority: 100;
+        giver: maren_vell;
+        sort_index: 1;
+        auto_complete: false;
+    }
+
+    entry: find_maren;
+
+    stage find_maren {
+        description: "Find Maren Vell in the cartographer's alcove.";
+        objective: "Search Silvercliff for Maren Vell.";
+        on_enter {
+            journal add, "Main Quest",
+                "Maren Vell asked me to find her brother Rellan.";
+        }
+        condition { flag:met_maren; }
+        on_exit {
+            inc_flag maren_trust, 5;
+        }
+        next: find_rellan;
+    }
+
+    stage find_rellan {
+        description: "Track Rellan's last known location near the docks.";
+        objective: "Search the docks for Rellan Vell.";
+        on_enter {
+        }
+        condition { flag:rellan_clue_docks; }
+        next: report_to_maren;
+    }
+
+    stage report_to_maren {
+        description: "Return to Maren with what you learned.";
+        objective: "Tell Maren what you found.";
+        on_enter {
+            give_item player, maren_gratitude, 1;
+            reputation coastal_watch += 2;
+        }
+        next: ;
+    }
+}
