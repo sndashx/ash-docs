@@ -1,2 +1,5 @@
 #include "render/terminal.hpp"
-// TODO(phase 06): Terminal size query
+
+namespace ash::render {
+// Terminal query is implemented header-only in terminal.hpp.
+}  // namespace ash::render

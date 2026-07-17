@@ -1,7 +1,22 @@
 #pragma once
-/// Phase 06: Layer compositing
+/// Phase 01 step 0109: Layer compositor + per-cell light application.
+#include <array>
+#include <cstdint>
+
+#include "render/buffer.hpp"
+#include "render/cell.hpp"
+#include "render/light.hpp"
+
 namespace ash {
 namespace render {
-// TODO(phase 06): render implementation
+
+struct CompositeInput {
+    std::array<Buffer, 9> layers{};
+    LightGrid const*      light = nullptr;
+    uint8_t               ambient = 0;
+};
+
+Buffer composite(CompositeInput const& input);
+
 }  // namespace render
 }  // namespace ash

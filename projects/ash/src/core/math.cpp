@@ -1,2 +1,5 @@
 #include "core/math.hpp"
-// TODO(phase 01): Fixed-point types, vec2, rect
+
+namespace ash::core::math {
+
+}  // namespace ash::core::math

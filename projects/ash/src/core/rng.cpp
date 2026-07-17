@@ -1,2 +1,4 @@
 #include "core/rng.hpp"
-// TODO(phase 01): xoshiro256** PRNG
+
+namespace ash::core::rng {
+}  // namespace ash::core::rng

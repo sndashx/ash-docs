@@ -4,6 +4,13 @@
 #include "core/version.hpp"
 #include "platform/signal.hpp"
 #include "render/ansi.hpp"
+#include "render/buffer.hpp"
+#include "render/buffer_diff.hpp"
+#include "render/buffer_emit.hpp"
+#include "render/camera.hpp"
+#include "render/compositor.hpp"
+#include "render/light.hpp"
+#include "render/palette.hpp"
 
 #include <iostream>
 
@@ -47,6 +54,34 @@ int App::run() {
     }
     if (args_.show_help) {
         cli::usage(std::cout);
+        return 0;
+    }
+    if (args_.render_test) {
+        // Phase 0 stub: smoke-test the render primitives so the symbols
+        // are exercised. Phase 1 will replace this with a real event loop.
+        render::Terminal t = render::terminal_query();
+        render::Buffer buf(t);
+        buf.fill_rect(0, 0, t.width_cells, t.height_cells,
+                      {0x20, 20, 30, 80, 20, 30, 80, 0});
+        render::Camera cam;
+        cam.width_cells = t.width_cells;
+        cam.height_cells = t.height_cells;
+        cam.map_width_cells = t.width_cells;
+        cam.map_height_cells = t.height_cells;
+        cam.world_pos = {render::Camera::Fixed{0}, render::Camera::Fixed{0}};
+        render::CompositeInput ci{};
+        ci.layers[0] = buf;
+        ci.ambient = 0;
+        render::LightGrid lg;
+        lg.resize(t.width_cells, t.height_cells);
+        ci.light = &lg;
+        render::Buffer out = render::composite(ci);
+        std::cout << ansi::alt_screen_on() << ansi::hide_cursor();
+        std::string s;
+        render::buffer_emit(out, s,
+                            {render::DirtyRect{0, 0, t.width_cells, t.height_cells}});
+        std::cout << s << std::flush;
+        std::cout << ansi::alt_screen_off() << ansi::show_cursor() << std::flush;
         return 0;
     }
 
