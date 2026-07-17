@@ -1,2 +1,11 @@
 #include "render/font_metrics.hpp"
-// TODO(phase 06): Cell pixel size query
+
+namespace ash {
+namespace render {
+
+FontMetrics query() {
+    return FontMetrics{8, 16};
+}
+
+}  // namespace render
+}  // namespace ash
