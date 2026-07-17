@@ -86,14 +86,15 @@ void CombatManager::tick(world::World& w, int dt_ms) noexcept {
     if (state_ == CombatState::Paused) return;
 
     ms_into_round_ += dt_ms;
-    if (ms_into_round_ >= kRoundMs) {
+    while (ms_into_round_ >= kRoundMs) {
         ms_into_round_ -= kRoundMs;
         round_.round_number += 1;
         for (auto& eco : economies_) eco.reset();
         for (auto& e : w.entities) {
-            if (e.alive) tick_conditions(e, dt_ms);
+            if (e.alive) tick_conditions(e, kRoundMs);
         }
     }
+    w.rebuild_occupancy();
 }
 
 bool CombatManager::should_end_combat(world::World const& w) const noexcept {

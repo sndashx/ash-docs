@@ -20,7 +20,7 @@ struct Node {
     bool operator>(Node const& o) const noexcept { return f > o.f; }
 };
 
-int chebyshev(core::IVec2 a, core::IVec2 b) noexcept {
+int manhattan_heuristic(core::IVec2 a, core::IVec2 b) noexcept {
     int dx = a.x - b.x; if (dx < 0) dx = -dx;
     int dy = a.y - b.y; if (dy < 0) dy = -dy;
     return dx + dy;
@@ -66,7 +66,7 @@ std::vector<core::IVec2> find_path(world::Map const& map,
     std::unordered_set<int> closed;
 
     g_score[world::idx(from.x, from.y)] = 0;
-    open.push(Node{from, chebyshev(from, to), 0});
+    open.push(Node{from, manhattan_heuristic(from, to), 0});
 
     while (!open.empty()) {
         Node cur = open.top();
@@ -89,7 +89,7 @@ std::vector<core::IVec2> find_path(world::Map const& map,
             if (it == g_score.end() || tentative_g < it->second) {
                 g_score[nk] = tentative_g;
                 came_from[nk] = cur.cell;
-                int f = tentative_g + chebyshev(next, to);
+                int f = tentative_g + manhattan_heuristic(next, to);
                 open.push(Node{next, f, tentative_g});
             }
         }

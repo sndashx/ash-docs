@@ -148,7 +148,7 @@ AttackResult attack_resolve(world::Entity const& attacker,
     if (weapon != nullptr) {
         auto sk = governing_skill_for(*weapon);
         int sk_lvl = skill_level(attacker, sk);
-        attack_bonus += sk_lvl / 100;
+        attack_bonus += sk_lvl / 10;
         attack_bonus += attr_mod(attacker, governing_attr_for(*weapon));
     } else {
         attack_bonus += attr_mod(attacker, character::Attribute::Str);
