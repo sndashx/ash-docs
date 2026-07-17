@@ -1,6 +1,7 @@
-#include "app/cli.hpp"
+#include "app/app.hpp"
 
 int main(int argc, char** argv)
 {
-    return ash::app::cli_main(argc, argv);
+    ash::app::App app(argc, argv);
+    return app.run();
 }
