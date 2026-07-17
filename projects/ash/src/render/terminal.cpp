@@ -1,2 +1,4 @@
 #include "render/terminal.hpp"
-// TODO(phase 06): Terminal size query
+// Terminal is a plain data descriptor; no out-of-line definitions needed
+// at this phase. Platform-specific size probing arrives with the
+// input/IO layer in later phases.

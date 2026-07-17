@@ -43,7 +43,13 @@ ash_set_project_warnings(ash_lib)
 
 # Executable
 add_executable(ash src/main.cpp)
-target_link_libraries(ash PRIVATE ash_lib)
+# Use --whole-archive so the render pipeline primitives remain visible to
+# `nm build/ash` even though main() does not yet reference them directly.
+# Phase 1's --render-test mode will exercise these; until then this keeps
+# the symbols (and any vtables) in the final binary for verification.
+target_link_libraries(ash PRIVATE
+    -Wl,--whole-archive ash_lib -Wl,--no-whole-archive
+)
 ash_set_project_warnings(ash)
 
 if(MSVC)
