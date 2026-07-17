@@ -170,8 +170,16 @@ bool QuestEngine::eval_condition_inner(const Condition& c) const {
             auto w = hooks_.weather ? hooks_.weather() : std::string{};
             return !c.args.empty() && w == c.args[0];
         }
-        case CondOp::TimeOfDay:
-            return hooks_.game_hour && c.args.empty() == false && c.args[0] == "hour";
+        case CondOp::TimeOfDay: {
+            if (!hooks_.game_hour || c.args.empty()) return false;
+            int h = hooks_.game_hour();
+            bool daytime = (h >= 6 && h < 18);
+            const auto& unit = c.args[0];
+            if (unit == "hour")  return daytime;
+            if (unit == "day")   return daytime;
+            if (unit == "night") return !daytime;
+            return false;
+        }
         case CondOp::HasFlag: {
             if (c.args.empty()) return false;
             return flags_.has(c.args[0]);
@@ -510,7 +518,7 @@ void QuestEngine::update(double dt) {
         for (auto& [stage_id, remaining] : rt.timers) {
             if (remaining <= 0.0) continue;
             remaining -= dt;
-            if (remaining <= 0.0) rt.counters[stage_id] = 0;
+            (void)stage_id;
         }
     }
 }

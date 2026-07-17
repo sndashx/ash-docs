@@ -43,6 +43,9 @@ struct Consequence {
 class ConsequenceRunner {
 public:
     ConsequenceRunner(FlagStore& flags, WorldHooks hooks);
+    ~ConsequenceRunner();
+    ConsequenceRunner(const ConsequenceRunner&)            = delete;
+    ConsequenceRunner& operator=(const ConsequenceRunner&) = delete;
 
     /// Add a rule.
     void add(Consequence c);

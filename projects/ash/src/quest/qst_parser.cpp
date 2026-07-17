@@ -131,13 +131,15 @@ Token Lexer::next() {
         case ')': return single(TokenKind::RParen, 1);
         case '[': return single(TokenKind::LBracket, 1);
         case ']': return single(TokenKind::RBracket, 1);
-        case '+': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('+','=',TokenKind::PlusEq); return single(TokenKind::Eof,0);
+        case '+': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('+','=',TokenKind::PlusEq);
+                  throw ParseError(line_, col_, "stray '+' (expected '+=')");
         case '-': if (i_ + 1 < s_.size() && s_[i_ + 1] == '>') return pairc('-','>',TokenKind::Arrow);
                   if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('-','=',TokenKind::MinusEq);
-                  return single(TokenKind::Eof,0);
+                  throw ParseError(line_, col_, "stray '-' (expected '->' or '-=')");
         case '=': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('=','=',TokenKind::Eq);
                   return single(TokenKind::EqAssign, 1);
-        case '!': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('!','=',TokenKind::Ne); return single(TokenKind::Eof,0);
+        case '!': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('!','=',TokenKind::Ne);
+                  throw ParseError(line_, col_, "stray '!' (expected '!=')");
         case '>': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('>','=',TokenKind::Ge); return single(TokenKind::Gt, 1);
         case '<': if (i_ + 1 < s_.size() && s_[i_ + 1] == '=') return pairc('<','=',TokenKind::Le); return single(TokenKind::Lt, 1);
     }
@@ -824,4 +826,4 @@ ParsedQuest parse_qst_file(const std::string& path) {
 }
 
 }  // namespace quest
-}  // namespace asm
+}  // namespace ash

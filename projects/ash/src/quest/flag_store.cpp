@@ -168,7 +168,7 @@ void FlagStore::increment(const std::string& key, std::int64_t delta) {
             } else if constexpr (std::is_same_v<T, std::int64_t>) {
                 cur = x;
             } else {
-                try { cur = static_cast<std::int64_t>(std::stoll(x)); }
+                try { cur = static_cast<std::int64_t>(std::stoi(x)); }
                 catch (...) { cur = 0; }
             }
         }, it->second);

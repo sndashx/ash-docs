@@ -21,6 +21,10 @@ ConsequenceRunner::ConsequenceRunner(FlagStore& flags, WorldHooks hooks)
     });
 }
 
+ConsequenceRunner::~ConsequenceRunner() {
+    flags_.remove_observer(obs_);
+}
+
 void ConsequenceRunner::add(Consequence c) {
     rules_.push_back(std::move(c));
 }
