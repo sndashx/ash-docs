@@ -1,0 +1,64 @@
+quest sample_five {
+    meta {
+        name: "Five Stages Sample";
+        category: "Side Quest";
+        priority: 50;
+        giver: harric;
+        sort_index: 5;
+        auto_complete: false;
+    }
+
+    entry: stage_1;
+
+    stage stage_1 {
+        description: "Talk to Harric about the missing herbs.";
+        objective: "Speak with Harric.";
+        condition { flag:talked_harric; }
+        next: stage_2;
+    }
+
+    stage stage_2 {
+        description: "Branch: choose a path.";
+        objective: "Decide whether to help.";
+        branch {
+            if (flag:agreed_to_help) -> stage_3a;
+            else if (flag:refused_to_help) -> stage_3b;
+            else -> stage_3a;
+        }
+    }
+
+    stage stage_3a {
+        description: "Gather the required herbs.";
+        objective: "Collect moonstone dust, ashwood bark, and saltwater flask.";
+        objective_all [
+            { item: "moonstone_dust", count: 3 },
+            { item: "ashwood_bark",   count: 5 },
+            { item: "saltwater_flask", count: 1 }
+        ];
+        next: stage_4;
+    }
+
+    stage stage_3b {
+        description: "Walk away.";
+        objective: "Refuse the task.";
+        next: stage_5;
+    }
+
+    stage stage_4 {
+        description: "Combine the herbs into a relic.";
+        objective: "Bring the relics to the altar.";
+        on_complete {
+            take_item player, moonstone_dust, 3;
+            take_item player, ashwood_bark, 5;
+            take_item player, saltwater_flask, 1;
+            give_item player, assembled_relic, 1;
+            inc_flag sample_score, 1;
+        }
+        next: stage_5;
+    }
+
+    stage stage_5 {
+        description: "Quest complete.";
+        objective: "Return to Harric.";
+    }
+}
