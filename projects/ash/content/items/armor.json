@@ -1,1 +1,75 @@
-[]
+[
+  {
+    "code": "leather_jerkin",
+    "name": "Leather Jerkin",
+    "slot": "chest",
+    "dr_slash": 5,
+    "dr_pierce": 8,
+    "dr_crush": 4,
+    "dr_element": 2,
+    "dr_voice": 0,
+    "encumbrance": 4.0,
+    "condition": 100
+  },
+  {
+    "code": "iron_hauberk",
+    "name": "Iron Hauberk",
+    "slot": "chest",
+    "dr_slash": 30,
+    "dr_pierce": 35,
+    "dr_crush": 25,
+    "dr_element": 15,
+    "dr_voice": 5,
+    "encumbrance": 18.0,
+    "condition": 100,
+    "tags": ["heavy"]
+  },
+  {
+    "code": "iron_helm",
+    "name": "Iron Helm",
+    "slot": "helm",
+    "dr_slash": 15,
+    "dr_pierce": 20,
+    "dr_crush": 18,
+    "dr_element": 8,
+    "dr_voice": 0,
+    "encumbrance": 4.0,
+    "condition": 100
+  },
+  {
+    "code": "leather_boots",
+    "name": "Leather Boots",
+    "slot": "boots",
+    "dr_slash": 3,
+    "dr_pierce": 4,
+    "dr_crush": 3,
+    "dr_element": 0,
+    "dr_voice": 0,
+    "encumbrance": 2.0,
+    "condition": 100
+  },
+  {
+    "code": "leather_gloves",
+    "name": "Leather Gloves",
+    "slot": "gloves",
+    "dr_slash": 2,
+    "dr_pierce": 3,
+    "dr_crush": 2,
+    "dr_element": 0,
+    "dr_voice": 0,
+    "encumbrance": 1.0,
+    "condition": 100
+  },
+  {
+    "code": "wooden_shield",
+    "name": "Wooden Shield",
+    "slot": "shield",
+    "dr_slash": 10,
+    "dr_pierce": 8,
+    "dr_crush": 12,
+    "dr_element": 4,
+    "dr_voice": 0,
+    "encumbrance": 6.0,
+    "condition": 100
+  }
+]

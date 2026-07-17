@@ -35,6 +35,9 @@ set(ASH_TEST_SOURCES
     combat/test_status.cpp
     combat/test_path.cpp
     combat/test_los.cpp
+    combat/test_cover.cpp
+    combat/test_ai.cpp
+    combat/test_frame_budget.cpp
     npc/test_schedule.cpp
     npc/test_disposition.cpp
     npc/test_dialogue_run.cpp
