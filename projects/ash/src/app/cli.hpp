@@ -12,6 +12,7 @@ struct CliArgs {
     bool show_help = false;
     bool render_test = false;
     bool char_test = false;
+    bool combat_test = false;
     std::optional<std::string> log_level;
     std::optional<std::string> map_id;
     bool error = false;

@@ -1,2 +1,3 @@
 #include "world/trigger.hpp"
-// TODO(phase 07): Trigger volumes
+// Phase 7 ships the trigger-volume data type only; runtime dispatch lives
+// in the quest engine (Phase 9).

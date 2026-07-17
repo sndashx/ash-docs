@@ -30,6 +30,8 @@ CliArgs parse(int argc, char** argv) {
             args.render_test = true;
         } else if (std::strcmp(a, "--char-test") == 0) {
             args.char_test = true;
+        } else if (std::strcmp(a, "--combat-test") == 0) {
+            args.combat_test = true;
         } else if (starts_with(a, "--log-level=")) {
             const char* value = a + std::strlen("--log-level=");
             if (*value == '\0') {
@@ -84,6 +86,7 @@ int usage(std::ostream& os) {
         "  --log-level LEVEL       Set log level (trace|debug|info|warn|error|critical|off)\n"
         "  --render-test           Run the render-test stub (Phase 1)\n"
         "  --char-test             Print derived stat table for starting player (Phase 6)\n"
+        "  --combat-test           Run a 5x5 arena combat demo (Phase 7)\n"
         "  --map=ID                Select map for --render-test\n";
     os << text;
     return static_cast<int>(std::strlen(text));

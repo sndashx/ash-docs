@@ -1,5 +1,6 @@
 #pragma once
 /// Phase 01: Strongly-typed IDs (Entity, Map, Item, ...).
+#include <compare>
 #include <cstddef>
 
 namespace ash {
