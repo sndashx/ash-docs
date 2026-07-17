@@ -175,7 +175,7 @@ bool QuestEngine::eval_condition_inner(const Condition& c) const {
             int h = hooks_.game_hour();
             bool daytime = (h >= 6 && h < 18);
             const auto& unit = c.args[0];
-            if (unit == "hour")  return daytime;
+            if (unit == "hour")  return h >= 6 && h < 22;
             if (unit == "day")   return daytime;
             if (unit == "night") return !daytime;
             return false;
@@ -516,9 +516,9 @@ void QuestEngine::update(double dt) {
         auto* def = cat_.find(qid);
         if (!def) continue;
         for (auto& [stage_id, remaining] : rt.timers) {
+            (void)stage_id;
             if (remaining <= 0.0) continue;
             remaining -= dt;
-            (void)stage_id;
         }
     }
 }
