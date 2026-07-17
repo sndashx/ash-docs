@@ -6,6 +6,8 @@
 #include "character/skills.hpp"
 #include "core/log.hpp"
 #include "core/version.hpp"
+#include "editor/editor.hpp"
+#include "editor/map_io.hpp"
 #include "platform/signal.hpp"
 #include "render/ansi.hpp"
 
@@ -86,6 +88,142 @@ int App::run() {
                   << "  persuade_skill      = " << d.persuade_skill      << "\n"
                   << "  encumbered          = " << (d.encumbered ? "yes" : "no") << "\n"
                   << std::flush;
+        return 0;
+    }
+    if (args_.editor_test) {
+        /// Drive the in-game editor (Phase 4) non-interactively.
+        ///
+        /// The non-TTY path here is a smoke harness that exercises
+        /// every tool from C++ code — exactly the same sequence a
+        /// user would issue from a terminal:
+        ///
+        ///   1. Switch to Paint tool, stamp '#' on layer 1.
+        ///   2. Switch to Fill, fill the rest with '.'.
+        ///   3. Pick, sample, paint.
+        ///   4. Select a 3x3, copy it, paste to a new location.
+        ///   5. Place an NPC entity.
+        ///   6. Warp player to (10, 5).
+        ///   7. Ctrl+Z four times to unwind.
+        ///   8. Save to /tmp/ash_editor_demo.xp and reload to verify.
+        using namespace ash::editor;
+        Editor ed;
+        ed.init();
+        std::cout << "ASH Phase 4 editor smoke harness\n";
+        std::cout << ed.status_line() << "\n";
+
+        // 1. Paint.
+        ed.current_tool = Tool::Paint;
+        ed.paint_cell = render::Cell{ uint32_t('#'), 220, 220, 220 };
+        ed.active_layer = 1;
+        EditorInput clk;
+        clk.kind = EditorInput::Kind::MouseClick;
+        clk.mouse_x = 5; clk.mouse_y = 5;
+        ed.handle(clk);
+        std::cout << "after paint:    " << ed.status_line() << "\n";
+        if (ed.map.at(1, 5, 5).glyph != uint32_t('#')) {
+            std::cerr << "FAIL: paint did not stamp glyph\n";
+            return 1;
+        }
+
+        // 2. Fill.
+        ed.current_tool = Tool::Fill;
+        ed.fill_cell = render::Cell{ uint32_t('.'), 100, 100, 100 };
+        clk.mouse_x = 0; clk.mouse_y = 0;
+        ed.handle(clk);
+        std::cout << "after fill:     " << ed.status_line() << "\n";
+
+        // 3. Pick + paint again.
+        ed.current_tool = Tool::Pick;
+        clk.mouse_x = 0; clk.mouse_y = 0;
+        ed.handle(clk);
+        if (ed.paint_cell.glyph != uint32_t('.')) {
+            std::cerr << "FAIL: pick did not sample glyph\n";
+            return 1;
+        }
+
+        ed.current_tool = Tool::Paint;
+        clk.mouse_x = 7; clk.mouse_y = 7;
+        ed.handle(clk);
+        if (ed.map.at(1, 7, 7).glyph != uint32_t('.')) {
+            std::cerr << "FAIL: paint after pick did not stamp\n";
+            return 1;
+        }
+
+        // 4. Select, copy, paste.
+        ed.current_tool = Tool::Select;
+        EditorInput mm;
+        mm.kind = EditorInput::Kind::MouseMove;
+        mm.mouse_x = 10; mm.mouse_y = 10;
+        ed.handle(mm);
+        EditorInput mc;
+        mc.kind = EditorInput::Kind::MouseClick;
+        mc.mouse_x = 10; mc.mouse_y = 10;
+        ed.handle(mc);
+        mm.mouse_x = 13; mm.mouse_y = 13;
+        ed.handle(mm);
+        ed.selection.x0 = 10; ed.selection.y0 = 10;
+        ed.selection.x1 = 13; ed.selection.y1 = 13;
+        ed.selection = ed.selection.normalize();
+        EditorInput ctrl;
+        ctrl.kind = EditorInput::Kind::Ctrl;
+        ctrl.ctrl_letter = 'c';
+        ed.handle(ctrl);
+        if (!ed.clipboard.has_data) {
+            std::cerr << "FAIL: copy did not populate clipboard\n";
+            return 1;
+        }
+        ctrl.ctrl_letter = 'v';
+        ed.cursor = { 20, 20 };
+        ed.handle(ctrl);
+        std::cout << "after copy/paste: " << ed.status_line() << "\n";
+
+        // 5. Place entity.
+        ed.current_tool = Tool::Entity;
+        mc.mouse_x = 15; mc.mouse_y = 15;
+        ed.handle(mc);
+        if (ed.map.entities.size() != std::size_t{1}) {
+            std::cerr << "FAIL: place entity did not add entity\n";
+            return 1;
+        }
+        std::cout << "after place entity: " << ed.status_line() << "\n";
+
+        // 6. Warp player.
+        ed.current_tool = Tool::Warp;
+        mc.mouse_x = 10; mc.mouse_y = 5;
+        ed.handle(mc);
+        bool found = false;
+        for (auto const& e : ed.map.entities) {
+            if (e.id == 0 && e.pos.x == 10 && e.pos.y == 5) found = true;
+        }
+        if (!found) {
+            std::cerr << "FAIL: warp did not move player\n";
+            return 1;
+        }
+        std::cout << "after warp: " << ed.status_line() << "\n";
+
+        // 7. Undo four times.
+        for (int i = 0; i < 4; ++i) ed.undo.undo(ed.map);
+        std::cout << "after 4x undo:  " << ed.status_line() << "\n";
+
+        // 8. Save + reload roundtrip.
+        std::string path = "/tmp/ash_editor_demo.xp";
+        if (!ed.save_to(path)) {
+            std::cerr << "FAIL: save_to returned false\n";
+            return 1;
+        }
+        Map saved;
+        if (!load_map(saved, path)) {
+            std::cerr << "FAIL: load_map returned false\n";
+            return 1;
+        }
+        if (saved.width != ed.map.width || saved.height != ed.map.height
+            || saved.map_id != ed.map.map_id) {
+            std::cerr << "FAIL: reloaded map metadata mismatch\n";
+            return 1;
+        }
+        std::cout << "save+reload ok  (" << saved.width << "x" << saved.height
+                  << " id=" << saved.map_id << ")\n";
+        std::cout << "OK: editor smoke harness passed\n";
         return 0;
     }
 
