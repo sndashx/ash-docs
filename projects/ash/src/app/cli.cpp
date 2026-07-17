@@ -29,7 +29,14 @@ CliArgs parse(int argc, char** argv) {
         } else if (std::strcmp(a, "--render-test") == 0) {
             args.render_test = true;
         } else if (starts_with(a, "--log-level=")) {
-            args.log_level = std::string(a + std::strlen("--log-level="));
+            const char* value = a + std::strlen("--log-level=");
+            if (*value == '\0') {
+                std::cerr << "Error: --log-level requires a value\n"
+                             "Try 'ash --help' for usage.\n";
+                args.error = true;
+                return args;
+            }
+            args.log_level = std::string(value);
         } else if (std::strcmp(a, "--log-level") == 0) {
             if (i + 1 >= argc) {
                 std::cerr << "Error: --log-level requires a value\n"
@@ -39,7 +46,14 @@ CliArgs parse(int argc, char** argv) {
             }
             args.log_level = std::string(argv[++i]);
         } else if (starts_with(a, "--map=")) {
-            args.map_id = std::string(a + std::strlen("--map="));
+            const char* value = a + std::strlen("--map=");
+            if (*value == '\0') {
+                std::cerr << "Error: --map requires a value\n"
+                             "Try 'ash --help' for usage.\n";
+                args.error = true;
+                return args;
+            }
+            args.map_id = std::string(value);
         } else if (std::strcmp(a, "--map") == 0) {
             if (i + 1 >= argc) {
                 std::cerr << "Error: --map requires a value\n"

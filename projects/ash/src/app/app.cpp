@@ -11,8 +11,14 @@ namespace ash {
 namespace app {
 
 namespace {
-constexpr const char* kBannerLine1 = "ASH v0.0.1 (First Spark)";
 constexpr const char* kBannerLine2 = "A hand-authored ASCII RPG";
+
+void write_banner_line1(std::ostream& os) {
+    os << ansi::set_fg(255, 80, 200)
+       << "ASH v" << core::ASH_VERSION_STRING
+       << " (" << core::ASH_CODENAME << ")"
+       << ansi::reset();
+}
 }  // namespace
 
 App::App(int argc, char** argv)
@@ -35,10 +41,8 @@ int App::run() {
         return 1;
     }
     if (args_.show_version) {
-        std::cout << ansi::set_fg(255, 80, 200)
-                  << "ASH v" << core::ASH_VERSION_STRING
-                  << " (" << core::ASH_CODENAME << ")"
-                  << ansi::reset() << std::flush;
+        write_banner_line1(std::cout);
+        std::cout << std::flush;
         return 0;
     }
     if (args_.show_help) {
@@ -47,9 +51,8 @@ int App::run() {
     }
 
     // Default action: truecolor banner (spec lines 384–386).
-    std::cout << ansi::set_fg(255, 80, 200)
-              << kBannerLine1
-              << ansi::reset() << "\n"
+    write_banner_line1(std::cout);
+    std::cout << "\n"
               << ansi::set_fg(80, 200, 255)
               << kBannerLine2
               << ansi::reset() << std::flush;
