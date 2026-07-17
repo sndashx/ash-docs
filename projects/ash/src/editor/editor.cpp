@@ -154,12 +154,19 @@ EditorAction Editor::handle(EditorInput const& ev) {
                 undo.push(std::make_unique<PaintRectCommand>(
                     active_layer, selection, render::CELL_BLANK), map);
                 clipboard.copy(map, selection, active_layer);
-                // Also drop entities in the region.
+                // Snapshot ids in the region first; pushing commands
+                // mutates map.entities, which would invalidate the
+                // range-for iterator.
+                IRect r = selection.normalize();
+                std::vector<std::uint64_t> ids;
+                ids.reserve(map.entities.size());
                 for (auto const& e : map.entities) {
-                    IRect r = selection.normalize();
                     if (r.contains(e.pos.x, e.pos.y) && e.id != 0) {
-                        undo.push(std::make_unique<DeleteEntityCommand>(e.id), map);
+                        ids.push_back(e.id);
                     }
+                }
+                for (auto id : ids) {
+                    undo.push(std::make_unique<DeleteEntityCommand>(id), map);
                 }
             }
             return EditorAction::None;

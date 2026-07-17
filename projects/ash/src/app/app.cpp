@@ -221,6 +221,16 @@ int App::run() {
             std::cerr << "FAIL: reloaded map metadata mismatch\n";
             return 1;
         }
+        // Verify a known painted cell survived the roundtrip.
+        if (saved.at(1, 5, 5).glyph != uint32_t('#')) {
+            std::cerr << "FAIL: reloaded cell glyph mismatch at (5,5) layer 1\n";
+            return 1;
+        }
+        // Verify entity count survived too.
+        if (saved.entities.size() != ed.map.entities.size()) {
+            std::cerr << "FAIL: reloaded entity count mismatch\n";
+            return 1;
+        }
         std::cout << "save+reload ok  (" << saved.width << "x" << saved.height
                   << " id=" << saved.map_id << ")\n";
         std::cout << "OK: editor smoke harness passed\n";

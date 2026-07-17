@@ -50,9 +50,10 @@ bool parse_hex_byte(std::string const& s, std::uint8_t& out) {
 bool parse_hex_u32(std::string const& s, std::uint32_t& out) {
     if (s.empty()) return false;
     std::size_t pos = 0;
-    unsigned long v = 0;
-    try { v = std::stoul(s, &pos, 16); } catch (...) { return false; }
+    unsigned long long v = 0;
+    try { v = std::stoull(s, &pos, 16); } catch (...) { return false; }
     if (pos == 0) return false;
+    if (v > 0xFFFFFFFFull) return false;
     out = static_cast<std::uint32_t>(v);
     return true;
 }

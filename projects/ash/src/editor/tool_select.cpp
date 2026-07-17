@@ -1,5 +1,7 @@
 #include "editor/tool_select.hpp"
 
+#include <vector>
+
 namespace ash {
 namespace editor {
 
@@ -39,11 +41,17 @@ void select_delete(Editor& ed) {
                 ed.active_layer, x, y, old_c, render::CELL_BLANK));
         }
     }
-    // Also drop any entities inside the region.
+    // Snapshot ids in the region first; pushing commands mutates
+    // ed.map.entities and would invalidate the range-for iterator.
+    std::vector<std::uint64_t> ids;
+    ids.reserve(ed.map.entities.size());
     for (auto const& e : ed.map.entities) {
         if (r.contains(e.pos.x, e.pos.y) && e.id != 0) {
-            ed.push(std::make_unique<DeleteEntityCommand>(e.id));
+            ids.push_back(e.id);
         }
+    }
+    for (auto id : ids) {
+        ed.push(std::make_unique<DeleteEntityCommand>(id));
     }
 }
 
