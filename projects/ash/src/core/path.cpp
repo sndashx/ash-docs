@@ -3,6 +3,12 @@
 #include <cstdlib>
 #include <mutex>
 
+#if defined(__linux__) || defined(__APPLE__)
+#  include <unistd.h>
+#elif defined(_WIN32)
+#  include <windows.h>
+#endif
+
 namespace ash {
 namespace core {
 
@@ -26,6 +32,22 @@ fs::path xdg_data_home() {
 
 fs::path xdg_config_home() {
     return env_or("XDG_CONFIG_HOME", (home_dir() / ".config").string());
+}
+
+fs::path exe_dir() {
+#if defined(__linux__) || defined(__APPLE__)
+    std::error_code ec;
+    fs::path self = fs::read_symlink("/proc/self/exe", ec);
+    if (ec) return {};
+    return self.parent_path();
+#elif defined(_WIN32)
+    char buf[MAX_PATH];
+    DWORD n = GetModuleFileNameA(nullptr, buf, MAX_PATH);
+    if (n == 0 || n >= MAX_PATH) return {};
+    return fs::path(std::string(buf, n)).parent_path();
+#else
+    return {};
+#endif
 }
 
 }  // namespace
@@ -61,7 +83,15 @@ fs::path logs_dir() {
 }
 
 fs::path content_dir() {
+    std::error_code ec;
     if (const char* v = std::getenv("ASH_CONTENT_DIR"); v && *v) return v;
+    fs::path exed = exe_dir();
+    if (!exed.empty()) {
+        fs::path share = exed / ".." / "share" / "ash" / "content";
+        if (fs::is_directory(share, ec)) return fs::canonical(share, ec);
+        fs::path here = exed / "content";
+        if (fs::is_directory(here, ec)) return fs::canonical(here, ec);
+    }
     return "content";
 }
 

@@ -52,10 +52,11 @@ std::string iso8601_utc(std::int64_t u) {
 }
 
 std::int64_t parse_iso8601(const std::string& s) {
+    if (s.empty()) return -1;
     int y=0, mo=0, d=0, h=0, mi=0, se=0;
     if (std::sscanf(s.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d",
                     &y, &mo, &d, &h, &mi, &se) < 3) {
-        return 0;
+        return -1;
     }
     std::tm tm{};
     tm.tm_year = y - 1900;

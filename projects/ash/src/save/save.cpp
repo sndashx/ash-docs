@@ -70,8 +70,10 @@ bool is_slot_name_safe(const std::string& n) {
     return true;
 }
 
-void rotate_backups(const fs::path& slot) {
-    // bak1 -> bak2, slot -> bak1, then prepare for the new slot.
+// Returns true on success. On failure (e.g. cannot rename slot -> bak1),
+// returns false and leaves the existing slot in place. The caller must
+// not overwrite the slot in that case.
+bool rotate_backups(const fs::path& slot, std::string& out_error) {
     fs::path bak2 = slot;
     bak2 += ".bak2";
     fs::path bak1 = slot;
@@ -81,17 +83,20 @@ void rotate_backups(const fs::path& slot) {
     if (fs::exists(bak1, ec)) {
         fs::rename(bak1, bak2, ec);
         if (ec) {
-            // If rename fails, force-remove and try again.
+            // Best-effort: nuke bak1 and retry. If bak2 removal worked
+            // we can no longer preserve the chain, but we don't want to
+            // destroy the existing slot.
             fs::remove_all(bak1, ec);
         }
     }
     if (fs::exists(slot, ec)) {
         fs::rename(slot, bak1, ec);
         if (ec) {
-            // Could not rotate; the caller will continue with a tmp dir.
-            ec.clear();
+            out_error = "save: could not rotate slot to bak1: " + ec.message();
+            return false;
         }
     }
+    return true;
 }
 
 }  // namespace
@@ -183,11 +188,18 @@ SaveResult save_with_meta(const std::string& savename, const SaveData& data,
         }
 
         // Atomic swap: rotate backups, then rename tmp -> slot.
-        rotate_backups(slot);
+        std::string rot_err;
+        if (!rotate_backups(slot, rot_err)) {
+            res.error = rot_err + "; refusing to overwrite existing save";
+            log::error(res.error);
+            remove_dir(tmp);
+            return res;
+        }
         std::error_code ec;
         fs::rename(tmp, slot, ec);
         if (ec) {
             res.error = "save: atomic rename failed: " + ec.message();
+            log::error(res.error);
             remove_dir(tmp);
             return res;
         }

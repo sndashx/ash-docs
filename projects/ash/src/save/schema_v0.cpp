@@ -312,7 +312,6 @@ json::Value world_to_json(const WorldSave& w) {
 
 json::Value meta_to_json(const SaveMeta& m) {
     Value obj(json::Object{});
-    obj["version"]         = static_cast<std::int64_t>(kSchemaVersion);
     obj["schema_version"]  = static_cast<std::int64_t>(kSchemaVersion);
     obj["save_name"]       = m.save_name;
     obj["created_at"]      = m.created_at;
@@ -563,10 +562,15 @@ void world_from_json(const json::Value& v, WorldSave& out) {
     }
     if (v.contains("global_counters") && v["global_counters"].is_object()) {
         auto const& gc = v["global_counters"].as_object();
-        out.counters.kills_total        = static_cast<int>(gc.at("kills_total").int_or(0));
-        out.counters.books_read         = static_cast<int>(gc.at("books_read").int_or(0));
-        out.counters.secrets_found      = static_cast<int>(gc.at("secrets_found").int_or(0));
-        out.counters.npc_conversations  = static_cast<int>(gc.at("npc_conversations").int_or(0));
+        auto counter = [&gc](char const* key) -> int {
+            auto it = gc.find(key);
+            if (it == gc.end()) return 0;
+            return static_cast<int>(it->second.int_or(0));
+        };
+        out.counters.kills_total        = counter("kills_total");
+        out.counters.books_read         = counter("books_read");
+        out.counters.secrets_found      = counter("secrets_found");
+        out.counters.npc_conversations  = counter("npc_conversations");
         out.counters.kills_by_faction.clear();
         if (gc.count("kills_by_faction") && gc.at("kills_by_faction").is_object()) {
             for (auto const& [k, val] : gc.at("kills_by_faction").as_object()) {

@@ -1,6 +1,7 @@
 #include "save/load.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <set>
@@ -24,6 +25,18 @@ namespace {
 long long now_ms() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+}
+
+std::uint32_t crc32(const std::string& s) {
+    std::uint32_t crc = 0xFFFFFFFFu;
+    for (char ch : s) {
+        unsigned char c = static_cast<unsigned char>(ch);
+        crc ^= c;
+        for (int k = 0; k < 8; ++k) {
+            crc = (crc >> 1) ^ (0xEDB88320u & (-(crc & 1)));
+        }
+    }
+    return ~crc;
 }
 
 std::string slurp(const fs::path& p) {
@@ -81,6 +94,26 @@ LoadResult load_from_dir(const fs::path& slot, std::string& out_error_chain) {
         meta_from_json(mj, res.meta);
         player_from_json(pj, res.data.player);
         world_from_json(wj, res.data.world);
+
+        // Verify meta.checksum against the on-disk player/world blobs.
+        // Only check unmigrated loads: migrated blobs were written under
+        // an older schema and the checksum would have to be re-computed
+        // after migration, which we deliberately avoid here to keep the
+        // migration path side-effect free.
+        if (from == kCurrentSchema) {
+            std::string player_blob_v = slurp(player_p);
+            std::string world_blob_v  = slurp(world_p);
+            std::uint32_t want = crc32(player_blob_v) ^ crc32(world_blob_v);
+            if (res.meta.checksum != want) {
+                res.error = "save: checksum mismatch in " + slot.string() +
+                            " (want=" + std::to_string(want) +
+                            ", got=" + std::to_string(res.meta.checksum) +
+                            "); data may be corrupted";
+                out_error_chain += res.error + "; ";
+                log::warn(res.error);
+                return res;
+            }
+        }
 
         // Optional thumbnail.
         fs::path thumb_p = slot / "thumbnail.txt";
