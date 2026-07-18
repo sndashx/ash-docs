@@ -1,6 +1,7 @@
 #include "character/inventory.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <functional>
 
 namespace ash {
@@ -20,6 +21,37 @@ char const* equip_slot_name(EquipSlot s) noexcept {
         case EquipSlot::Count:     break;
     }
     return "Unknown";
+}
+
+char const* equip_slot_id(EquipSlot s) noexcept {
+    switch (s) {
+        case EquipSlot::Weapon:    return "weapon";
+        case EquipSlot::OffHand:   return "off_hand";
+        case EquipSlot::Chest:     return "chest";
+        case EquipSlot::Helm:      return "helm";
+        case EquipSlot::Boots:     return "boots";
+        case EquipSlot::Gloves:    return "gloves";
+        case EquipSlot::RingLeft:  return "ring_left";
+        case EquipSlot::RingRight: return "ring_right";
+        case EquipSlot::Amulet:    return "amulet";
+        case EquipSlot::Count:     break;
+    }
+    return "unknown";
+}
+
+EquipSlot equip_slot_from_id(const char* id) noexcept {
+    if (!id) return EquipSlot::Count;
+    auto eq = [id](const char* s) { return std::strcmp(id, s) == 0; };
+    if (eq("weapon"))    return EquipSlot::Weapon;
+    if (eq("off_hand"))   return EquipSlot::OffHand;
+    if (eq("chest"))      return EquipSlot::Chest;
+    if (eq("helm"))       return EquipSlot::Helm;
+    if (eq("boots"))      return EquipSlot::Boots;
+    if (eq("gloves"))     return EquipSlot::Gloves;
+    if (eq("ring_left"))  return EquipSlot::RingLeft;
+    if (eq("ring_right")) return EquipSlot::RingRight;
+    if (eq("amulet"))     return EquipSlot::Amulet;
+    return EquipSlot::Count;
 }
 
 int Inventory::total_count() const noexcept {

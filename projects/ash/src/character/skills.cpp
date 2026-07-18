@@ -72,7 +72,7 @@ std::array<SkillGroup, 8> const& skill_groups() noexcept {
     return groups;
 }
 
-constexpr char const* skill_id(Skill s) noexcept {
+char const* skill_id(Skill s) noexcept {
     switch (s) {
         case Skill::Armorer:      return "armorer";
         case Skill::Blunt:        return "blunt";

@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <cctype>
+#include <cstdio>
 #include <string>
 
 namespace ash {
@@ -27,6 +28,10 @@ int level_for_name(const std::string& name) {
     return -1;
 }
 
+bool level_active(int lvl) {
+    return lvl >= g_level.load(std::memory_order_relaxed);
+}
+
 }  // namespace
 
 void init() {
@@ -38,6 +43,16 @@ void set_level(const std::string& level) {
     if (v >= 0) {
         g_level.store(v, std::memory_order_relaxed);
     }
+}
+
+void info(const std::string& msg) {
+    if (level_active(2)) std::fprintf(stderr, "[info] %s\n", msg.c_str());
+}
+void warn(const std::string& msg) {
+    if (level_active(3)) std::fprintf(stderr, "[warn] %s\n", msg.c_str());
+}
+void error(const std::string& msg) {
+    if (level_active(4)) std::fprintf(stderr, "[error] %s\n", msg.c_str());
 }
 
 }  // namespace log

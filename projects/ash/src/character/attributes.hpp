@@ -64,8 +64,8 @@ struct Attributes {
 
 /// Long-form localized-style names; lower-case in headers, capitalized
 /// for display. These are stable identifiers used by save data.
-constexpr char const* attribute_id(Attribute a) noexcept;
-char const*          attribute_name(Attribute a) noexcept;
+char const* attribute_id(Attribute a) noexcept;
+char const* attribute_name(Attribute a) noexcept;
 
 }  // namespace character
 }  // namespace ash
