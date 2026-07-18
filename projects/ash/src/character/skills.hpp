@@ -61,8 +61,8 @@ Attribute skill_attribute(Skill s) noexcept;
 std::array<SkillGroup, 8> const& skill_groups() noexcept;
 
 /// Stable, lower-case identifier used in save data.
-constexpr char const* skill_id(Skill s) noexcept;
-char const*          skill_name(Skill s) noexcept;
+char const* skill_id(Skill s) noexcept;
+char const* skill_name(Skill s) noexcept;
 
 struct Skills {
     std::array<int, kSkillCount> values{};

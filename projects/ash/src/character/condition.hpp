@@ -37,6 +37,12 @@ inline constexpr std::size_t kConditionCount = static_cast<std::size_t>(Conditio
 
 char const* condition_name(Condition c) noexcept;
 
+/// Stable lowercase identifier used in save data and content files.
+char const* condition_id(Condition c) noexcept;
+
+/// Reverse lookup: returns `Condition::Count` if the id is unknown.
+Condition condition_from_id(const char* id) noexcept;
+
 struct ActiveCondition {
     Condition  type{Condition::Count};
     int        duration_ms{0};

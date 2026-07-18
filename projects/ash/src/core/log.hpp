@@ -14,5 +14,16 @@ void init();
 /// Unknown names are ignored.
 void set_level(const std::string& level);
 
+/// Emit an informational line. Phase 10 added this so save / migrate can
+/// surface "saving", "loading", "migration applied" lines without pulling
+/// in spdlog. Phase 12 will replace these with real log calls.
+void info(const std::string& msg);
+
+/// Emit a warning line.
+void warn(const std::string& msg);
+
+/// Emit an error line.
+void error(const std::string& msg);
+
 }  // namespace log
 }  // namespace ash

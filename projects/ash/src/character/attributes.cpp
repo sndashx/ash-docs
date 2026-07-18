@@ -11,7 +11,7 @@ void Attributes::clamp() noexcept {
     }
 }
 
-constexpr char const* attribute_id(Attribute a) noexcept {
+char const* attribute_id(Attribute a) noexcept {
     switch (a) {
         case Attribute::Str: return "str";
         case Attribute::End: return "end";

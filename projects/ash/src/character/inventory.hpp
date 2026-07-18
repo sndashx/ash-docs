@@ -33,6 +33,12 @@ inline constexpr std::size_t kEquipSlotCount = static_cast<std::size_t>(EquipSlo
 
 char const* equip_slot_name(EquipSlot s) noexcept;
 
+/// Stable lowercase identifier used in save data (e.g. "weapon", "ring_left").
+char const* equip_slot_id(EquipSlot s) noexcept;
+
+/// Reverse of `equip_slot_id`. Returns `EquipSlot::Count` for unknown ids.
+EquipSlot equip_slot_from_id(const char* id) noexcept;
+
 /// One slot in the inventory. Multiple stacks of the same ItemId are
 /// collapsed into a single entry with `count > 1`. `condition` is in
 /// [0, 100]; 100 = pristine, 0 = broken (Phase 7 uses this for armor).

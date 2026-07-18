@@ -1,6 +1,7 @@
 #include "character/condition.hpp"
 
 #include <algorithm>
+#include <cstring>
 
 namespace ash {
 namespace character {
@@ -25,6 +26,72 @@ char const* condition_name(Condition c) noexcept {
         case Condition::Count:     break;
     }
     return "Unknown";
+}
+
+char const* condition_id(Condition c) noexcept {
+    switch (c) {
+        case Condition::Bleeding:  return "bleeding";
+        case Condition::Stunned:   return "stunned";
+        case Condition::Poisoned:  return "poisoned";
+        case Condition::Terrified: return "terrified";
+        case Condition::Blessed:   return "blessed";
+        case Condition::Cursed:    return "cursed";
+        case Condition::Warded:    return "warded";
+        case Condition::Slowed:    return "slowed";
+        case Condition::Hasted:    return "hasted";
+        case Condition::Silenced:  return "silenced";
+        case Condition::Rooted:    return "rooted";
+        case Condition::Burning:   return "burning";
+        case Condition::Frozen:    return "frozen";
+        case Condition::Dazed:     return "dazed";
+        case Condition::Inspired:  return "inspired";
+        case Condition::Count:     break;
+    }
+    return "unknown";
+}
+
+Condition condition_from_id(const char* id) noexcept {
+    if (!id) return Condition::Count;
+    switch (id[0]) {
+        case 'b':
+            if (std::strcmp(id, "bleeding") == 0) return Condition::Bleeding;
+            if (std::strcmp(id, "blessed")  == 0) return Condition::Blessed;
+            if (std::strcmp(id, "burning")  == 0) return Condition::Burning;
+            break;
+        case 'c':
+            if (std::strcmp(id, "cursed") == 0) return Condition::Cursed;
+            break;
+        case 'd':
+            if (std::strcmp(id, "dazed") == 0) return Condition::Dazed;
+            break;
+        case 'f':
+            if (std::strcmp(id, "frozen") == 0) return Condition::Frozen;
+            break;
+        case 'h':
+            if (std::strcmp(id, "hasted") == 0) return Condition::Hasted;
+            break;
+        case 'i':
+            if (std::strcmp(id, "inspired") == 0) return Condition::Inspired;
+            break;
+        case 'p':
+            if (std::strcmp(id, "poisoned") == 0) return Condition::Poisoned;
+            break;
+        case 'r':
+            if (std::strcmp(id, "rooted") == 0) return Condition::Rooted;
+            break;
+        case 's':
+            if (std::strcmp(id, "stunned")  == 0) return Condition::Stunned;
+            if (std::strcmp(id, "slowed")   == 0) return Condition::Slowed;
+            if (std::strcmp(id, "silenced") == 0) return Condition::Silenced;
+            break;
+        case 't':
+            if (std::strcmp(id, "terrified") == 0) return Condition::Terrified;
+            break;
+        case 'w':
+            if (std::strcmp(id, "warded") == 0) return Condition::Warded;
+            break;
+    }
+    return Condition::Count;
 }
 
 bool ConditionList::has(Condition c) const noexcept {
