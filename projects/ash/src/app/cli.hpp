@@ -13,8 +13,11 @@ struct CliArgs {
     bool render_test = false;
     bool char_test = false;
     bool editor_test = false;
+    bool ui_demo = false;
+    bool perf_bench = false;
     std::optional<std::string> log_level;
     std::optional<std::string> map_id;
+    std::optional<std::string> script_path;
     bool error = false;
 };
 
