@@ -108,6 +108,13 @@ int App::run() {
         ctx.refresh_accessibility();
         return run_perf_bench(ctx);
     }
+    if (args_.full_loop) {
+        /// Phase 11: full playable loop demo.
+        ui::ScreenContext ctx;
+        ctx.settings = settings::load();
+        ctx.refresh_accessibility();
+        return run_full_loop(ctx);
+    }
     if (args_.editor_test) {
         /// Drive the in-game editor (Phase 4) non-interactively.
         ///

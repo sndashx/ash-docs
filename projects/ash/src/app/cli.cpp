@@ -36,6 +36,8 @@ CliArgs parse(int argc, char** argv) {
             args.ui_demo = true;
         } else if (std::strcmp(a, "--perf-bench") == 0) {
             args.perf_bench = true;
+        } else if (std::strcmp(a, "--full-loop") == 0) {
+            args.full_loop = true;
         } else if (starts_with(a, "--log-level=")) {
             const char* value = a + std::strlen("--log-level=");
             if (*value == '\0') {
@@ -110,6 +112,7 @@ int usage(std::ostream& os) {
         "  --editor-test           Drive the in-game editor stub (Phase 4)\n"
         "  --ui-demo               Drive the UI mode-stack demo (Phase 11)\n"
         "  --perf-bench            Run performance budgets D66/D67/D68 (Phase 11)\n"
+        "  --full-loop             Drive a scripted full-game loop and print a transcript\n"
         "  --map=ID                Select map for --render-test\n"
         "  --script=FILE           Read key events from FILE (for --ui-demo)\n";
     os << text;

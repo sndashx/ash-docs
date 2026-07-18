@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "render/buffer.hpp"
+#include "render/buffer_emit.hpp"
 #include "render/cell.hpp"
 #include "settings/accessibility.hpp"
 #include "settings/settings.hpp"
@@ -371,6 +372,46 @@ TEST_CASE("ui: word_wrap splits long text", "[ui][widgets]") {
     for (auto const& l : lines) {
         REQUIRE(l.size() <= 10);
     }
+}
+
+TEST_CASE("ui: render output differs across palette variants", "[ui][accessibility]") {
+    auto render_with = [](std::string variant, bool no_color, bool hc) {
+        ScreenContext ctx;
+        ctx.viewport_w = 60;
+        ctx.viewport_h = 20;
+        ctx.settings.palette_variant = variant;
+        ctx.settings.no_color = no_color;
+        ctx.settings.high_contrast = hc;
+        ctx.refresh_accessibility();
+
+        HudOverlay overlay;
+        ash::render::Buffer buf(static_cast<std::uint16_t>(ctx.viewport_w),
+                                  static_cast<std::uint16_t>(ctx.viewport_h));
+        buf.clear();
+        overlay.render(buf, Rect{0, 0, ctx.viewport_w, ctx.viewport_h}, ctx);
+        std::string out;
+        std::vector<ash::render::DirtyRect> dirty;
+        ash::render::DirtyRect d; d.x = 0; d.y = 0;
+        d.w = buf.width; d.h = buf.height;
+        dirty.push_back(d);
+        ash::render::emit(buf, out, dirty);
+        return out;
+    };
+
+    auto baseline = render_with("default", false, false);
+    auto deutan   = render_with("deuteranopia", false, false);
+    auto protan   = render_with("protanopia", false, false);
+    auto tritan   = render_with("tritanopia", false, false);
+    auto no_color = render_with("default", true, false);
+    auto highcon  = render_with("default", false, true);
+
+    // Different palette variants should produce different ANSI escapes.
+    REQUIRE(baseline != deutan);
+    REQUIRE(baseline != protan);
+    REQUIRE(baseline != tritan);
+    REQUIRE(baseline != no_color);
+    REQUIRE(baseline != highcon);
+    REQUIRE(no_color != highcon);
 }
 
 TEST_CASE("ui: draw_list highlights selected row", "[ui][widgets]") {

@@ -15,6 +15,7 @@ struct CliArgs {
     bool editor_test = false;
     bool ui_demo = false;
     bool perf_bench = false;
+    bool full_loop = false;
     std::optional<std::string> log_level;
     std::optional<std::string> map_id;
     std::optional<std::string> script_path;

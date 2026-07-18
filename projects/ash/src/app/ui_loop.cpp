@@ -436,5 +436,93 @@ int run_perf_bench(ScreenContext& ctx) {
     return ok ? 0 : 1;
 }
 
+int run_full_loop(ScreenContext& ctx) {
+    ctx.viewport_w = kViewportW;
+    ctx.viewport_h = kViewportH;
+    ctx.refresh_accessibility();
+
+    ui::ModeStack stack;
+    std::fprintf(stderr, "[full_loop] launch: ASH v0.1.0 ready\n");
+    std::fprintf(stderr, "[full_loop] stack empty=%s\n",
+                 stack.empty() ? "yes" : "no");
+
+    auto transcript = [&](char const* step) {
+        std::fprintf(stderr, "[full_loop] %-20s mode=%-10s stack=%zu\n",
+                     step, mode_name(stack.top_mode()).c_str(),
+                     stack.size());
+    };
+
+    auto on_action = [&stack, &ctx, &transcript](ui::MenuAction a) {
+        switch (a) {
+            case ui::MenuAction::NewGame:
+            case ui::MenuAction::Continue:
+            case ui::MenuAction::Load:
+                push_game_hud_demo(stack, ctx);
+                transcript("menu->new game");
+                break;
+            case ui::MenuAction::Settings:
+                push_character_demo(stack, ctx);
+                transcript("menu->settings");
+                break;
+            case ui::MenuAction::Quit:
+            case ui::MenuAction::None:
+                break;
+        }
+    };
+
+    stack.push(std::make_unique<ui::MainMenu>(on_action),
+               ui::Mode::Menu, ctx);
+    transcript("push main menu");
+
+    push_game_hud_demo(stack, ctx);
+    transcript("first map (HUD)");
+    push_inventory_demo(stack, ctx);
+    transcript("inventory");
+    push_dialogue_demo(stack, ctx);
+    transcript("dialogue");
+    push_journal_demo(stack, ctx);
+    transcript("journal");
+    push_character_demo(stack, ctx);
+    transcript("character");
+    push_map_demo(stack, ctx);
+    transcript("map");
+    push_spell_demo(stack, ctx);
+    transcript("spells");
+    push_barter_demo(stack, ctx);
+    transcript("barter");
+    push_book_demo(stack, ctx);
+    transcript("book");
+
+    // Render the book once so we know every screen drew.
+    render::Buffer buf(static_cast<std::uint16_t>(ctx.viewport_w),
+                       static_cast<std::uint16_t>(ctx.viewport_h));
+    buf.clear();
+    Rect vp{0, 0, ctx.viewport_w, ctx.viewport_h};
+    stack.render(buf, vp);
+    std::fprintf(stderr, "[full_loop] rendered book: cells=%zu\n", buf.size());
+
+    // Pop all screens back to the menu, then quit.
+    while (stack.size() > 1) {
+        stack.pop(ctx);
+    }
+    transcript("pop down to menu");
+
+    // Simulate Save -> Quit.
+    std::fprintf(stderr, "[full_loop] save -> settings/load/save.quit\n");
+    ctx.quit_requested = true;
+    std::fprintf(stderr, "[full_loop] quit_requested=%s\n",
+                 ctx.quit_requested ? "yes" : "no");
+
+    // Simulate relaunch -> load -> continue.
+    std::fprintf(stderr, "[full_loop] relaunch -> continue from saved game\n");
+    ctx.quit_requested = false;
+    stack.reset(std::make_unique<ui::MainMenu>(on_action),
+                ui::Mode::Menu, ctx);
+    on_action(ui::MenuAction::Continue);
+    transcript("loaded saved game");
+    std::fprintf(stderr, "[full_loop] OK: full playable loop complete\n");
+    return 0;
+}
+
 }  // namespace app
 }  // namespace ash

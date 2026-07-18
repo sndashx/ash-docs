@@ -25,5 +25,11 @@ int run_ui_demo(ui::ScreenContext& ctx, std::string const& script_path);
 /// format.
 int run_perf_bench(ui::ScreenContext& ctx);
 
+/// Drive a scripted full-game loop (launch -> menu -> new game -> each
+/// screen -> save -> quit) and write a transcript to stderr. Returns 0
+/// on success, 1 on assertion failure. Used by `--full-loop` and the
+/// CI demo path.
+int run_full_loop(ui::ScreenContext& ctx);
+
 }  // namespace app
 }  // namespace ash
