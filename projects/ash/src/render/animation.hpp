@@ -39,6 +39,13 @@ struct AnimationState {
 /// Wraps frame index on loop, sets finished=true on terminal non-loop.
 void tick(AnimationState& s, Animation const& a, int dt_ms);
 
+/// Convenience: build a state bound to `anim_id`. Frame 0, elapsed 0.
+inline AnimationState make_state(std::string const& id) {
+    AnimationState s;
+    s.anim_id = id;
+    return s;
+}
+
 class AnimationRegistry {
 public:
     AnimationRegistry() = default;
