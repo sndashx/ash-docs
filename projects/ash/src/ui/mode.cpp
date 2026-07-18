@@ -1,2 +1,9 @@
 #include "ui/mode.hpp"
-// TODO(phase 11): UI mode stack
+
+namespace ash {
+namespace ui {
+namespace {
+[[maybe_unused]] int const mode_alias_anchor = 0;
+}
+}  // namespace ui
+}  // namespace ash
