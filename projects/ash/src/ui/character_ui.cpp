@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <numeric>
 #include <utility>
 
@@ -148,7 +149,7 @@ void CharacterScreen::render(render::Buffer& buf, Rect viewport) {
     std::snprintf(foot, sizeof(foot),
                   "Skills sum: %d    Press Enter or Esc to close",
                   total_skills);
-    int fx = panel.x + (panel.w - static_cast<int>(std::char_traits<char>::length(foot))) / 2;
+    int fx = panel.x + (panel.w - static_cast<int>(std::strlen(foot))) / 2;
     draw_string(buf, fx, panel.y + panel.h - 1, foot, t.disabled_fg, t.panel_bg);
 }
 

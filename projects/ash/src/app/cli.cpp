@@ -64,7 +64,7 @@ CliArgs parse(int argc, char** argv) {
                 return args;
             }
             args.map_id = std::string(value);
-} else if (std::strcmp(a, "--map") == 0) {
+        } else if (std::strcmp(a, "--map") == 0) {
             if (i + 1 >= argc) {
                 std::fprintf(stderr, "Error: --map requires a value\n"
                              "Try 'ash --help' for usage.\n");

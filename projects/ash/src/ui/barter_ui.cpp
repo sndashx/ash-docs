@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <utility>
 
 #include "ui/widgets.hpp"
@@ -158,7 +159,7 @@ void BarterScreen::render(render::Buffer& buf, Rect viewport) {
     std::snprintf(foot, sizeof(foot),
                   "Your total: %dgp   Their total: %dgp   Net: %+d",
                   pt, mt, pt - mt);
-    int fx = panel.x + (panel.w - static_cast<int>(std::char_traits<char>::length(foot))) / 2;
+    int fx = panel.x + (panel.w - static_cast<int>(std::strlen(foot))) / 2;
     draw_string(buf, fx, panel.y + panel.h - 2, foot, t.title_fg, t.panel_bg);
 
     std::string hint = "Tab switch   Up/Down pick   Enter offer   Esc leave";

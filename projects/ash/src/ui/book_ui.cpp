@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <utility>
 
 #include "ui/widgets.hpp"
@@ -86,7 +87,7 @@ void BookScreen::render(render::Buffer& buf, Rect viewport) {
     std::snprintf(foot, sizeof(foot),
                   "Page %d of %d    [<- ->] flip   [Esc] close",
                   page_ + 1, total);
-    int fx = panel.x + (panel.w - static_cast<int>(std::char_traits<char>::length(foot))) / 2;
+    int fx = panel.x + (panel.w - static_cast<int>(std::strlen(foot))) / 2;
     draw_string(buf, fx, panel.y + panel.h - 1, foot, t.disabled_fg, t.panel_bg);
 }
 

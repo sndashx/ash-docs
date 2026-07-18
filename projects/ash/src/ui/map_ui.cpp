@@ -131,6 +131,7 @@ void MapScreen::render(render::Buffer& buf, Rect viewport) {
                                   detail, true, nullptr});
     }
     if (selected_ >= static_cast<int>(items.size())) selected_ = 0;
+    if (selected_ < 0) selected_ = 0;
     Rect inner{list.x + 1, list.y + 1, list.w - 2, list.h - 2};
     if (inner.h > 0) {
         int max_scroll = std::max(0, static_cast<int>(items.size()) - inner.h);
