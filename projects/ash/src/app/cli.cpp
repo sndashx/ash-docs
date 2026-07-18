@@ -32,6 +32,12 @@ CliArgs parse(int argc, char** argv) {
             args.char_test = true;
         } else if (std::strcmp(a, "--editor-test") == 0) {
             args.editor_test = true;
+        } else if (std::strcmp(a, "--ui-demo") == 0) {
+            args.ui_demo = true;
+        } else if (std::strcmp(a, "--perf-bench") == 0) {
+            args.perf_bench = true;
+        } else if (std::strcmp(a, "--full-loop") == 0) {
+            args.full_loop = true;
         } else if (starts_with(a, "--log-level=")) {
             const char* value = a + std::strlen("--log-level=");
             if (*value == '\0') {
@@ -60,12 +66,29 @@ CliArgs parse(int argc, char** argv) {
             args.map_id = std::string(value);
         } else if (std::strcmp(a, "--map") == 0) {
             if (i + 1 >= argc) {
-                std::cerr << "Error: --map requires a value\n"
-                             "Try 'ash --help' for usage.\n";
+                std::fprintf(stderr, "Error: --map requires a value\n"
+                             "Try 'ash --help' for usage.\n");
                 args.error = true;
                 return args;
             }
             args.map_id = std::string(argv[++i]);
+        } else if (starts_with(a, "--script=")) {
+            const char* value = a + std::strlen("--script=");
+            if (*value == '\0') {
+                std::fprintf(stderr, "Error: --script requires a value\n"
+                             "Try 'ash --help' for usage.\n");
+                args.error = true;
+                return args;
+            }
+            args.script_path = std::string(value);
+        } else if (std::strcmp(a, "--script") == 0) {
+            if (i + 1 >= argc) {
+                std::fprintf(stderr, "Error: --script requires a value\n"
+                             "Try 'ash --help' for usage.\n");
+                args.error = true;
+                return args;
+            }
+            args.script_path = std::string(argv[++i]);
         } else {
             std::cerr << "Error: unknown flag '" << a << "'\n"
                          "Try 'ash --help' for usage.\n";
@@ -87,7 +110,11 @@ int usage(std::ostream& os) {
         "  --render-test           Run the render-test stub (Phase 1)\n"
         "  --char-test             Print derived stat table for starting player (Phase 6)\n"
         "  --editor-test           Drive the in-game editor stub (Phase 4)\n"
-        "  --map=ID                Select map for --render-test\n";
+        "  --ui-demo               Drive the UI mode-stack demo (Phase 11)\n"
+        "  --perf-bench            Run performance budgets D66/D67/D68 (Phase 11)\n"
+        "  --full-loop             Drive a scripted full-game loop and print a transcript\n"
+        "  --map=ID                Select map for --render-test\n"
+        "  --script=FILE           Read key events from FILE (for --ui-demo)\n";
     os << text;
     return static_cast<int>(std::strlen(text));
 }

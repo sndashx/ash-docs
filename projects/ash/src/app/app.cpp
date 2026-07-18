@@ -1,5 +1,6 @@
 #include "app/app.hpp"
 
+#include "app/ui_loop.hpp"
 #include "character/attributes.hpp"
 #include "character/derived.hpp"
 #include "character/inventory.hpp"
@@ -10,6 +11,8 @@
 #include "editor/map_io.hpp"
 #include "platform/signal.hpp"
 #include "render/ansi.hpp"
+#include "settings/settings.hpp"
+#include "ui/screen_context.hpp"
 
 #include <iostream>
 
@@ -89,6 +92,28 @@ int App::run() {
                   << "  encumbered          = " << (d.encumbered ? "yes" : "no") << "\n"
                   << std::flush;
         return 0;
+    }
+    if (args_.ui_demo) {
+        /// Phase 11: drive the UI mode stack end-to-end.
+        ui::ScreenContext ctx;
+        ctx.settings = settings::load();
+        ctx.refresh_accessibility();
+        std::string script = args_.script_path ? *args_.script_path : std::string{};
+        return run_ui_demo(ctx, script);
+    }
+    if (args_.perf_bench) {
+        /// Phase 11: performance budgets D66/D67/D68.
+        ui::ScreenContext ctx;
+        ctx.settings = settings::load();
+        ctx.refresh_accessibility();
+        return run_perf_bench(ctx);
+    }
+    if (args_.full_loop) {
+        /// Phase 11: full playable loop demo.
+        ui::ScreenContext ctx;
+        ctx.settings = settings::load();
+        ctx.refresh_accessibility();
+        return run_full_loop(ctx);
     }
     if (args_.editor_test) {
         /// Drive the in-game editor (Phase 4) non-interactively.

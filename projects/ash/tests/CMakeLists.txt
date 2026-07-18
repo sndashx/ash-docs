@@ -15,6 +15,7 @@ set(ASH_TEST_SOURCES
     render/test_camera.cpp
     render/test_light.cpp
     render/test_compositor.cpp
+    render/test_animation.cpp
     rexpaint/test_xp_loader.cpp
     rexpaint/test_xp_writer.cpp
     rexpaint/test_layer_spec.cpp
@@ -48,6 +49,7 @@ set(ASH_TEST_SOURCES
     save/test_load.cpp
     save/test_migrate.cpp
     content/test_content_load.cpp
+    ui/test_ui.cpp
 )
 
 add_executable(ash_tests ${ASH_TEST_SOURCES})
